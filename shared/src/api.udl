@@ -1,0 +1,7 @@
+namespace deepeye_core {
+    void initialize_engine();
+    sequence<string> get_available_models();
+    string load_model(string model_id);
+    void unload_model();
+    string run_inference(string prompt);
+};

@@ -1,0 +1,509 @@
+--------- beginning of system
+06-12 00:53:20.841 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'INTERFACE' not found
+06-12 00:53:20.841 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'STATE' not found
+06-12 00:53:20.841 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'TIME_NS' not found
+06-12 00:53:20.841 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'UID' not found
+06-12 00:54:21.366 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'INTERFACE' not found
+06-12 00:54:21.366 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'STATE' not found
+06-12 00:54:21.366 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'TIME_NS' not found
+06-12 00:54:21.366 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'UID' not found
+06-12 00:55:06.156 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'INTERFACE' not found
+06-12 00:55:06.156 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'STATE' not found
+06-12 00:55:06.156 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'TIME_NS' not found
+06-12 00:55:06.156 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'UID' not found
+06-12 00:55:12.669 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 00:55:12.674 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 00:55:12.674 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 00:55:12.675 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 00:55:13.159 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 00:55:13.161 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 00:55:13.162 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 00:55:13.163 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 00:55:13.172 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 00:55:13.173 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 00:55:13.174 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 00:55:13.181 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 00:57:06.492 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'INTERFACE' not found
+06-12 00:57:06.492 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'STATE' not found
+06-12 00:57:06.492 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'TIME_NS' not found
+06-12 00:57:06.492 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'UID' not found
+06-12 00:58:20.723 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'INTERFACE' not found
+06-12 00:58:20.723 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'STATE' not found
+06-12 00:58:20.723 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'TIME_NS' not found
+06-12 00:58:20.723 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'UID' not found
+06-12 01:00:05.429 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'INTERFACE' not found
+06-12 01:00:05.429 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'STATE' not found
+06-12 01:00:05.429 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'TIME_NS' not found
+06-12 01:00:05.429 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'UID' not found
+06-12 01:00:36.022 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'INTERFACE' not found
+06-12 01:00:36.022 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'STATE' not found
+06-12 01:00:36.022 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'TIME_NS' not found
+06-12 01:00:36.022 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'UID' not found
+06-12 01:01:23.427 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'INTERFACE' not found
+06-12 01:01:23.427 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'STATE' not found
+06-12 01:01:23.427 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'TIME_NS' not found
+06-12 01:01:23.427 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'UID' not found
+06-12 01:02:03.388 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 01:02:03.392 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 01:02:03.392 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 01:02:03.395 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 01:02:03.704 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 01:02:03.714 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 01:02:03.716 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 01:02:03.718 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 01:02:03.719 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 01:02:03.720 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 01:02:03.727 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 01:02:03.729 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 01:02:36.401 E/ActivityTaskManager( 3064): Abort background activity starts from 10469
+06-12 01:02:36.414 E/ActivityTaskManager( 3064): Abort background activity starts from 10469
+06-12 01:02:41.403 E/BLASTSyncEngine( 3064): WM sent Transaction to organized, but never received commit callback. Application ANR likely to follow.
+06-12 01:02:41.414 E/BLASTSyncEngine( 3064): WM sent Transaction to organized, but never received commit callback. Application ANR likely to follow.
+06-12 01:04:22.956 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'INTERFACE' not found
+06-12 01:04:22.956 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'STATE' not found
+06-12 01:04:22.956 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'TIME_NS' not found
+06-12 01:04:22.956 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'UID' not found
+06-12 01:05:08.701 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'INTERFACE' not found
+06-12 01:05:08.701 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'STATE' not found
+06-12 01:05:08.701 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'TIME_NS' not found
+06-12 01:05:08.701 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'UID' not found
+06-12 01:05:38.470 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'INTERFACE' not found
+06-12 01:05:38.470 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'STATE' not found
+06-12 01:05:38.470 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'TIME_NS' not found
+06-12 01:05:38.470 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'UID' not found
+06-12 01:07:23.180 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'INTERFACE' not found
+06-12 01:07:23.180 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'STATE' not found
+06-12 01:07:23.180 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'TIME_NS' not found
+06-12 01:07:23.180 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'UID' not found
+06-12 01:09:08.148 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'INTERFACE' not found
+06-12 01:09:08.148 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'STATE' not found
+06-12 01:09:08.148 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'TIME_NS' not found
+06-12 01:09:08.148 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'UID' not found
+06-12 01:10:08.299 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'INTERFACE' not found
+06-12 01:10:08.299 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'STATE' not found
+06-12 01:10:08.299 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'TIME_NS' not found
+06-12 01:10:08.299 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'UID' not found
+06-12 01:11:24.982 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'INTERFACE' not found
+06-12 01:11:24.982 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'STATE' not found
+06-12 01:11:24.982 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'TIME_NS' not found
+06-12 01:11:24.982 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'UID' not found
+06-12 01:12:13.820 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 01:12:13.824 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 01:12:13.826 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 01:12:13.831 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 01:12:14.315 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 01:12:14.318 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 01:12:14.320 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 01:12:14.327 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 01:12:14.331 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 01:12:14.344 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 01:12:14.346 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+06-12 01:12:14.355 E/AppOps  ( 3064): attributionTag VCN not declared in manifest of android
+--------- beginning of main
+06-12 01:12:42.391 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56b2 went down
+06-12 01:12:42.392 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56b3 went down
+06-12 01:12:42.393 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56b4 went down
+06-12 01:12:42.393 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56b5 went down
+06-12 01:12:43.499 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56b6 went down
+06-12 01:12:43.500 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56b7 went down
+06-12 01:12:43.501 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56b8 went down
+06-12 01:12:43.502 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56b9 went down
+06-12 01:12:52.520 E/RIL-MOTEXT( 2397): qcrilUpdRegRAT, called , rat =5
+06-12 01:12:52.538 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:12:52.558 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5645 went down
+06-12 01:12:52.563 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:12:52.569 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:12:54.194 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56ba went down
+06-12 01:12:54.195 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56bb went down
+06-12 01:12:54.195 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56bc went down
+06-12 01:12:54.195 E/Diag_Lib( 1737): diag: Diag_LSM_Init: invoked for pid: 1737 with init_count: 0
+06-12 01:12:54.195 E/Diag_Lib( 1737): diag:failed to connect to diag socket
+06-12 01:12:54.196 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56bd went down
+06-12 01:12:54.196 E/Diag_Lib( 1737):  Diag_LSM_Init: Failed to open handle to diag driver, error = 13
+06-12 01:12:54.238 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:12:54.245 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:12:54.869 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56bf went down
+06-12 01:12:54.870 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56c0 went down
+06-12 01:12:54.871 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56c1 went down
+06-12 01:12:54.872 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56c2 went down
+06-12 01:12:55.971 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56c3 went down
+06-12 01:12:55.972 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56c4 went down
+06-12 01:12:55.973 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56c5 went down
+06-12 01:12:55.974 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56c6 went down
+06-12 01:12:56.862 E/ANDR-PERF-LM( 1842): MetaMeter: handleAsync() 166: AdaptLaunch Invalid Async
+06-12 01:12:56.862 E/ANDR-PERF-LM( 1842): MetaMeter: handleAsync() 166: AdaptLaunch Invalid Async
+06-12 01:12:56.889 E/ANDR-PERF-LM( 1842): MetaMeter: handleAsync() 166: AdaptLaunch Invalid Async
+06-12 01:12:56.903 E/OpenGLRenderer( 3826): Unable to match the desired swap behavior.
+06-12 01:12:56.927 E/ANDR-PERF-LM( 1842): MetaMeter: handleAsync() 166: AdaptLaunch Invalid Async
+06-12 01:12:56.937 E/QTI PowerHAL( 1758): Failed to acquire lock for hint_id: 10A5.
+06-12 01:12:57.652 E/OpenGLRenderer( 9571): Unable to match the desired swap behavior.
+06-12 01:12:57.896 E/ANDR-PERF-LM( 1842): VmRssMeter:: start() 358: Could not find pid, can not collect vmrss data
+06-12 01:12:57.896 E/ANDR-PERF-LM( 1842): AdaptiveLaunch: writeToDataBase() 64: Meter aborted or could not get meter data for this run
+06-12 01:12:57.898 E/ANDR-PERF-LM( 1842): VmRssMeter:: start() 358: Could not find pid, can not collect vmrss data
+06-12 01:13:01.589 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56c7 went down
+06-12 01:13:01.590 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56c8 went down
+06-12 01:13:01.592 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56c9 went down
+06-12 01:13:01.594 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56ca went down
+06-12 01:13:02.695 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56cb went down
+06-12 01:13:02.697 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56cc went down
+06-12 01:13:02.698 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56cd went down
+06-12 01:13:02.699 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56ce went down
+06-12 01:13:09.447 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56cf went down
+06-12 01:13:09.449 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56d0 went down
+06-12 01:13:09.450 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56d1 went down
+06-12 01:13:09.451 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56d2 went down
+06-12 01:13:10.551 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56d3 went down
+06-12 01:13:10.552 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56d4 went down
+06-12 01:13:10.552 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56d5 went down
+06-12 01:13:10.554 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56d7 went down
+06-12 01:13:10.555 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56d8 went down
+06-12 01:13:10.556 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56d9 went down
+06-12 01:13:10.559 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56db went down
+06-12 01:13:10.560 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56dc went down
+06-12 01:13:10.561 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56dd went down
+06-12 01:13:10.563 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56de went down
+06-12 01:13:11.651 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56df went down
+06-12 01:13:11.652 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56e0 went down
+06-12 01:13:11.654 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56e1 went down
+06-12 01:13:11.656 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56e2 went down
+06-12 01:13:11.861 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:13:11.863 E/RIL-MOTEXT( 2397): qcrilUpdRegRAT, called , rat =5
+06-12 01:13:11.872 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:13:11.884 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:13:11.896 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:13:12.754 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56e3 went down
+06-12 01:13:12.755 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56e4 went down
+06-12 01:13:12.755 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56e5 went down
+06-12 01:13:12.757 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56e6 went down
+06-12 01:13:13.863 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56d6 went down
+06-12 01:13:13.864 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56da went down
+06-12 01:13:13.865 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56e7 went down
+06-12 01:13:13.866 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56e8 went down
+06-12 01:13:13.867 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56e9 went down
+06-12 01:13:13.868 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56ea went down
+06-12 01:13:15.419 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56eb went down
+06-12 01:13:15.420 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56ec went down
+06-12 01:13:15.421 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56ed went down
+06-12 01:13:15.422 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56ee went down
+06-12 01:13:15.518 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56ef went down
+06-12 01:13:15.519 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56f0 went down
+06-12 01:13:15.519 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56f1 went down
+06-12 01:13:15.521 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56f3 went down
+06-12 01:13:15.521 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56f4 went down
+06-12 01:13:15.522 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56f5 went down
+06-12 01:13:16.523 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56f7 went down
+06-12 01:13:16.524 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56f8 went down
+06-12 01:13:16.526 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56f9 went down
+06-12 01:13:16.526 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56fa went down
+06-12 01:13:17.028 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56f2 went down
+06-12 01:13:17.028 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56f6 went down
+06-12 01:13:24.071 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56fb went down
+06-12 01:13:24.071 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56fc went down
+06-12 01:13:24.072 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56fd went down
+06-12 01:13:24.072 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56fe went down
+06-12 01:13:25.182 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56ff went down
+06-12 01:13:25.183 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5700 went down
+06-12 01:13:25.184 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5701 went down
+06-12 01:13:25.185 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5702 went down
+06-12 01:13:26.299 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5703 went down
+06-12 01:13:26.300 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5704 went down
+06-12 01:13:26.301 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5705 went down
+06-12 01:13:26.302 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5706 went down
+06-12 01:13:27.014 E/Transition( 3064): Trying to add a ready-group twice: Display{#0 state=ON size=1080x2400 ROTATION_0}
+06-12 01:13:27.027 E/ANDR-PERF-LM( 1842): MetaMeter: handleAsync() 166: AdaptLaunch Invalid Async
+06-12 01:13:27.043 E/ANDR-PERF-LM( 1842): MetaMeter: handleAsync() 166: AdaptLaunch Invalid Async
+06-12 01:13:27.127 E/ANDR-PERF-LM( 1842): MetaMeter: handleAsync() 166: AdaptLaunch Invalid Async
+06-12 01:13:27.133 E/OpenGLRenderer( 3826): Unable to match the desired swap behavior.
+06-12 01:13:27.147 E/ANDR-PERF-LM( 1842): MetaMeter: handleAsync() 166: AdaptLaunch Invalid Async
+06-12 01:13:27.235 E/oid.documentsui(10698): No package ID ff found for resource ID 0xffffffff.
+06-12 01:13:27.244 E/oid.documentsui(10698): No package ID ff found for resource ID 0xffffffff.
+06-12 01:13:27.260 E/oid.documentsui(10698): No package ID ff found for resource ID 0xffffffff.
+06-12 01:13:27.335 E/OpenGLRenderer(10698): Unable to match the desired swap behavior.
+06-12 01:13:27.363 E/oid.documentsui(10698): No package ID ff found for resource ID 0xffffffff.
+06-12 01:13:27.380 E/oid.documentsui(10698): No package ID ff found for resource ID 0xffffffff.
+06-12 01:13:27.412 E/oid.documentsui(10698): No package ID ff found for resource ID 0xffffffff.
+06-12 01:13:28.027 E/ANDR-PERF-LM( 1842): VmRssMeter:: start() 358: Could not find pid, can not collect vmrss data
+06-12 01:13:28.031 E/ANDR-PERF-LM( 1842): VmRssMeter:: start() 358: Could not find pid, can not collect vmrss data
+06-12 01:13:28.031 E/ANDR-PERF-LM( 1842): AdaptiveLaunch: writeToDataBase() 64: Meter aborted or could not get meter data for this run
+06-12 01:13:30.571 E/OpenGLRenderer( 3826): Unable to match the desired swap behavior.
+06-12 01:13:30.836 E/OpenGLRenderer( 9571): Unable to match the desired swap behavior.
+06-12 01:13:31.211 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5707 went down
+06-12 01:13:31.212 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5708 went down
+06-12 01:13:31.212 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5709 went down
+06-12 01:13:31.213 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 570a went down
+06-12 01:13:31.838 E/ANDR-PERF-LM( 1842): VmRssMeter:: start() 358: Could not find pid, can not collect vmrss data
+06-12 01:13:31.839 E/ANDR-PERF-LM( 1842): VmRssMeter:: start() 358: Could not find pid, can not collect vmrss data
+06-12 01:13:31.839 E/ANDR-PERF-LM( 1842): AdaptiveLaunch: writeToDataBase() 64: Meter aborted or could not get meter data for this run
+06-12 01:13:32.322 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 570b went down
+06-12 01:13:32.323 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 570c went down
+06-12 01:13:32.323 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 570d went down
+06-12 01:13:32.324 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 570f went down
+06-12 01:13:32.324 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5710 went down
+06-12 01:13:32.324 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5711 went down
+06-12 01:13:32.327 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5713 went down
+06-12 01:13:32.328 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5714 went down
+06-12 01:13:32.329 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5715 went down
+06-12 01:13:32.330 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5716 went down
+06-12 01:13:33.428 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 570e went down
+06-12 01:13:33.429 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5712 went down
+06-12 01:13:33.429 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5717 went down
+06-12 01:13:33.430 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5718 went down
+06-12 01:13:33.431 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5719 went down
+06-12 01:13:33.431 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 571a went down
+06-12 01:13:39.350 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 571b went down
+06-12 01:13:39.351 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 571c went down
+06-12 01:13:39.352 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 571d went down
+06-12 01:13:39.352 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 571e went down
+06-12 01:13:40.459 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 571f went down
+06-12 01:13:40.459 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5720 went down
+06-12 01:13:40.460 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5721 went down
+06-12 01:13:40.461 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5722 went down
+06-12 01:13:42.997 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5723 went down
+06-12 01:13:42.998 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5724 went down
+06-12 01:13:42.998 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5725 went down
+06-12 01:13:43.000 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5726 went down
+06-12 01:13:44.101 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5727 went down
+06-12 01:13:44.102 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5728 went down
+06-12 01:13:44.102 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5729 went down
+06-12 01:13:44.103 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 572a went down
+06-12 01:13:53.188 E/RIL-MOTEXT( 2397): qcrilUpdRegRAT, called , rat =5
+06-12 01:13:53.194 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:13:53.202 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:13:53.206 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:13:53.217 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 56be went down
+06-12 01:13:53.227 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:13:53.235 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:13:56.907 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 572b went down
+06-12 01:13:56.907 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 572c went down
+06-12 01:13:56.907 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 572d went down
+06-12 01:13:56.907 E/Diag_Lib( 1737): diag: Diag_LSM_Init: invoked for pid: 1737 with init_count: 0
+06-12 01:13:56.907 E/Diag_Lib( 1737): diag:failed to connect to diag socket
+06-12 01:13:56.907 E/Diag_Lib( 1737):  Diag_LSM_Init: Failed to open handle to diag driver, error = 13
+06-12 01:13:56.908 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 572e went down
+06-12 01:13:56.958 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:13:56.964 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:13:57.891 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5730 went down
+06-12 01:13:57.892 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5731 went down
+06-12 01:13:57.892 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5732 went down
+06-12 01:13:57.894 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5733 went down
+06-12 01:13:58.991 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5734 went down
+06-12 01:13:58.991 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5735 went down
+06-12 01:13:58.992 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5736 went down
+06-12 01:13:58.992 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5737 went down
+06-12 01:14:07.257 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 572f went down
+06-12 01:14:07.273 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:14:07.853 E/OpenGLRenderer( 3826): Unable to match the desired swap behavior.
+06-12 01:14:07.897 E/OpenGLRenderer(29887): Unable to match the desired swap behavior.
+06-12 01:14:07.902 E/NetworkErrorMessage(29887): (REDACTED) Invalid connectivity state: %s
+06-12 01:14:07.904 E/OpenGLRenderer(11130): Unable to match the desired swap behavior.
+06-12 01:14:07.994 E/QTI PowerHAL( 1758): Failed to acquire lock for hint_id: 10A5.
+06-12 01:14:08.906 E/ANDR-PERF-LM( 1842): VmRssMeter:: start() 358: Could not find pid, can not collect vmrss data
+06-12 01:14:08.908 E/ANDR-PERF-LM( 1842): VmRssMeter:: start() 358: Could not find pid, can not collect vmrss data
+06-12 01:14:08.909 E/ANDR-PERF-LM( 1842): AdaptiveLaunch: writeToDataBase() 64: Meter aborted or could not get meter data for this run
+06-12 01:14:09.606 E/Transition( 3064): Trying to add a ready-group twice: Display{#0 state=ON size=1080x2400 ROTATION_0}
+06-12 01:14:09.625 E/OpenGLRenderer( 9571): Unable to match the desired swap behavior.
+06-12 01:14:09.674 E/QTI PowerHAL( 1758): Failed to acquire lock for hint_id: 10A5.
+06-12 01:14:09.690 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5738 went down
+06-12 01:14:09.690 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5739 went down
+06-12 01:14:09.690 E/Diag_Lib( 1737): diag: Diag_LSM_Init: invoked for pid: 1737 with init_count: 0
+06-12 01:14:09.690 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 573a went down
+06-12 01:14:09.691 E/Diag_Lib( 1737): diag:failed to connect to diag socket
+06-12 01:14:09.691 E/Diag_Lib( 1737):  Diag_LSM_Init: Failed to open handle to diag driver, error = 13
+06-12 01:14:09.691 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 573b went down
+06-12 01:14:09.745 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:14:10.609 E/ANDR-PERF-LM( 1842): VmRssMeter:: start() 358: Could not find pid, can not collect vmrss data
+06-12 01:14:10.609 E/ANDR-PERF-LM( 1842): AdaptiveLaunch: writeToDataBase() 64: Meter aborted or could not get meter data for this run
+06-12 01:14:10.612 E/ANDR-PERF-LM( 1842): VmRssMeter:: start() 358: Could not find pid, can not collect vmrss data
+06-12 01:14:10.786 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 573d went down
+06-12 01:14:10.787 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 573e went down
+06-12 01:14:10.788 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 573f went down
+06-12 01:14:10.788 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5740 went down
+06-12 01:14:14.048 E/OpenGLRenderer(29887): Unable to match the desired swap behavior.
+06-12 01:14:14.065 E/OpenGLRenderer(11130): Unable to match the desired swap behavior.
+06-12 01:14:14.210 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5741 went down
+06-12 01:14:14.211 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5742 went down
+06-12 01:14:14.212 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5743 went down
+06-12 01:14:14.213 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5744 went down
+06-12 01:14:14.245 E/NetworkErrorMessage(29887): (REDACTED) Invalid connectivity state: %s
+06-12 01:14:14.510 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5745 went down
+06-12 01:14:14.511 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5746 went down
+06-12 01:14:14.512 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5747 went down
+06-12 01:14:14.514 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5749 went down
+06-12 01:14:14.514 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 574a went down
+06-12 01:14:14.515 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 574b went down
+06-12 01:14:15.049 E/ANDR-PERF-LM( 1842): VmRssMeter:: start() 358: Could not find pid, can not collect vmrss data
+06-12 01:14:15.052 E/ANDR-PERF-LM( 1842): VmRssMeter:: start() 358: Could not find pid, can not collect vmrss data
+06-12 01:14:15.053 E/ANDR-PERF-LM( 1842): AdaptiveLaunch: writeToDataBase() 64: Meter aborted or could not get meter data for this run
+06-12 01:14:15.324 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 574d went down
+06-12 01:14:15.325 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 574e went down
+06-12 01:14:15.327 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 574f went down
+06-12 01:14:15.327 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5750 went down
+06-12 01:14:15.506 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:14:15.510 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:14:15.514 E/RIL-MOTEXT( 2397): qcrilUpdRegRAT, called , rat =5
+06-12 01:14:15.525 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:14:15.541 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:14:15.570 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:14:16.429 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5751 went down
+06-12 01:14:16.430 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5752 went down
+06-12 01:14:16.430 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5753 went down
+06-12 01:14:16.431 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5754 went down
+06-12 01:14:16.732 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5748 went down
+06-12 01:14:16.732 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 574c went down
+06-12 01:14:16.892 E/OpenGLRenderer( 9571): Unable to match the desired swap behavior.
+06-12 01:14:23.841 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5755 went down
+06-12 01:14:23.842 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5756 went down
+06-12 01:14:23.844 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5757 went down
+06-12 01:14:23.845 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5758 went down
+06-12 01:14:24.942 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5759 went down
+06-12 01:14:24.943 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 575a went down
+06-12 01:14:24.943 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 575b went down
+06-12 01:14:24.945 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 575c went down
+06-12 01:14:29.974 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 575d went down
+06-12 01:14:29.976 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 575e went down
+06-12 01:14:29.976 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 575f went down
+06-12 01:14:29.978 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5761 went down
+06-12 01:14:29.978 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5762 went down
+06-12 01:14:29.979 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5763 went down
+06-12 01:14:30.075 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5765 went down
+06-12 01:14:30.075 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5766 went down
+06-12 01:14:30.076 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5767 went down
+06-12 01:14:30.078 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5768 went down
+06-12 01:14:30.979 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5760 went down
+06-12 01:14:30.979 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5764 went down
+06-12 01:14:31.178 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5769 went down
+06-12 01:14:31.178 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 576a went down
+06-12 01:14:31.178 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 576b went down
+06-12 01:14:31.179 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 576c went down
+06-12 01:14:33.421 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 576d went down
+06-12 01:14:33.422 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 576e went down
+06-12 01:14:33.423 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 576f went down
+06-12 01:14:33.424 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5771 went down
+06-12 01:14:33.425 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5772 went down
+06-12 01:14:33.426 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5773 went down
+06-12 01:14:33.720 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5775 went down
+06-12 01:14:33.721 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5776 went down
+06-12 01:14:33.722 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5777 went down
+06-12 01:14:33.725 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5778 went down
+06-12 01:14:34.426 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5770 went down
+06-12 01:14:34.428 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5774 went down
+06-12 01:14:34.823 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5779 went down
+06-12 01:14:34.824 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 577a went down
+06-12 01:14:34.825 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 577b went down
+06-12 01:14:34.825 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 577c went down
+06-12 01:14:35.926 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 577d went down
+06-12 01:14:35.928 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 577e went down
+06-12 01:14:35.929 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 577f went down
+06-12 01:14:35.930 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5780 went down
+06-12 01:14:39.245 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5781 went down
+06-12 01:14:39.247 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5782 went down
+06-12 01:14:39.248 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5783 went down
+06-12 01:14:39.249 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5784 went down
+06-12 01:14:40.344 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5785 went down
+06-12 01:14:40.345 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5786 went down
+06-12 01:14:40.346 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5787 went down
+06-12 01:14:40.347 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5788 went down
+06-12 01:14:43.361 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5789 went down
+06-12 01:14:43.362 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 578a went down
+06-12 01:14:43.364 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 578b went down
+06-12 01:14:43.365 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 578c went down
+06-12 01:14:44.471 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 578d went down
+06-12 01:14:44.471 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 578e went down
+06-12 01:14:44.472 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 578f went down
+06-12 01:14:44.474 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5790 went down
+06-12 01:14:47.750 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5791 went down
+06-12 01:14:47.752 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5792 went down
+06-12 01:14:47.753 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5793 went down
+06-12 01:14:47.755 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5795 went down
+06-12 01:14:47.756 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5796 went down
+06-12 01:14:47.756 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5797 went down
+06-12 01:14:48.353 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5799 went down
+06-12 01:14:48.355 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 579a went down
+06-12 01:14:48.356 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 579b went down
+06-12 01:14:48.357 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 579c went down
+06-12 01:14:48.855 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5794 went down
+06-12 01:14:48.855 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 5798 went down
+06-12 01:14:49.459 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 579d went down
+06-12 01:14:49.460 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 579e went down
+06-12 01:14:49.461 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 579f went down
+06-12 01:14:49.462 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57a0 went down
+06-12 01:14:54.711 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57a1 went down
+06-12 01:14:54.711 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57a2 went down
+06-12 01:14:54.712 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57a3 went down
+06-12 01:14:54.713 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57a4 went down
+06-12 01:14:55.821 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57a5 went down
+06-12 01:14:55.822 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57a6 went down
+06-12 01:14:55.823 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57a7 went down
+06-12 01:14:55.825 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57a8 went down
+06-12 01:15:04.123 E/RIL-MOTEXT( 2397): qcrilUpdRegRAT, called , rat =5
+06-12 01:15:04.144 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:15:04.149 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:15:04.160 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 573c went down
+06-12 01:15:04.167 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:15:04.175 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:15:04.194 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:15:09.888 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57a9 went down
+06-12 01:15:09.889 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57aa went down
+06-12 01:15:09.889 E/Diag_Lib( 1737): diag: Diag_LSM_Init: invoked for pid: 1737 with init_count: 0
+06-12 01:15:09.889 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57ab went down
+06-12 01:15:09.889 E/Diag_Lib( 1737): diag:failed to connect to diag socket
+06-12 01:15:09.889 E/Diag_Lib( 1737):  Diag_LSM_Init: Failed to open handle to diag driver, error = 13
+06-12 01:15:09.890 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57ac went down
+06-12 01:15:09.942 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:15:10.308 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'INTERFACE' not found
+06-12 01:15:10.308 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'STATE' not found
+06-12 01:15:10.308 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'TIME_NS' not found
+06-12 01:15:10.308 E/NetlinkEvent( 1587): NetlinkEvent::FindParam(): Parameter 'UID' not found
+06-12 01:15:10.963 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57ae went down
+06-12 01:15:10.964 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57af went down
+06-12 01:15:10.965 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57b0 went down
+06-12 01:15:10.966 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57b1 went down
+06-12 01:15:20.356 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:15:20.357 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57ad went down
+06-12 01:15:23.953 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57b2 went down
+06-12 01:15:23.953 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57b3 went down
+06-12 01:15:23.954 E/Diag_Lib( 1737): diag: Diag_LSM_Init: invoked for pid: 1737 with init_count: 0
+06-12 01:15:23.954 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57b4 went down
+06-12 01:15:23.954 E/Diag_Lib( 1737): diag:failed to connect to diag socket
+06-12 01:15:23.954 E/Diag_Lib( 1737):  Diag_LSM_Init: Failed to open handle to diag driver, error = 13
+06-12 01:15:23.955 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57b5 went down
+06-12 01:15:24.000 E/RIL-MOTEXT( 2397): qcrilUpdateOperator, called
+06-12 01:15:24.010 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57b7 went down
+06-12 01:15:24.011 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57b8 went down
+06-12 01:15:24.011 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57b9 went down
+06-12 01:15:24.012 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57ba went down
+06-12 01:15:25.111 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57bb went down
+06-12 01:15:25.111 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57bc went down
+06-12 01:15:25.112 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57bd went down
+06-12 01:15:25.113 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57be went down
+06-12 01:15:26.979 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57bf went down
+06-12 01:15:26.979 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57c0 went down
+06-12 01:15:26.979 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57c1 went down
+06-12 01:15:26.980 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57c2 went down
+06-12 01:15:27.382 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57c3 went down
+06-12 01:15:27.383 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57c4 went down
+06-12 01:15:27.383 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57c5 went down
+06-12 01:15:27.384 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57c7 went down
+06-12 01:15:27.384 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57c8 went down
+06-12 01:15:27.385 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57c9 went down
+06-12 01:15:28.089 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57cb went down
+06-12 01:15:28.090 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57cc went down
+06-12 01:15:28.092 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57cd went down
+06-12 01:15:28.092 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57ce went down
+06-12 01:15:28.389 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57c6 went down
+06-12 01:15:28.389 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57ca went down
+06-12 01:15:28.408 E/KeymasterUtils( 1254): rsp_header->status: -28
+06-12 01:15:28.408 E/KeyMasterHalDevice( 1254): abort_operation
+06-12 01:15:28.408 E/KeyMasterHalDevice( 1254): ret: -28
+06-12 01:15:28.688 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57cf went down
+06-12 01:15:28.689 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57d0 went down
+06-12 01:15:28.690 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57d1 went down
+06-12 01:15:28.692 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57d3 went down
+06-12 01:15:28.692 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57d4 went down
+06-12 01:15:28.693 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57d5 went down
+06-12 01:15:29.193 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57d7 went down
+06-12 01:15:29.195 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57d8 went down
+06-12 01:15:29.197 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57d9 went down
+06-12 01:15:29.198 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57da went down
+06-12 01:15:29.801 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57d2 went down
+06-12 01:15:29.801 E/minksocket( 1734): MinkIPC_QRTR_Service: client with node 1 port 57d6 went down

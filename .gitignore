@@ -1,0 +1,24 @@
+# Gradle & Android Build Outputs
+.gradle/
+build/
+**/build/
+*.apk
+*.aar
+*.aab
+.cxx/
+**/cxx/
+local.properties
+
+# Logs & App Data
+logs
+*.log
+.kiro/
+*.bin
+*.gguf
+*.tmp
+
+# System & IDE
+.DS_Store
+.idea/
+*.iml
+.vscode/

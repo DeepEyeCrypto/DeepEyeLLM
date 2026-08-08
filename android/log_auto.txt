@@ -1,0 +1,534 @@
+--------- beginning of main
+06-12 00:52:40.494 28604 28792 I ThermalEngine: Monitor:ACTIVE:FREEZE-CHG:freeze_rule=1:DETECT-STANDBY=1
+06-12 00:52:40.494 28604 28792 I ThermalEngine: ACTION: freeze_rule - Setting freeze_rule to 1
+06-12 00:52:40.495 28604 28792 I ThermalEngine: Monitor:ACTIVE:OVERRIDE-CHG:internal_override=1:DETECT-STANDBY=1
+06-12 00:52:40.495 28604 28792 I ThermalEngine: ACTION: override_c - Setting override_c to 1
+06-12 00:52:40.495 28604 28791 I ThermalEngine: Thermal-Server: Thermal received msg from  override_c
+06-12 00:52:40.495 28604 25200 I Thermal-Lib: Thermal-Lib-Client: Client request sent
+06-12 00:52:40.495 28604 28791 I ThermalEngine: Thermal-Server: Thermal received msg from  freezing
+06-12 00:52:40.495 28604 25199 I Thermal-Lib: Thermal-Lib-Client: Client request sent
+--------- beginning of system
+06-12 00:52:40.798  3064  3928 W ActivityTaskManager: callingPackage for (uid=2000, pid=25211) has no WPC
+06-12 00:52:40.799  3064  3928 I SettingsAccessControlPolicy: isDeviceSettingsChangeDisabled: value -> false
+06-12 00:52:40.800  3064  3928 D CompatibilityChangeReporter: Compat change id reported: 265464455; UID 10515; state: DISABLED
+06-12 00:52:40.800  3064  3928 D CompatibilityChangeReporter: Compat change id reported: 265452344; UID 10515; state: DISABLED
+06-12 00:52:40.800  3064  3928 D CompatibilityChangeReporter: Compat change id reported: 266124927; UID 10515; state: DISABLED
+06-12 00:52:40.800  3064  3928 D CompatibilityChangeReporter: Compat change id reported: 265451093; UID 10515; state: DISABLED
+06-12 00:52:40.800  3064  3928 D CompatibilityChangeReporter: Compat change id reported: 265456536; UID 10515; state: DISABLED
+06-12 00:52:40.800  3064  3928 D CompatibilityChangeReporter: Compat change id reported: 255940284; UID 10515; state: DISABLED
+06-12 00:52:40.800  3064  3928 D CompatibilityChangeReporter: Compat change id reported: 236283604; UID 10515; state: DISABLED
+06-12 00:52:40.800  3064  3928 D CompatibilityChangeReporter: Compat change id reported: 263959004; UID 10515; state: DISABLED
+06-12 00:52:40.801  3064  3928 D CompatibilityChangeReporter: Compat change id reported: 264304459; UID 10515; state: DISABLED
+06-12 00:52:40.801  3064  3928 D CompatibilityChangeReporter: Compat change id reported: 264301586; UID 10515; state: DISABLED
+06-12 00:52:40.801  3064  3928 D CompatibilityChangeReporter: Compat change id reported: 254631730; UID 10515; state: DISABLED
+06-12 00:52:40.801  3064  3928 D CompatibilityChangeReporter: Compat change id reported: 273509367; UID 10515; state: DISABLED
+06-12 00:52:40.801  3064  3928 D CompatibilityChangeReporter: Compat change id reported: 263259275; UID 10515; state: DISABLED
+06-12 00:52:40.801  3064  3928 D CompatibilityChangeReporter: Compat change id reported: 174042980; UID 10515; state: DISABLED
+06-12 00:52:40.801  3064  3928 D CompatibilityChangeReporter: Compat change id reported: 174042936; UID 10515; state: DISABLED
+06-12 00:52:40.801  3064  3928 D CompatibilityChangeReporter: Compat change id reported: 181136395; UID 10515; state: DISABLED
+06-12 00:52:40.805  3064  3928 D CompatibilityChangeReporter: Compat change id reported: 194480991; UID 10515; state: ENABLED
+06-12 00:52:40.805  3064  3928 D ActivityTaskManager: getPreferredLaunchDisplay userset_displayid false user set display id -1, current focus display 0
+06-12 00:52:40.805  3064  3928 D ActivityTaskManager: getPreferredLaunchDisplay userset_displayid false user set display id -1, current focus display 0
+06-12 00:52:40.807  1842  2007 E ANDR-PERF-LM: MetaMeter: handleAsync() 166: AdaptLaunch Invalid Async
+06-12 00:52:40.808  1842  2007 E ANDR-PERF-LM: MetaMeter: handleAsync() 166: AdaptLaunch Invalid Async
+06-12 00:52:40.808  3064  3928 D ActivityTaskManager: getPreferredLaunchDisplay userset_displayid false user set display id -1, current focus display 0
+06-12 00:52:40.808  3064  3928 D ActivityTaskManager: getPreferredLaunchDisplay userset_displayid false user set display id -1, current focus display 0
+06-12 00:52:40.813  3064  3783 W TopAppMonitor: resend missed activity state ActivityState{com.deepeye.agent, userId=0, uid=10515, displayId=0, category=0, isLauncher=false, isTop=false, lastTopTime=250088735}
+06-12 00:52:40.813  3064  3928 D ActivityTaskManager: getPreferredLaunchDisplay userset_displayid false user set display id 0, current focus display 0
+06-12 00:52:40.814  3064  3928 D ActivityTaskManager: getPreferredLaunchDisplay userset_displayid false user set display id 0, current focus display 0
+06-12 00:52:40.815  3064  3928 D CompatibilityChangeReporter: Compat change id reported: 184838306; UID 10515; state: DISABLED
+06-12 00:52:40.815  3064  3928 D CompatibilityChangeReporter: Compat change id reported: 185004937; UID 10515; state: DISABLED
+06-12 00:52:40.817  3064  3928 D CompatibilityChangeReporter: Compat change id reported: 197654537; UID 10515; state: ENABLED
+06-12 00:52:40.818  3064  3928 D PowerManagerService: nativeSetPowerMode ret:false mode:5 enabled:true duration ms: 0
+06-12 00:52:40.818  3064  3928 D CompatibilityChangeReporter: Compat change id reported: 205907456; UID 10515; state: ENABLED
+06-12 00:52:40.819  3064  3928 D ActivityTrigger: ActivityTrigger activityPauseTrigger 
+06-12 00:52:40.821  3064  3928 D PowerManagerService: nativeAcquireSuspendBlocker name:PowerManagerService.WakeLocks duration ms: 1
+06-12 00:52:40.821  3064  3928 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.deepeye.agent/.MainActivity} with LAUNCH_MULTIPLE from uid 2000 (startActivityAsUser) (BAL_ALLOW_PERMISSION) result code=0
+06-12 00:52:40.823  3064  3357 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 10515; state: DISABLED
+06-12 00:52:40.823  3064  3357 D CompatibilityChangeReporter: Compat change id reported: 177438394; UID 10515; state: DISABLED
+06-12 00:52:40.823  3064  3357 D CompatibilityChangeReporter: Compat change id reported: 135772972; UID 10515; state: DISABLED
+06-12 00:52:40.823  3064  3357 D CompatibilityChangeReporter: Compat change id reported: 135754954; UID 10515; state: ENABLED
+06-12 00:52:40.823  3064  3366 D CompatibilityChangeReporter: Compat change id reported: 143937733; UID 10515; state: ENABLED
+06-12 00:52:40.824  3826  3921 D ViewRootImpl: update {(0,0)(fillxfill) ty=APPLICATION_STARTING fmt=TRANSLUCENT wanim=0x10302fe
+06-12 00:52:40.824  3826  3921 D ViewRootImpl:   fl=NOT_FOCUSABLE NOT_TOUCHABLE LAYOUT_IN_SCREEN LAYOUT_INSET_DECOR ALT_FOCUSABLE_IM HARDWARE_ACCELERATED DRAWS_SYSTEM_BAR_BACKGROUNDS
+06-12 00:52:40.824  3826  3921 D ViewRootImpl:   pfl=SHOW_FOR_ALL_USERS FIT_INSETS_CONTROLLED
+06-12 00:52:40.824  3826  3921 D ViewRootImpl:   bhv=DEFAULT
+06-12 00:52:40.824  3826  3921 D ViewRootImpl:   fitSides=} by setView
+06-12 00:52:40.825  3826  3885 V WindowManagerShell: Transition requested: android.os.BinderProxy@efc7085 TransitionRequestInfo { type = 1, triggerTask = TaskInfo{userId=0 taskId=6695 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.deepeye.agent/.MainActivity } baseActivity=ComponentInfo{com.deepeye.agent/com.deepeye.agent.MainActivity} topActivity=ComponentInfo{com.deepeye.agent/com.deepeye.agent.MainActivity} origActivity=null realActivity=ComponentInfo{com.deepeye.agent/com.deepeye.agent.MainActivity} numActivities=1 lastActiveTime=250234180 supportsMultiWindow=true supportsGlobalFreeform=true resizeMode=1 isResizeable=true isAppLocked=false canKillAndRestart=false isShowDecorCaptionWindowRequest=false minWidth=-1 minHeight=-1 defaultMinSize=200 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@7a29eda} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 90 - 0, 0) topActivityInfo=ActivityInfo{3403f0b com.deepeye.agent.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null, flags = 0 }
+06-12 00:52:40.830  1842  2007 W ANDR-PERF-LM: MetaMeter: handlePrimaryAsync() 118: AdaptLaunch MetaMeter. No MeterMgr Available to handle this Primary Async. !!!!
+06-12 00:52:40.830  1842  2007 W ANDR-PERF-LM: MetaMeter: handlePrimaryAsync() 118: AdaptLaunch MetaMeter. No MeterMgr Available to handle this Primary Async. !!!!
+06-12 00:52:40.831  1927  1927 I BpBinder: onLastStrongRef automatically unlinking death recipients: 
+06-12 00:52:40.835  1588  1588 D Zygote  : Forked child process 25230
+06-12 00:52:40.835  1842  2007 E ANDR-PERF-LM: MetaMeter: handleAsync() 166: AdaptLaunch Invalid Async
+06-12 00:52:40.835  3064  3366 I ActivityManager: Start proc 25230:com.deepeye.agent/u0a515 for next-top-activity {com.deepeye.agent/com.deepeye.agent.MainActivity}
+06-12 00:52:40.840  3064  3455 D CompatibilityChangeReporter: Compat change id reported: 265195908; UID 10515; state: ENABLED
+06-12 00:52:40.845 25230 25230 I m.deepeye.agent: Late-enabling -Xcheck:jni
+06-12 00:52:40.848  3064  3928 D CoreBackPreview: Window{bf41e09 u0 Splash Screen com.deepeye.agent}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@381624b, mPriority=0, mIsAnimationCallback=false}
+06-12 00:52:40.849  3826  3929 E OpenGLRenderer: Unable to match the desired swap behavior.
+06-12 00:52:40.849 11130 11130 W Choreographer: Frame time is 0.002093 ms in the future!  Check that graphics HAL is generating vsync timestamps using the correct timebase.
+06-12 00:52:40.855  3064  3354 V WindowManager: Sent Transition #1234 createdAt=06-12 00:52:40.805 via request=TransitionRequestInfo { type = 1, triggerTask = TaskInfo{userId=0 taskId=6695 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.deepeye.agent/.MainActivity } baseActivity=ComponentInfo{com.deepeye.agent/com.deepeye.agent.MainActivity} topActivity=ComponentInfo{com.deepeye.agent/com.deepeye.agent.MainActivity} origActivity=null realActivity=ComponentInfo{com.deepeye.agent/com.deepeye.agent.MainActivity} numActivities=1 lastActiveTime=250234180 supportsMultiWindow=true supportsGlobalFreeform=true resizeMode=1 isResizeable=true isAppLocked=false canKillAndRestart=true isShowDecorCaptionWindowRequest=false minWidth=-1 minHeight=-1 defaultMinSize=200 token=WCT{RemoteToken{44cbae6 Task{93b337 #6695 type=standard A=10515:com.deepeye.agent}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 90 - 0, 0) topActivityInfo=ActivityInfo{981d827 com.deepeye.agent.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null, flags = 0 }
+06-12 00:52:40.856  3064  3354 V WindowManager:     startWCT=WindowContainerTransaction { changes = {} hops = [] errorCallbackToken=null taskFragmentOrganizer=null }
+06-12 00:52:40.856  3064  3354 V WindowManager:     info={id=1234 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{RemoteToken{44cbae6 Task{93b337 #6695 type=standard A=10515:com.deepeye.agent}}} m=OPEN f=NONE pTaskId=-1 leash=Surface(name=Task=6695)/@0xb0be428 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0},{WCT{RemoteToken{65e150 Task{85c76aa #1 type=home}}} m=TO_BACK f=SHOW_WALLPAPER pTaskId=-1 leash=Surface(name=Task=1)/@0xda756d7 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
+06-12 00:52:40.856  3826  3885 V WindowManagerShell: onTransitionReady android.os.BinderProxy@efc7085: {id=1234 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@e745dad} m=OPEN f=NONE pTaskId=-1 leash=Surface(name=Task=6695)/@0x24b2d56 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0},{WCT{android.window.IWindowContainerToken$Stub$Proxy@ce4c8e2} m=TO_BACK f=SHOW_WALLPAPER pTaskId=-1 leash=Surface(name=Task=1)/@0x856b1d7 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
+06-12 00:52:40.856  3826  3885 V WindowManagerShell: Playing animation for (#1234)android.os.BinderProxy@efc7085@0
+06-12 00:52:40.856  3826  3885 V WindowManagerShell:  try handler com.android.wm.shell.transition.DefaultMixedHandler@d7cad6c
+06-12 00:52:40.856  3826  3885 V WindowManagerShell:  try handler com.android.wm.shell.keyguard.KeyguardTransitionHandler@c237e96
+06-12 00:52:40.856  3826  3885 V WindowManagerShell:  try handler com.android.wm.shell.activityembedding.ActivityEmbeddingController@9b2ca17
+06-12 00:52:40.856  3826  3885 V WindowManagerShell:  try handler com.android.wm.shell.recents.RecentsTransitionHandler@f7d3e04
+06-12 00:52:40.856  3826  3885 V ShellRecents: RecentsTransitionHandler.startAnimation: no controller found
+06-12 00:52:40.856  3826  3885 V WindowManagerShell:  try handler com.android.wm.shell.pip.PipTransition@9928e5d
+06-12 00:52:40.856  3826  3885 V WindowManagerShell:  try handler com.android.wm.shell.splitscreen.StageCoordinator@f8dd894
+06-12 00:52:40.856  3826  3885 V WindowManagerShell:  try handler com.android.wm.shell.transition.RemoteTransitionHandler@dda7f3d
+06-12 00:52:40.856  3826  3885 V WindowManagerShell: Transition doesn't have explicit remote, search filters for match for {id=1234 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@e745dad} m=OPEN f=NONE pTaskId=-1 leash=Surface(name=Task=6695)/@0x24b2d56 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0},{WCT{android.window.IWindowContainerToken$Stub$Proxy@ce4c8e2} m=TO_BACK f=SHOW_WALLPAPER pTaskId=-1 leash=Surface(name=Task=1)/@0x856b1d7 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
+06-12 00:52:40.856  3826  3885 V WindowManagerShell:  Checking filter Pair{{types=[] flags=0x0] notFlags=0x100 checks=[{atype=home independent=true modes=[OPEN,TO_FRONT] flags=NONE mustBeTask=false order=TOP topActivity=ComponentInfo{com.motorola.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}},{atype=standard independent=true modes=[CLOSE,TO_BACK] flags=NONE mustBeTask=false order=ANY topActivity=null}]} RemoteTransition { remoteTransition = android.window.IRemoteTransition$Stub$Proxy@dd105f4, appThread = android.app.IApplicationThread$Stub$Proxy@88111d, debugName = QuickstepLaunchHome }}
+06-12 00:52:40.856  3826  3885 V WindowManagerShell:  Delegate animation for #1234 to null
+06-12 00:52:40.857  3826  3885 V WindowManagerShell:  try handler com.android.wm.shell.transition.DefaultTransitionHandler@efaf332
+06-12 00:52:40.857  3826  3885 V WindowManagerShell: start default transition animation, info = {id=1234 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@e745dad} m=OPEN f=NONE pTaskId=-1 leash=Surface(name=Task=6695)/@0x24b2d56 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0},{WCT{android.window.IWindowContainerToken$Stub$Proxy@ce4c8e2} m=TO_BACK f=SHOW_WALLPAPER pTaskId=-1 leash=Surface(name=Task=1)/@0x856b1d7 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
+06-12 00:52:40.857  3826  3885 V WindowManagerShell: loadAnimation: anim=android.view.animation.AnimationSet@18e6f30 animAttr=0x13 type=OPEN isEntrance=false
+06-12 00:52:40.857  3826  3885 V WindowManagerShell: loadAnimation: anim=android.view.animation.AnimationSet@5234e5c animAttr=0x12 type=OPEN isEntrance=true
+06-12 00:52:40.858  3826  3885 V WindowManagerShell:  animated by com.android.wm.shell.transition.DefaultTransitionHandler@efaf332
+06-12 00:52:40.864 25230 25230 I m.deepeye.agent: Using CollectorTypeCMC GC.
+06-12 00:52:40.868 29553 29558 I adbd    : jdwp connection from 25230
+06-12 00:52:40.870 25230 25230 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+06-12 00:52:40.875  1842  2007 E ANDR-PERF-LM: MetaMeter: handleAsync() 166: AdaptLaunch Invalid Async
+06-12 00:52:40.881 15412 12122 W DynamicVolume: DynamicVolumeService: onForegroundActivitiesChanged, record latest volume: AppStartVolume(packageUid=10515, packageName=com.deepeye.agent, timeInMillis=1781205760881, date=Fri Jun 12 00:52:40 GMT+05:30 2026, startVolume=15, deviceType=2)
+06-12 00:52:40.883 25230 25230 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10515; state: ENABLED
+06-12 00:52:40.883 25230 25230 D CompatibilityChangeReporter: Compat change id reported: 242716250; UID 10515; state: ENABLED
+06-12 00:52:40.886  3064  3928 D CompatibilityChangeReporter: Compat change id reported: 170503758; UID 10515; state: ENABLED
+06-12 00:52:40.922  3064  3451 D BatteryService: uevent={POWER_SUPPLY_POWER_AVG=85426149, POWER_SUPPLY_VOLTAGE_NOW=4409342, POWER_SUPPLY_POWER_NOW=126765657, POWER_SUPPLY_CHARGE_CONTROL_LIMIT_MAX=11, POWER_SUPPLY_TYPE=Battery, POWER_SUPPLY_HEALTH=Good, POWER_SUPPLY_TECHNOLOGY=Li-ion, POWER_SUPPLY_CHARGE_FULL_DESIGN=4846000, SEQNUM=29790, POWER_SUPPLY_CHARGE_CONTROL_LIMIT=0, POWER_SUPPLY_MODEL_NAME=5371113_LENOVO_NINGDE_4800MAH_AVERAGED_MASTERSLAVE_SEPT17TH2021, POWER_SUPPLY_STATUS=Charging, POWER_SUPPLY_CYCLE_COUNT=5, POWER_SUPPLY_CAPACITY=100, DEVPATH=/devices/platform/soc/soc:qcom,pmic_glink/soc:qcom,pmic_glink:qcom,battery_charger/power_supply/battery, POWER_SUPPLY_CHARGE_TYPE=Fast, POWER_SUPPLY_CURRENT_NOW=-316776, POWER_SUPPLY_TIME_TO_FULL_AVG=-1, POWER_SUPPLY_PRESENT=1, POWER_SUPPLY_CHARGE_FULL=3664000, POWER_SUPPLY_TIME_TO_FULL_NOW=-1, SUBSYSTEM=power_supply, POWER_SUPPLY_VOLTAGE_OCV=4437878, POWER_SUPPLY_TEMP=400, ACTION=change, POWER_SUPPLY_NAME=battery, POWER_SUPPLY_VOLTAGE_MAX=4450000, POWER_SUPPLY_CHARGE_COUNTER=3660336, POWER_SUPPLY_TIME_TO_EMPTY_AVG=1235197}
+06-12 00:52:40.922  3064  3451 D BatteryService: uevent={POWER_SUPPLY_POWER_AVG=85426149, POWER_SUPPLY_VOLTAGE_NOW=4409342, POWER_SUPPLY_POWER_NOW=126765657, POWER_SUPPLY_CHARGE_CONTROL_LIMIT_MAX=11, POWER_SUPPLY_TYPE=Battery, POWER_SUPPLY_HEALTH=Good, POWER_SUPPLY_TECHNOLOGY=Li-ion, POWER_SUPPLY_CHARGE_FULL_DESIGN=4846000, SEQNUM=29790, POWER_SUPPLY_CHARGE_CONTROL_LIMIT=0, POWER_SUPPLY_MODEL_NAME=5371113_LENOVO_NINGDE_4800MAH_AVERAGED_MASTERSLAVE_SEPT17TH2021, POWER_SUPPLY_STATUS=Charging, POWER_SUPPLY_CYCLE_COUNT=5, POWER_SUPPLY_CAPACITY=100, DEVPATH=/devices/platform/soc/soc:qcom,pmic_glink/soc:qcom,pmic_glink:qcom,battery_charger/power_supply/battery, POWER_SUPPLY_CHARGE_TYPE=Fast, POWER_SUPPLY_CURRENT_NOW=-316776, POWER_SUPPLY_TIME_TO_FULL_AVG=-1, POWER_SUPPLY_PRESENT=1, POWER_SUPPLY_CHARGE_FULL=3664000, POWER_SUPPLY_TIME_TO_FULL_NOW=-1, SUBSYSTEM=power_supply, POWER_SUPPLY_VOLTAGE_OCV=4437878, POWER_SUPPLY_TEMP=400, ACTION=change, POWER_SUPPLY_NAME=battery, POWER_SUPPLY_VOLTAGE_MAX=4450000, POWER_SUPPLY_CHARGE_COUNTER=3660336, POWER_SUPPLY_TIME_TO_EMPTY_AVG=1235197}
+06-12 00:52:40.924  3826  4331 D PowerUI : can't show warning due to - plugged: true status unknown: false
+06-12 00:52:40.925  4036  4036 D DeviceStatisticsService: onReceive: action= android.intent.action.BATTERY_CHANGED
+06-12 00:52:40.927  4041  4041 D QtiCarrierConfigHelper: WARNING, no carrier configs on phone Id: 1
+06-12 00:52:40.928  3064  3064 V UiModeManager: updateLocked: null action, mDockState=0, category=null
+06-12 00:52:40.928  3064  3064 D UiModeManager: updateConfigurationLocked: mDockState=0; mCarMode=false; mNightMode=2; mNightModeCustomType=-1; uiMode=33
+06-12 00:52:40.928 29887 29887 I bzeg    : onPause
+06-12 00:52:40.929 29887 29887 W dpeo    : measuring already stopped.
+06-12 00:52:40.930  3064  3064 V UiModeManager: updateLocked: null action, mDockState=0, category=null
+06-12 00:52:40.930  3064  3064 D UiModeManager: updateConfigurationLocked: mDockState=0; mCarMode=false; mNightMode=2; mNightModeCustomType=-1; uiMode=33
+06-12 00:52:40.931  4041  4041 D QtiCarrierConfigHelper: WARNING, no carrier configs on phone Id: 1
+06-12 00:52:40.932  3826  5369 D PowerUI : can't show warning due to - plugged: true status unknown: false
+06-12 00:52:40.937  4036  4036 V DeviceStatisticsService: chargerType=2 batteryLevel=100 totalBatteryCapacity=3660300
+06-12 00:52:40.937  4036  4036 D DeviceStatisticsService: onReceive: action= android.intent.action.BATTERY_CHANGED
+06-12 00:52:40.939  4036  4036 V DeviceStatisticsService: chargerType=2 batteryLevel=100 totalBatteryCapacity=3660300
+06-12 00:52:40.940  3826  5598 D PowerUI : can't show warning due to - plugged: true status unknown: false
+06-12 00:52:40.940  4041  4041 D QtiCarrierConfigHelper: WARNING, no carrier configs on phone Id: 1
+06-12 00:52:40.941  4036  4036 D DeviceStatisticsService: onReceive: action= android.intent.action.BATTERY_CHANGED
+06-12 00:52:40.942  4036  4036 V DeviceStatisticsService: chargerType=2 batteryLevel=100 totalBatteryCapacity=3660300
+06-12 00:52:40.942  3064  3064 V UiModeManager: updateLocked: null action, mDockState=0, category=null
+06-12 00:52:40.942  3064  3064 D UiModeManager: updateConfigurationLocked: mDockState=0; mCarMode=false; mNightMode=2; mNightModeCustomType=-1; uiMode=33
+06-12 00:52:41.143  3826  3885 V WindowManagerShell: Transition animation finished (aborted=false), notifying core (#1234)android.os.BinderProxy@efc7085@0
+06-12 00:52:41.144  3064  3354 V WindowManager: Finish Transition #1234: created at 06-12 00:52:40.805 collect-started=0.07ms request-sent=15.817ms started=19.98ms ready=47.634ms sent=49.543ms finished=338.71ms
+06-12 00:52:41.145  3826  3885 V WindowManagerShell: Track 0 became idle
+06-12 00:52:41.145  3826  3885 V WindowManagerShell: All active transition animations finished
+06-12 00:52:41.150 29887 29951 D Surface : Surface::disconnect
+06-12 00:52:41.150 29887 29951 D BufferQueueProducer: [VRI[GoogleDiscoverWindow]#58(BLAST Consumer)58](id:74bf0000003a,api:1,p:29887,c:29887) disconnect: api 1
+06-12 00:52:41.151 11130 11147 D Surface : Surface::disconnect
+06-12 00:52:41.151 11130 11147 D BufferQueueProducer: [VRI[CustomizationPanelLauncher]#80(BLAST Consumer)80](id:2b7a000001e4,api:1,p:11130,c:11130) disconnect: api 1
+06-12 00:52:41.179 25230 25230 D nativeloader: Configuring clns-4 for other apk /data/app/~~aD_Yjm6aVJ6f1ElmLgcZJg==/com.deepeye.agent-XU5ER5eupW3jb5GQBWDj9g==/base.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~aD_Yjm6aVJ6f1ElmLgcZJg==/com.deepeye.agent-XU5ER5eupW3jb5GQBWDj9g==/lib/arm64:/data/app/~~aD_Yjm6aVJ6f1ElmLgcZJg==/com.deepeye.agent-XU5ER5eupW3jb5GQBWDj9g==/base.apk!/lib/arm64-v8a, permitted_path=/data:/mnt/expand:/data/user/0/com.deepeye.agent
+06-12 00:52:41.182 25230 25230 D nativeloader: Load libframework-connectivity-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity.jar: ok
+06-12 00:52:41.184 25230 25230 V GraphicsEnvironment: Currently set values for:
+06-12 00:52:41.184 25230 25230 V GraphicsEnvironment:   angle_gl_driver_selection_pkgs=[]
+06-12 00:52:41.184 25230 25230 V GraphicsEnvironment:   angle_gl_driver_selection_values=[]
+06-12 00:52:41.184 25230 25230 V GraphicsEnvironment: ANGLE GameManagerService for com.deepeye.agent: false
+06-12 00:52:41.184 25230 25230 V GraphicsEnvironment: com.deepeye.agent is not listed in per-application setting
+06-12 00:52:41.184 25230 25230 V GraphicsEnvironment: Updatable production driver is not supported on the device.
+06-12 00:52:41.196 25230 25230 I Typeface: updateThemeFont new=Rookery-Regular;old=sans-serif;new=Rookery-Stacked;old=
+06-12 00:52:41.197  3064 15872 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10515. pid: 25230
+06-12 00:52:41.232 25230 25230 D CompatibilityChangeReporter: Compat change id reported: 237531167; UID 10515; state: DISABLED
+06-12 00:52:41.236 25230 25230 D ViewRootImpl: update {(0,0)(fillxfill) sim={forwardNavigation} ty=BASE_APPLICATION wanim=0x10302fe
+06-12 00:52:41.236 25230 25230 D ViewRootImpl:   fl=LAYOUT_IN_SCREEN LAYOUT_INSET_DECOR SPLIT_TOUCH HARDWARE_ACCELERATED DRAWS_SYSTEM_BAR_BACKGROUNDS
+06-12 00:52:41.236 25230 25230 D ViewRootImpl:   pfl=NO_MOVE_ANIMATION FORCE_DRAW_STATUS_BAR_BACKGROUND FIT_INSETS_CONTROLLED
+06-12 00:52:41.236 25230 25230 D ViewRootImpl:   bhv=DEFAULT
+06-12 00:52:41.236 25230 25230 D ViewRootImpl:   fitSides=} by setView
+06-12 00:52:41.345 25230 25230 D nativeloader: Load /data/app/~~aD_Yjm6aVJ6f1ElmLgcZJg==/com.deepeye.agent-XU5ER5eupW3jb5GQBWDj9g==/base.apk!/lib/arm64-v8a/liblitertlm_jni.so using class loader ns clns-4 (caller=/data/app/~~aD_Yjm6aVJ6f1ElmLgcZJg==/com.deepeye.agent-XU5ER5eupW3jb5GQBWDj9g==/base.apk!classes4.dex): ok
+06-12 00:52:41.348 25230 25230 E AgentViewModel: AUTO STARTING DOWNLOAD FOR DEBUG
+06-12 00:52:41.370 25230 25230 W m.deepeye.agent: Method boolean androidx.compose.runtime.snapshots.SnapshotStateList.conditionalUpdate(boolean, kotlin.jvm.functions.Function1) failed lock verification and will run slower.
+06-12 00:52:41.370 25230 25230 W m.deepeye.agent: Common causes for lock verification issues are non-optimized dex code
+06-12 00:52:41.370 25230 25230 W m.deepeye.agent: and incorrect proguard optimizations.
+06-12 00:52:41.370 25230 25230 W m.deepeye.agent: Method boolean androidx.compose.runtime.snapshots.SnapshotStateList.conditionalUpdate$default(androidx.compose.runtime.snapshots.SnapshotStateList, boolean, kotlin.jvm.functions.Function1, int, java.lang.Object) failed lock verification and will run slower.
+06-12 00:52:41.370 25230 25230 W m.deepeye.agent: Method java.lang.Object androidx.compose.runtime.snapshots.SnapshotStateList.mutate(kotlin.jvm.functions.Function1) failed lock verification and will run slower.
+06-12 00:52:41.370 25230 25230 W m.deepeye.agent: Method void androidx.compose.runtime.snapshots.SnapshotStateList.update(boolean, kotlin.jvm.functions.Function1) failed lock verification and will run slower.
+06-12 00:52:41.370 25230 25230 W m.deepeye.agent: Method void androidx.compose.runtime.snapshots.SnapshotStateList.update$default(androidx.compose.runtime.snapshots.SnapshotStateList, boolean, kotlin.jvm.functions.Function1, int, java.lang.Object) failed lock verification and will run slower.
+06-12 00:52:41.438  3064  5710 D CoreBackPreview: Window{685e22b u0 com.deepeye.agent/com.deepeye.agent.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@9389334, mPriority=0, mIsAnimationCallback=false}
+06-12 00:52:41.439 15280 15891 D CmdCenter: - RowBase2: sPrevModStatus: 1, modStatus: 1
+06-12 00:52:41.439 15280 15891 D CmdCenter: - RowBase2: sPrevBatStatus: 2, status: 2
+06-12 00:52:41.439 15280 15891 D CmdCenter: - RowBase2: sPrevChargeRate = 1, new = 1
+06-12 00:52:41.439 15280 15891 D CmdCenter: - RowBase2: sPrevPlugType: 2 plugType: 2
+06-12 00:52:41.456 25230 25236 I m.deepeye.agent: Compiler allocated 4496KB to compile void android.view.ViewRootImpl.performTraversals()
+06-12 00:52:41.495 28604 28792 I ThermalEngine: ACTION: freeze_rule - Setting freeze_rule to 0
+06-12 00:52:41.495 28604 28792 I ThermalEngine: Monitor:INACTIVE:FREEZE-CHG:freeze_rule=1:DETECT-STANDBY=0
+06-12 00:52:41.495 28604 25263 I Thermal-Lib: Thermal-Lib-Client: Client request sent
+06-12 00:52:41.495 28604 28792 I ThermalEngine: ACTION: override_c - Setting override_c to 0
+06-12 00:52:41.495 28604 28792 I ThermalEngine: Monitor:INACTIVE:OVERRIDE-CHG:internal_override=1:DETECT-STANDBY=0
+06-12 00:52:41.495 28604 28791 I ThermalEngine: Thermal-Server: Thermal received msg from  freezing
+06-12 00:52:41.496 28604 25264 I Thermal-Lib: Thermal-Lib-Client: Client request sent
+06-12 00:52:41.496 28604 28791 I ThermalEngine: Thermal-Server: Thermal received msg from  override_c
+06-12 00:52:41.513 25230 25230 D CompatibilityChangeReporter: Compat change id reported: 289878283; UID 10515; state: ENABLED
+06-12 00:52:41.558  1734  1865 E minksocket: MinkIPC_QRTR_Service: client with node 1 port 4eea went down
+06-12 00:52:41.559  1734  1865 E minksocket: MinkIPC_QRTR_Service: client with node 1 port 4eeb went down
+06-12 00:52:41.560  1734  1865 E minksocket: MinkIPC_QRTR_Service: client with node 1 port 4eec went down
+06-12 00:52:41.560  1734  1865 E minksocket: MinkIPC_QRTR_Service: client with node 1 port 4eed went down
+06-12 00:52:41.570 25230 25249 I AdrenoGLES-0: QUALCOMM build                   : dad4038ba6, If56d4a5bb8
+06-12 00:52:41.570 25230 25249 I AdrenoGLES-0: Build Date                       : 07/28/23
+06-12 00:52:41.570 25230 25249 I AdrenoGLES-0: OpenGL ES Shader Compiler Version: EV031.36.08.24
+06-12 00:52:41.570 25230 25249 I AdrenoGLES-0: Local Branch                     : 
+06-12 00:52:41.570 25230 25249 I AdrenoGLES-0: Remote Branch                    : refs/tags/AU_LINUX_ANDROID_LA.VENDOR.1.0.11.00.00.766.892
+06-12 00:52:41.570 25230 25249 I AdrenoGLES-0: Remote Branch                    : NONE
+06-12 00:52:41.570 25230 25249 I AdrenoGLES-0: Reconstruct Branch               : NOTHING
+06-12 00:52:41.570 25230 25249 I AdrenoGLES-0: Build Config                     : S P 12.1.1 AArch64
+06-12 00:52:41.570 25230 25249 I AdrenoGLES-0: Driver Path                      : /vendor/lib64/egl/libGLESv2_adreno.so
+06-12 00:52:41.570 25230 25249 I AdrenoGLES-0: Driver Version                   : 0615.74
+06-12 00:52:41.573 25230 25249 I AdrenoGLES-0: PFP: 0x01730158, ME: 0x00000000
+06-12 00:52:41.585 25230 25249 I OpenGLRenderer: setGrContext nullptr-->validptr
+06-12 00:52:41.585 25230 25249 E OpenGLRenderer: Unable to match the desired swap behavior.
+06-12 00:52:41.610  3064  3358 I LaunchCheckinHandler: MotoDisplayed com.deepeye.agent/.MainActivity,cp,ca,776
+06-12 00:52:41.610  3064  3358 W ActivityTaskManager: activity boost didn't release as expected
+06-12 00:52:41.612  3064  3354 I ActivityTaskManager: Displayed com.deepeye.agent/.MainActivity for user 0: +811ms
+06-12 00:52:41.614 25230 25230 I Choreographer: Skipped 50 frames!  The application may be doing too much work on its main thread.
+06-12 00:52:41.629  3064  3084 D CompatibilityChangeReporter: Compat change id reported: 214016041; UID 10515; state: ENABLED
+06-12 00:52:41.629  3064  3084 I ImeTracker: com.deepeye.agent:4306ed08: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_UNSPECIFIED_WINDOW
+06-12 00:52:41.629  3064  3084 I ImeTracker: com.deepeye.agent:4306ed08: onCancelled at PHASE_SERVER_SHOULD_HIDE
+06-12 00:52:41.630 20099 20099 I SubtypeOperator: SubtypeOperator$1.onUnbindInput():43 
+06-12 00:52:41.632 20099 20099 I SubtypeOperator: SubtypeOperator$1.onBindInput():33 
+06-12 00:52:41.633 20099 20099 I GoogleInputMethodService: GoogleInputMethodService.onFinishInput():2274 
+06-12 00:52:41.634 20099 20099 I Module  : DeviceLockedStatusModuleProvider$Module.updateDeviceLockedStatusInternal():128 repeatCheckTimes = 0, locked = false
+06-12 00:52:41.634 20099 20099 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1459 onStartInput(EditorInfo{EditorInfo{packageName=com.deepeye.agent, inputType=0, inputTypeString=NULL, enableLearning=false, autoCorrection=false, autoComplete=false, imeOptions=0, privateImeOptions=null, actionName=UNSPECIFIED, actionLabel=null, initialSelStart=-1, initialSelEnd=-1, initialCapsMode=0, label=null, fieldId=0, fieldName=null, extras=null, hintText=null, hintLocales=[]}}, false)
+06-12 00:52:41.634 20099 20099 I LatinIMEBase: LatinIMEBase.updateInputViewCoverNavigation():317 Update input view padding, isNavbarOverInputWindow=false, bottom inset=102
+06-12 00:52:41.635 20099 20099 I Module  : DeviceLockedStatusModuleProvider$Module.updateDeviceLockedStatusInternal():128 repeatCheckTimes = 1, locked = false
+06-12 00:52:41.635  3064  3084 W PackageConfigPersister: App-specific configuration not found for packageName: com.deepeye.agent and userId: 0
+06-12 00:52:41.639  3064  3084 D PowerManagerService: nativeSetPowerMode ret:false mode:5 enabled:false duration ms: 0
+06-12 00:52:41.640  3064  3084 D PowerManagerService: nativeReleaseSuspendBlocker name:PowerManagerService.WakeLocks duration ms: 0
+06-12 00:52:41.649 29887 29887 I bzeg    : onStop
+06-12 00:52:41.650 11130 11145 I ImeTracker: com.motorola.launcher3:343bc17e: onRequestHide at ORIGIN_CLIENT_HIDE_SOFT_INPUT reason HIDE_SOFT_INPUT
+06-12 00:52:41.650 11130 11145 I ImeTracker: com.motorola.launcher3:343bc17e: onFailed at PHASE_CLIENT_VIEW_SERVED
+06-12 00:52:41.651  3064  3455 D PowerManagerService: nativeAcquireSuspendBlocker name:PowerManagerService.WakeLocks duration ms: 1
+06-12 00:52:41.657 28856 28856 I Finsky  : [2] SCH: job service start with id 9747.
+06-12 00:52:41.658  1734  1865 E minksocket: MinkIPC_QRTR_Service: client with node 1 port 4eee went down
+06-12 00:52:41.658  1734  1865 E minksocket: MinkIPC_QRTR_Service: client with node 1 port 4eef went down
+06-12 00:52:41.658  1734  1865 E minksocket: MinkIPC_QRTR_Service: client with node 1 port 4ef0 went down
+06-12 00:52:41.659  1734  1865 E minksocket: MinkIPC_QRTR_Service: client with node 1 port 4ef2 went down
+06-12 00:52:41.659  1734  1865 E minksocket: MinkIPC_QRTR_Service: client with node 1 port 4ef3 went down
+06-12 00:52:41.659  1734  1865 E minksocket: MinkIPC_QRTR_Service: client with node 1 port 4ef4 went down
+06-12 00:52:41.664 28856 24425 I Finsky  : [760] SCH: Satisfied jobs for 9747 are: 12-1
+06-12 00:52:41.664 28856 25283 I Finsky  : [768] SCH: Job 12-1 starting
+06-12 00:52:41.665 28856 28856 I Finsky  : [2] WM::SCH: Logging work start for 12-1
+06-12 00:52:41.666 28856 28856 I Finsky  : [2] [ContentSync] job started
+06-12 00:52:41.737 11847 11856 I FontLog : (REDACTED) Received query %s, URI %s
+06-12 00:52:41.737 11847 11856 I FontLog : (REDACTED) Query [%s] resolved to %s
+06-12 00:52:41.738 11847 11856 I FontLog : (REDACTED) Fetch %s end status %s
+06-12 00:52:41.741 11847 12002 I FontLog : (REDACTED) Pulling font file for id = %d, cache size = %d
+06-12 00:52:41.744 11847 12002 I FontLog : (REDACTED) Pulling font file for id = %d, cache size = %d
+06-12 00:52:41.767 19474 19480 W gle.android.gms: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~aD_Yjm6aVJ6f1ElmLgcZJg==/com.deepeye.agent-XU5ER5eupW3jb5GQBWDj9g==/base.apk' with 1 weak references
+06-12 00:52:41.837  1842  5355 E ANDR-PERF-LM: VmRssMeter:: start() 358: Could not find pid, can not collect vmrss data
+06-12 00:52:41.843  1842  5356 E ANDR-PERF-LM: VmRssMeter:: start() 358: Could not find pid, can not collect vmrss data
+06-12 00:52:41.843  1842  5356 E ANDR-PERF-LM: AdaptiveLaunch: writeToDataBase() 64: Meter aborted or could not get meter data for this run
+06-12 00:52:41.875 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.google.mainline.primary.libs' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:41.882  1745  4536 I vendor.qti.bluetooth@1.0-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+06-12 00:52:41.882  1745  4536 D vendor.qti.bluetooth@1.0-ibs_handler: SerialClockVote: vote for UART CLK ON
+06-12 00:52:41.882  1745  4536 D vendor.qti.bluetooth@1.0-wake_lock: Acquire wakelock is acquired 
+06-12 00:52:41.882  1745  4536 I vendor.qti.bluetooth@1.0-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+06-12 00:52:41.883  4002  4539 I bt_stack: [INFO:btm_ble_gap.cc(3287)] btm_ble_process_adv_pkt_cont Data Complete 0d:31:8d:1d:25:73
+06-12 00:52:41.883  4002  4539 D bt_btm_ble: bool parse_adv_audio_uuids_from_adv_pkt(const uint8_t *, size_t, uint8_t): tmap_cap_pts: false
+06-12 00:52:41.922  1745  4536 I vendor.qti.bluetooth@1.0-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+06-12 00:52:41.922  1745  4536 D vendor.qti.bluetooth@1.0-ibs_handler: SerialClockVote: vote for UART CLK OFF
+06-12 00:52:41.929 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.android.apex.cts.shim' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:41.937 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.google.android.appsearch' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:41.940 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.google.android.art' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:41.962  3826  3929 D Surface : Surface::disconnect
+06-12 00:52:41.962  3826  3929 D BufferQueueProducer: [VRI[agent]#1364(BLAST Consumer)1364](id:ef200000556,api:1,p:3826,c:3826) disconnect: api 1
+06-12 00:52:41.963 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.google.android.mediaprovider' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:41.965  3826  3921 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=falsecallback=android.view.ViewRootImpl$$ExternalSyntheticLambda17@b9384f5
+06-12 00:52:41.965  3064  3928 D CoreBackPreview: Window{bf41e09 u0 Splash Screen com.deepeye.agent EXITING}: Setting back callback null
+06-12 00:52:41.965  3064  3084 W InputManager-JNI: Input channel object 'bf41e09 Splash Screen com.deepeye.agent (client)' was disposed without first being removed with the input manager!
+06-12 00:52:41.973 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.android.virt' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:41.977 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.google.android.resolv' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:41.982 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.google.android.configinfrastructure' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:41.982 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.google.android.media' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:41.989 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.android.vndk.v31' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:41.990 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.android.vndk.v30' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:41.991 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.android.vndk.v33' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:41.991 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.android.vndk.v32' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:41.993 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.android.vndk.v34' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:42.015 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.google.android.sdkext' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:42.022 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.google.android.adservices' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:42.023 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.google.android.tethering' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:42.033 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.android.runtime' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:42.043 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.google.android.cellbroadcast' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:42.072  1745  4279 D vendor.qti.bluetooth@1.0-wake_lock: Release wakelock is released 
+06-12 00:52:42.090 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.motorola.enterprise' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:42.105 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.google.android.tzdata5' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:42.112 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.google.android.permission' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:42.122 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.google.android.wifi' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:42.208 20255 20633 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[bolt clock triggered, queue operations will be executed now..]
+06-12 00:52:42.208 20255 20632 I System.out: [[Dispatchers.Default][bolt-default][debug][bolt-v2][BoltControlManager]:message[bolt clock is registered for [2000] delay]
+06-12 00:52:42.209 20255 20633 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[execution called for name [StateValidationQueueOperation and item [StateInactiveTimeQueueOperation(uniqueName=StateValidationQueueOperation, retryConfig=com.phonepe.boltV2Sdk.external.RetryConfiguration@50aa402, logger=com.phonepe.boltV2Sdk.internal.logger.core.DebugLogger@f0ca113, analyticManager=com.phonepe.boltV2Sdk.internal.BoltAnalyticManager@9268f50, immediateExecute=true, queueOperationType=STATE_INACTIVE_TIME_QUEUE_OPERATION, block=(com.phonepe.boltV2Sdk.internal.boltctl.queueOperations.QueueOperation) -> kotlin.Boolean)]]
+06-12 00:52:42.209 20255 20633 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][StateInactiveTimeQueueOperation]:message[Queue operation with name [StateValidationQueueOperation retry started, checking for retry limits..]
+06-12 00:52:42.209 20255 20633 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][StateInactiveTimeQueueOperation]:message[Queue operation with name [StateValidationQueueOperation retry limits not reached, checking for waiting window before execution..]
+06-12 00:52:42.209 20255 20633 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][StateInactiveTimeQueueOperation]:message[Queue operation with name [StateValidationQueueOperation retry limits not reached, waiting window is not completed, skipping the execution this time...]
+06-12 00:52:42.210 20255 20633 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[execution completed for name [StateValidationQueueOperation and item [StateInactiveTimeQueueOperation(uniqueName=StateValidationQueueOperation, retryConfig=com.phonepe.boltV2Sdk.external.RetryConfiguration@50aa402, logger=com.phonepe.boltV2Sdk.internal.logger.core.DebugLogger@f0ca113, analyticManager=com.phonepe.boltV2Sdk.internal.BoltAnalyticManager@9268f50, immediateExecute=true, queueOperationType=STATE_INACTIVE_TIME_QUEUE_OPERATION, block=(com.phonepe.boltV2Sdk.internal.boltctl.queueOperations.QueueOperation) -> kotlin.Boolean)], checking for GC status]
+06-12 00:52:42.210 20255 20633 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[execution called for name [BoltCtl and item [PeriodicCheckQueueOperation(uniqueName=BoltCtl, retryConfig=com.phonepe.boltV2Sdk.external.RetryConfiguration@eed507c, logger=com.phonepe.boltV2Sdk.internal.logger.core.DebugLogger@5793d05, analyticManager=com.phonepe.boltV2Sdk.internal.BoltAnalyticManager@9268f50, immediateExecute=false, queueOperationType=BOLT_PERIODIC_OPERATION, block=(com.phonepe.boltV2Sdk.internal.boltctl.queueOperations.QueueOperation) -> kotlin.Boolean)]]
+06-12 00:52:42.210 20255 20633 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][PeriodicCheckQueueOperation]:message[Queue operation with name [BoltCtl retry started, checking for retry limits..]
+06-12 00:52:42.210 20255 20633 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][PeriodicCheckQueueOperation]:message[Queue operation with name [BoltCtl retry limits not reached, checking for waiting window before execution..]
+06-12 00:52:42.210 20255 20633 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][PeriodicCheckQueueOperation]:message[Queue operation with name [BoltCtl retry limits not reached, waiting window is not completed, skipping the execution this time...]
+06-12 00:52:42.211 20255 20633 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[execution completed for name [BoltCtl and item [PeriodicCheckQueueOperation(uniqueName=BoltCtl, retryConfig=com.phonepe.boltV2Sdk.external.RetryConfiguration@eed507c, logger=com.phonepe.boltV2Sdk.internal.logger.core.DebugLogger@5793d05, analyticManager=com.phonepe.boltV2Sdk.internal.BoltAnalyticManager@9268f50, immediateExecute=false, queueOperationType=BOLT_PERIODIC_OPERATION, block=(com.phonepe.boltV2Sdk.internal.boltctl.queueOperations.QueueOperation) -> kotlin.Boolean)], checking for GC status]
+06-12 00:52:42.324  4104  4104 D TelephonyManager: requestModemActivityInfo: Sending result to app: ModemActivityInfo{ mTimestamp=250235683 mSleepTimeMs=180498149 mIdleTimeMs=3802407 mActivityStatsTechSpecificInfo=[{mRat=UNKNOWN,mFrequencyRange=UNKNOWN,mTxTimeMs[]=[1855738, 2284662, 991983, 478415, 595739],mRxTimeMs=59812989}]}
+06-12 00:52:42.325  3826  3826 D StatusBarIconController: ignoring old pipeline callbacks, because the new mobile icons are enabled
+06-12 00:52:42.437 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.google.android.media.swcodec' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:42.465 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.google.android.adbd' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:42.469 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.android.i18n' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:42.471 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.google.android.conscrypt' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:42.479 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.google.android.neuralnetworks' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:42.482 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.google.android.ipsec' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:42.484 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.android.devicelock' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:42.488 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.google.android.ondevicepersonalization' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:42.489  4036  4441 I QcrilOemhookMsgTunnel: [0]processOemHookIndication length=33
+06-12 00:52:42.489  4036  4036 D QcrilMsgTunnelIfaceManager: handleMessage what = 5
+06-12 00:52:42.490  4036  4441 I QcrilOemhookMsgTunnel: [0]processOemHookIndication length=12
+06-12 00:52:42.490  4036  4036 D QcrilMsgTunnelIfaceManager: handleMessage what = 5
+06-12 00:52:42.492 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.google.android.healthfitness' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:42.500 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.android.uwb' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:42.500 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.google.android.extservices' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:42.510 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.google.android.os.statsd' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:42.515 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.android.rkpd' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:42.518 28856 28856 W Finsky  : [2] STU: Failed to get storage stats for package 'com.google.android.scheduling' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+06-12 00:52:42.527 28856 28856 I Finsky  : [2] App states replicator found 40 unowned apps
+06-12 00:52:42.539 28856 28920 I Finsky  : [349] Completed 0 account content syncs with 0 successful.
+06-12 00:52:42.539 28856 28856 I Finsky  : [2] [ContentSync] Installation state replication succeeded.
+06-12 00:52:42.540 28856 28856 I Finsky  : [2] SCH: jobFinished: 12-1. TimeElapsed: 875ms.
+06-12 00:52:42.540 28856 28856 I Finsky  : [2] WM::SCH: Logging work end for 12-1
+06-12 00:52:42.546 28856 28920 I Finsky  : [349] SCH: Scheduling phonesky job Id: 1-1337, CT: 1781168355215, Constraints: [{ L: 43081010, D: 86281010, C: CHARGING_NONE, I: IDLE_NONE, N: NET_ANY, B: BATTERY_ANY }]
+06-12 00:52:42.546 28856 28920 I Finsky  : [349] SCH: Scheduling phonesky job Id: 34-1863, CT: 1781125108440, Constraints: [{ L: 604800000, D: 2476945252, C: CHARGING_NONE, I: IDLE_NONE, N: NET_ANY, B: BATTERY_ANY }]
+06-12 00:52:42.546 28856 28920 I Finsky  : [349] SCH: Scheduling phonesky job Id: 34-1869, CT: 1781125108440, Constraints: [{ L: 604800000, D: 2556204563, C: CHARGING_NONE, I: IDLE_NONE, N: NET_ANY, B: BATTERY_ANY }]
+06-12 00:52:42.546 28856 28920 I Finsky  : [349] SCH: Scheduling phonesky job Id: 34-1873, CT: 1781168575250, Constraints: [{ L: 79199873, D: 1375199873, C: CHARGING_NONE, I: IDLE_NONE, N: NET_ANY, B: BATTERY_ANY }]
+06-12 00:52:42.546 28856 28920 I Finsky  : [349] SCH: Scheduling phonesky job Id: 34-1874, CT: 1781168577196, Constraints: [{ L: 604800000, D: 2591998106, C: CHARGING_NONE, I: IDLE_NONE, N: NET_ANY, B: BATTERY_ANY }]
+06-12 00:52:42.548 28856 28921 I Finsky  : [350] SCH: Scheduling 1 system job(s)
+06-12 00:52:42.548 28856 28921 I Finsky  : [350] SCH: Scheduling system job Id: 9754, L: 5673677, D: 48873677, C: false, I: false, N: 1
+06-12 00:52:42.552 28856 25283 I Finsky  : [768] SCH: job service finished with id 9747.
+06-12 00:52:42.552  3064  5710 D PowerManagerService: nativeReleaseSuspendBlocker name:PowerManagerService.WakeLocks duration ms: 0
+06-12 00:52:42.604  4036  4441 I QcrilOemhookMsgTunnel: [0]processOemHookIndication length=33
+06-12 00:52:42.604  4036  4036 D QcrilMsgTunnelIfaceManager: handleMessage what = 5
+06-12 00:52:42.605  4036  4441 I QcrilOemhookMsgTunnel: [0]processOemHookIndication length=12
+06-12 00:52:42.605  4036  4036 D QcrilMsgTunnelIfaceManager: handleMessage what = 5
+06-12 00:52:42.662  1734  1865 E minksocket: MinkIPC_QRTR_Service: client with node 1 port 4ef6 went down
+06-12 00:52:42.662  1734  1865 E minksocket: MinkIPC_QRTR_Service: client with node 1 port 4ef7 went down
+06-12 00:52:42.663  1734  1865 E minksocket: MinkIPC_QRTR_Service: client with node 1 port 4ef8 went down
+06-12 00:52:42.663  1734  1865 E minksocket: MinkIPC_QRTR_Service: client with node 1 port 4ef9 went down
+06-12 00:52:43.151  3064  3731 D PowerManagerService: nativeAcquireSuspendBlocker name:PowerManagerService.WakeLocks duration ms: 3
+06-12 00:52:43.175  3064  3731 D PowerManagerService: nativeReleaseSuspendBlocker name:PowerManagerService.WakeLocks duration ms: 0
+06-12 00:52:43.175  4041 24374 I QImsService: VtDataUsageProvider : onSetAlert:2097152
+06-12 00:52:43.175  4041  5591 I QImsService: VtDataUsageProvider : onSetAlert:2097152
+06-12 00:52:43.175  4041  4041 I QImsService: ImsServiceClassTracker : updateAlertQuota:newQuota=2097152,Remaining=2097152
+06-12 00:52:43.175  4041  4041 I QImsService: ImsServiceClassTracker : updateAlertQuota:newQuota=2097152,Remaining=2097152
+06-12 00:52:43.184  1737  3695 I slpi    : STK3A5X ALS_OC: lux:2525.040039, last_ps:0[1172], CH0:1890, CH2:261, CH4:10, AWAIT:32, ACRL:33, AGAIN:33, INT1:9, INT2:0, PS:114, LED:128, flag:65, state:7, scale:167.560,als_sel:1(0)(cnt:0)
+06-12 00:52:43.498 28604 28792 I ThermalEngine: Monitor:ACTIVE:FREEZE-CHG:freeze_rule=1:DETECT-STANDBY=1
+06-12 00:52:43.499 28604 28792 I ThermalEngine: ACTION: freeze_rule - Setting freeze_rule to 1
+06-12 00:52:43.499  1737  3695 I slpi    : STK3A5X ALS_OC: lux:2268.528076, last_ps:0[1171], CH0:1698, CH2:227, CH4:10, AWAIT:32, ACRL:33, AGAIN:33, INT1:9, INT2:0, PS:114, LED:128, flag:65, state:7, scale:167.560,als_sel:1(0)(cnt:0)
+06-12 00:52:43.499 28604 28792 I ThermalEngine: Monitor:ACTIVE:OVERRIDE-CHG:internal_override=1:DETECT-STANDBY=1
+06-12 00:52:43.499 28604 28792 I ThermalEngine: ACTION: override_c - Setting override_c to 1
+06-12 00:52:43.499 28604 25308 I Thermal-Lib: Thermal-Lib-Client: Client request sent
+06-12 00:52:43.500 28604 28791 I ThermalEngine: Thermal-Server: Thermal received msg from  freezing
+06-12 00:52:43.500 28604 28791 I ThermalEngine: Thermal-Server: Thermal received msg from  override_c
+06-12 00:52:43.500 28604 25307 I Thermal-Lib: Thermal-Lib-Client: Client request sent
+06-12 00:52:43.676  1734  1865 E minksocket: MinkIPC_QRTR_Service: client with node 1 port 4ef1 went down
+06-12 00:52:43.677  1734  1865 E minksocket: MinkIPC_QRTR_Service: client with node 1 port 4ef5 went down
+06-12 00:52:43.711  3064  3451 D BatteryService: uevent={POWER_SUPPLY_POWER_AVG=85426149, POWER_SUPPLY_VOLTAGE_NOW=4454107, POWER_SUPPLY_POWER_NOW=126765657, POWER_SUPPLY_CHARGE_CONTROL_LIMIT_MAX=11, POWER_SUPPLY_TYPE=Battery, POWER_SUPPLY_HEALTH=Good, POWER_SUPPLY_TECHNOLOGY=Li-ion, POWER_SUPPLY_CHARGE_FULL_DESIGN=4846000, SEQNUM=29791, POWER_SUPPLY_CHARGE_CONTROL_LIMIT=0, POWER_SUPPLY_MODEL_NAME=5371113_LENOVO_NINGDE_4800MAH_AVERAGED_MASTERSLAVE_SEPT17TH2021, POWER_SUPPLY_STATUS=Charging, POWER_SUPPLY_CYCLE_COUNT=5, POWER_SUPPLY_CAPACITY=100, DEVPATH=/devices/platform/soc/soc:qcom,pmic_glink/soc:qcom,pmic_glink:qcom,battery_charger/power_supply/battery, POWER_SUPPLY_CHARGE_TYPE=Standard, POWER_SUPPLY_CURRENT_NOW=293583, POWER_SUPPLY_TIME_TO_FULL_AVG=-1, POWER_SUPPLY_PRESENT=1, POWER_SUPPLY_CHARGE_FULL=3664000, POWER_SUPPLY_TIME_TO_FULL_NOW=-1, SUBSYSTEM=power_supply, POWER_SUPPLY_VOLTAGE_OCV=4437878, POWER_SUPPLY_TEMP=400, ACTION=change, POWER_SUPPLY_NAME=battery, POWER_SUPPLY_VOLTAGE_MAX=4450000, POWER_SUPPLY_CHARGE_COUNTER=3660336, POWER_SUPPLY_TIME_TO_EMPTY_AVG=1235197}
+06-12 00:52:43.711  3064  3451 D BatteryService: uevent={POWER_SUPPLY_POWER_AVG=85426149, POWER_SUPPLY_VOLTAGE_NOW=4454107, POWER_SUPPLY_POWER_NOW=126765657, POWER_SUPPLY_CHARGE_CONTROL_LIMIT_MAX=11, POWER_SUPPLY_TYPE=Battery, POWER_SUPPLY_HEALTH=Good, POWER_SUPPLY_TECHNOLOGY=Li-ion, POWER_SUPPLY_CHARGE_FULL_DESIGN=4846000, SEQNUM=29791, POWER_SUPPLY_CHARGE_CONTROL_LIMIT=0, POWER_SUPPLY_MODEL_NAME=5371113_LENOVO_NINGDE_4800MAH_AVERAGED_MASTERSLAVE_SEPT17TH2021, POWER_SUPPLY_STATUS=Charging, POWER_SUPPLY_CYCLE_COUNT=5, POWER_SUPPLY_CAPACITY=100, DEVPATH=/devices/platform/soc/soc:qcom,pmic_glink/soc:qcom,pmic_glink:qcom,battery_charger/power_supply/battery, POWER_SUPPLY_CHARGE_TYPE=Standard, POWER_SUPPLY_CURRENT_NOW=293583, POWER_SUPPLY_TIME_TO_FULL_AVG=-1, POWER_SUPPLY_PRESENT=1, POWER_SUPPLY_CHARGE_FULL=3664000, POWER_SUPPLY_TIME_TO_FULL_NOW=-1, SUBSYSTEM=power_supply, POWER_SUPPLY_VOLTAGE_OCV=4437878, POWER_SUPPLY_TEMP=400, ACTION=change, POWER_SUPPLY_NAME=battery, POWER_SUPPLY_VOLTAGE_MAX=4450000, POWER_SUPPLY_CHARGE_COUNTER=3660336, POWER_SUPPLY_TIME_TO_EMPTY_AVG=1235197}
+06-12 00:52:43.718  4041  4041 D QtiCarrierConfigHelper: WARNING, no carrier configs on phone Id: 1
+06-12 00:52:43.718  4036  4036 D DeviceStatisticsService: onReceive: action= android.intent.action.BATTERY_CHANGED
+06-12 00:52:43.719  3826  4778 D PowerUI : can't show warning due to - plugged: true status unknown: false
+06-12 00:52:43.722  3064  3064 V UiModeManager: updateLocked: null action, mDockState=0, category=null
+06-12 00:52:43.722  3064  3064 D UiModeManager: updateConfigurationLocked: mDockState=0; mCarMode=false; mNightMode=2; mNightModeCustomType=-1; uiMode=33
+06-12 00:52:43.723  3064  3064 V UiModeManager: updateLocked: null action, mDockState=0, category=null
+06-12 00:52:43.724  4041  4041 D QtiCarrierConfigHelper: WARNING, no carrier configs on phone Id: 1
+06-12 00:52:43.724  3064  3064 D UiModeManager: updateConfigurationLocked: mDockState=0; mCarMode=false; mNightMode=2; mNightModeCustomType=-1; uiMode=33
+06-12 00:52:43.725  3826  4772 D PowerUI : can't show warning due to - plugged: true status unknown: false
+06-12 00:52:43.725  4036  4036 V DeviceStatisticsService: chargerType=2 batteryLevel=100 totalBatteryCapacity=3660300
+06-12 00:52:43.725  4036  4036 D DeviceStatisticsService: onReceive: action= android.intent.action.BATTERY_CHANGED
+06-12 00:52:43.727  4036  4036 V DeviceStatisticsService: chargerType=2 batteryLevel=100 totalBatteryCapacity=3660300
+06-12 00:52:43.728  4036  4036 D DeviceStatisticsService: onReceive: action= android.intent.action.BATTERY_CHANGED
+06-12 00:52:43.729  4041  4041 D QtiCarrierConfigHelper: WARNING, no carrier configs on phone Id: 1
+06-12 00:52:43.729  3064  3064 V UiModeManager: updateLocked: null action, mDockState=0, category=null
+06-12 00:52:43.729  3064  3064 D UiModeManager: updateConfigurationLocked: mDockState=0; mCarMode=false; mNightMode=2; mNightModeCustomType=-1; uiMode=33
+06-12 00:52:43.730  4036  4036 V DeviceStatisticsService: chargerType=2 batteryLevel=100 totalBatteryCapacity=3660300
+06-12 00:52:43.730  3826  5377 D PowerUI : can't show warning due to - plugged: true status unknown: false
+06-12 00:52:43.772  1734  1865 E minksocket: MinkIPC_QRTR_Service: client with node 1 port 4efa went down
+06-12 00:52:43.773  1734  1865 E minksocket: MinkIPC_QRTR_Service: client with node 1 port 4efb went down
+06-12 00:52:43.773  1734  1865 E minksocket: MinkIPC_QRTR_Service: client with node 1 port 4efc went down
+06-12 00:52:43.775  1734  1865 E minksocket: MinkIPC_QRTR_Service: client with node 1 port 4efd went down
+06-12 00:52:44.212 20255 20633 I System.out: [[Dispatchers.Default][bolt-default][debug][bolt-v2][BoltControlManager]:message[bolt clock is registered for [2000] delay]
+06-12 00:52:44.212 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[bolt clock triggered, queue operations will be executed now..]
+06-12 00:52:44.215 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[execution called for name [StateValidationQueueOperation and item [StateInactiveTimeQueueOperation(uniqueName=StateValidationQueueOperation, retryConfig=com.phonepe.boltV2Sdk.external.RetryConfiguration@50aa402, logger=com.phonepe.boltV2Sdk.internal.logger.core.DebugLogger@f0ca113, analyticManager=com.phonepe.boltV2Sdk.internal.BoltAnalyticManager@9268f50, immediateExecute=true, queueOperationType=STATE_INACTIVE_TIME_QUEUE_OPERATION, block=(com.phonepe.boltV2Sdk.internal.boltctl.queueOperations.QueueOperation) -> kotlin.Boolean)]]
+06-12 00:52:44.215 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][StateInactiveTimeQueueOperation]:message[Queue operation with name [StateValidationQueueOperation retry started, checking for retry limits..]
+06-12 00:52:44.215 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][StateInactiveTimeQueueOperation]:message[Queue operation with name [StateValidationQueueOperation retry limits not reached, checking for waiting window before execution..]
+06-12 00:52:44.215 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][StateInactiveTimeQueueOperation]:message[Queue operation with name [StateValidationQueueOperation retry limits not reached, waiting window is completed, ready to execute in 3.2.1..]
+06-12 00:52:44.215 20255 20632 I System.out: [[BlockingEventLoop@eb2b6fc][unknown][info][bolt-v2][BoltManager]:message[state validation operation running]
+06-12 00:52:44.216 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][StateInactiveTimeQueueOperation]:message[Queue operation with name [StateValidationQueueOperation] retried.]
+06-12 00:52:44.216 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[execution completed for name [StateValidationQueueOperation and item [StateInactiveTimeQueueOperation(uniqueName=StateValidationQueueOperation, retryConfig=com.phonepe.boltV2Sdk.external.RetryConfiguration@50aa402, logger=com.phonepe.boltV2Sdk.internal.logger.core.DebugLogger@f0ca113, analyticManager=com.phonepe.boltV2Sdk.internal.BoltAnalyticManager@9268f50, immediateExecute=true, queueOperationType=STATE_INACTIVE_TIME_QUEUE_OPERATION, block=(com.phonepe.boltV2Sdk.internal.boltctl.queueOperations.QueueOperation) -> kotlin.Boolean)], checking for GC status]
+06-12 00:52:44.217 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[execution called for name [BoltCtl and item [PeriodicCheckQueueOperation(uniqueName=BoltCtl, retryConfig=com.phonepe.boltV2Sdk.external.RetryConfiguration@eed507c, logger=com.phonepe.boltV2Sdk.internal.logger.core.DebugLogger@5793d05, analyticManager=com.phonepe.boltV2Sdk.internal.BoltAnalyticManager@9268f50, immediateExecute=false, queueOperationType=BOLT_PERIODIC_OPERATION, block=(com.phonepe.boltV2Sdk.internal.boltctl.queueOperations.QueueOperation) -> kotlin.Boolean)]]
+06-12 00:52:44.217 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][PeriodicCheckQueueOperation]:message[Queue operation with name [BoltCtl retry started, checking for retry limits..]
+06-12 00:52:44.218 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][PeriodicCheckQueueOperation]:message[Queue operation with name [BoltCtl retry limits not reached, checking for waiting window before execution..]
+06-12 00:52:44.218 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][PeriodicCheckQueueOperation]:message[Queue operation with name [BoltCtl retry limits not reached, waiting window is completed, ready to execute in 3.2.1..]
+06-12 00:52:44.218 20255 20632 I System.out: [[BlockingEventLoop@8c0e185][unknown][info][bolt-v2][BoltManager]:message[periodic check operation running]
+06-12 00:52:44.218 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltManager]:message[updatePredicate is Called by PeriodicCheckPredicate with value true]
+06-12 00:52:44.218 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][ConnectionManager]:message[Predicate BoltAppStatePredicate is not ready for making connection]
+06-12 00:52:44.218 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltManager]:message[all predicates are evaluated, result [false]]
+06-12 00:52:44.219 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltManager]:message[calculated is there any listener which is still active, result [true]]
+06-12 00:52:44.219 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltManager]:message[calculated should bolt manager proceed with connection attempt for CONNECT_AGGRESSIVELY with predicate PeriodicCheckPredicate, result [false]]
+06-12 00:52:44.219 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltManager]:message[connection state [DISCONNECTED] and the connection verdict [false] is same, no need to proceed further.]
+06-12 00:52:44.219 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][PeriodicCheckQueueOperation]:message[Queue operation with name [BoltCtl] retried.]
+06-12 00:52:44.220 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[execution completed for name [BoltCtl and item [PeriodicCheckQueueOperation(uniqueName=BoltCtl, retryConfig=com.phonepe.boltV2Sdk.external.RetryConfiguration@eed507c, logger=com.phonepe.boltV2Sdk.internal.logger.core.DebugLogger@5793d05, analyticManager=com.phonepe.boltV2Sdk.internal.BoltAnalyticManager@9268f50, immediateExecute=false, queueOperationType=BOLT_PERIODIC_OPERATION, block=(com.phonepe.boltV2Sdk.internal.boltctl.queueOperations.QueueOperation) -> kotlin.Boolean)], checking for GC status]
+06-12 00:52:44.232 15280 15891 D CmdCenter: - RowBase2: sPrevModStatus: 1, modStatus: 1
+06-12 00:52:44.232 15280 15891 D CmdCenter: - RowBase2: sPrevBatStatus: 2, status: 2
+06-12 00:52:44.232 15280 15891 D CmdCenter: - RowBase2: sPrevChargeRate = 1, new = 1
+06-12 00:52:44.232 15280 15891 D CmdCenter: - RowBase2: sPrevPlugType: 2 plugType: 2
+06-12 00:52:44.334  3826  3826 D StatusBarIconController: ignoring old pipeline callbacks, because the new mobile icons are enabled
+06-12 00:52:45.180 25355 25355 W getenforce: type=1400 audit(0.0:67480): avc:  denied  { read } for  name="enforce" dev="selinuxfs" ino=4 scontext=u:r:untrusted_app:s0:c208,c257,c512,c768 tcontext=u:object_r:selinuxfs:s0 tclass=file permissive=0
+06-12 00:52:45.184 20255 20255 W Thread-3381: type=1400 audit(0.0:67481): avc:  denied  { read } for  name="enforce" dev="selinuxfs" ino=4 scontext=u:r:untrusted_app:s0:c208,c257,c512,c768 tcontext=u:object_r:selinuxfs:s0 tclass=file permissive=0 app=com.phonepe.app
+06-12 00:52:45.184 20255 20255 W Thread-3381: type=1400 audit(0.0:67482): avc:  denied  { read } for  name="cache" dev="dm-8" ino=16 scontext=u:r:untrusted_app:s0:c208,c257,c512,c768 tcontext=u:object_r:cache_file:s0 tclass=lnk_file permissive=0 app=com.phonepe.app
+06-12 00:52:45.184 20255 20255 W Thread-3381: type=1400 audit(0.0:67483): avc:  denied  { read } for  name="cache" dev="dm-8" ino=16 scontext=u:r:untrusted_app:s0:c208,c257,c512,c768 tcontext=u:object_r:cache_file:s0 tclass=lnk_file permissive=0 app=com.phonepe.app
+06-12 00:52:46.213 20255 20632 I System.out: [[Dispatchers.Default][bolt-default][debug][bolt-v2][BoltControlManager]:message[bolt clock is registered for [2000] delay]
+06-12 00:52:46.213 20255  4713 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[bolt clock triggered, queue operations will be executed now..]
+06-12 00:52:46.214 20255  4713 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[execution called for name [StateValidationQueueOperation and item [StateInactiveTimeQueueOperation(uniqueName=StateValidationQueueOperation, retryConfig=com.phonepe.boltV2Sdk.external.RetryConfiguration@50aa402, logger=com.phonepe.boltV2Sdk.internal.logger.core.DebugLogger@f0ca113, analyticManager=com.phonepe.boltV2Sdk.internal.BoltAnalyticManager@9268f50, immediateExecute=true, queueOperationType=STATE_INACTIVE_TIME_QUEUE_OPERATION, block=(com.phonepe.boltV2Sdk.internal.boltctl.queueOperations.QueueOperation) -> kotlin.Boolean)]]
+06-12 00:52:46.214 20255  4713 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][StateInactiveTimeQueueOperation]:message[Queue operation with name [StateValidationQueueOperation retry started, checking for retry limits..]
+06-12 00:52:46.214 20255  4713 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][StateInactiveTimeQueueOperation]:message[Queue operation with name [StateValidationQueueOperation retry limits not reached, checking for waiting window before execution..]
+06-12 00:52:46.214 20255  4713 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][StateInactiveTimeQueueOperation]:message[Queue operation with name [StateValidationQueueOperation retry limits not reached, waiting window is not completed, skipping the execution this time...]
+06-12 00:52:46.215 20255  4713 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[execution completed for name [StateValidationQueueOperation and item [StateInactiveTimeQueueOperation(uniqueName=StateValidationQueueOperation, retryConfig=com.phonepe.boltV2Sdk.external.RetryConfiguration@50aa402, logger=com.phonepe.boltV2Sdk.internal.logger.core.DebugLogger@f0ca113, analyticManager=com.phonepe.boltV2Sdk.internal.BoltAnalyticManager@9268f50, immediateExecute=true, queueOperationType=STATE_INACTIVE_TIME_QUEUE_OPERATION, block=(com.phonepe.boltV2Sdk.internal.boltctl.queueOperations.QueueOperation) -> kotlin.Boolean)], checking for GC status]
+06-12 00:52:46.215 20255  4713 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[execution called for name [BoltCtl and item [PeriodicCheckQueueOperation(uniqueName=BoltCtl, retryConfig=com.phonepe.boltV2Sdk.external.RetryConfiguration@eed507c, logger=com.phonepe.boltV2Sdk.internal.logger.core.DebugLogger@5793d05, analyticManager=com.phonepe.boltV2Sdk.internal.BoltAnalyticManager@9268f50, immediateExecute=false, queueOperationType=BOLT_PERIODIC_OPERATION, block=(com.phonepe.boltV2Sdk.internal.boltctl.queueOperations.QueueOperation) -> kotlin.Boolean)]]
+06-12 00:52:46.215 20255  4713 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][PeriodicCheckQueueOperation]:message[Queue operation with name [BoltCtl retry started, checking for retry limits..]
+06-12 00:52:46.215 20255  4713 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][PeriodicCheckQueueOperation]:message[Queue operation with name [BoltCtl retry limits not reached, checking for waiting window before execution..]
+06-12 00:52:46.215 20255  4713 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][PeriodicCheckQueueOperation]:message[Queue operation with name [BoltCtl retry limits not reached, waiting window is not completed, skipping the execution this time...]
+06-12 00:52:46.215 20255  4713 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[execution completed for name [BoltCtl and item [PeriodicCheckQueueOperation(uniqueName=BoltCtl, retryConfig=com.phonepe.boltV2Sdk.external.RetryConfiguration@eed507c, logger=com.phonepe.boltV2Sdk.internal.logger.core.DebugLogger@5793d05, analyticManager=com.phonepe.boltV2Sdk.internal.BoltAnalyticManager@9268f50, immediateExecute=false, queueOperationType=BOLT_PERIODIC_OPERATION, block=(com.phonepe.boltV2Sdk.internal.boltctl.queueOperations.QueueOperation) -> kotlin.Boolean)], checking for GC status]
+06-12 00:52:46.222  1745  4536 I vendor.qti.bluetooth@1.0-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+06-12 00:52:46.222  1745  4536 D vendor.qti.bluetooth@1.0-ibs_handler: SerialClockVote: vote for UART CLK ON
+06-12 00:52:46.222  1745  4536 D vendor.qti.bluetooth@1.0-wake_lock: Acquire wakelock is acquired 
+06-12 00:52:46.222  1745  4536 I vendor.qti.bluetooth@1.0-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+06-12 00:52:46.223  4002  4539 I bt_stack: [INFO:btm_ble_gap.cc(3287)] btm_ble_process_adv_pkt_cont Data Complete 0d:31:8d:1d:25:73
+06-12 00:52:46.223  4002  4539 D bt_btm_ble: bool parse_adv_audio_uuids_from_adv_pkt(const uint8_t *, size_t, uint8_t): tmap_cap_pts: false
+06-12 00:52:46.262  1745  4536 I vendor.qti.bluetooth@1.0-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+06-12 00:52:46.262  1745  4536 D vendor.qti.bluetooth@1.0-ibs_handler: SerialClockVote: vote for UART CLK OFF
+06-12 00:52:46.412  1745  4279 D vendor.qti.bluetooth@1.0-wake_lock: Release wakelock is released 
+06-12 00:52:46.442 25230 25468 D ProfileInstaller: Installing profile for com.deepeye.agent
+06-12 00:52:46.502 28604 28792 I ThermalEngine: ACTION: freeze_rule - Setting freeze_rule to 0
+06-12 00:52:46.502 28604 28792 I ThermalEngine: Monitor:INACTIVE:FREEZE-CHG:freeze_rule=1:DETECT-STANDBY=0
+06-12 00:52:46.502 28604 28792 I ThermalEngine: ACTION: override_c - Setting override_c to 0
+06-12 00:52:46.502 28604 28792 I ThermalEngine: Monitor:INACTIVE:OVERRIDE-CHG:internal_override=1:DETECT-STANDBY=0
+06-12 00:52:46.503 28604 28791 I ThermalEngine: Thermal-Server: Thermal received msg from  override_c
+06-12 00:52:46.503 28604 25474 I Thermal-Lib: Thermal-Lib-Client: Client request sent
+06-12 00:52:46.503 28604 28791 I ThermalEngine: Thermal-Server: Thermal received msg from  freezing
+06-12 00:52:46.503 28604 25473 I Thermal-Lib: Thermal-Lib-Client: Client request sent
+06-12 00:52:46.505 28604 28792 I ThermalEngine: Monitor:ACTIVE:MON-MSM-charge:battery=9:CHG-SENSORS=41010
+06-12 00:52:47.343  3064 15872 D PowerManagerService: nativeAcquireSuspendBlocker name:PowerManagerService.WakeLocks duration ms: 2
+06-12 00:52:47.347  4104  4104 D TelephonyManager: requestModemActivityInfo: Sending result to app: ModemActivityInfo{ mTimestamp=250240706 mSleepTimeMs=180500270 mIdleTimeMs=3802464 mActivityStatsTechSpecificInfo=[{mRat=UNKNOWN,mFrequencyRange=UNKNOWN,mTxTimeMs[]=[1855738, 2284662, 992009, 478416, 595755],mRxTimeMs=59815791}]}
+06-12 00:52:47.348  3064 15872 D PowerManagerService: nativeReleaseSuspendBlocker name:PowerManagerService.WakeLocks duration ms: 0
+06-12 00:52:47.357  3064  3064 D EnhancedConnectivityController: Default net onCapabilitiesChanged
+06-12 00:52:47.357  3064  3064 D EnhancedConnectivityController: updateDefaultNet:327
+06-12 00:52:47.359  4027  4943 D QCNEJ/WwanInfoRelay: onCapabilitiesChanged: 327 [ Transports: CELLULAR Capabilities: SUPL&FOTA&INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN&VALIDATED&NOT_ROAMING&FOREGROUND&NOT_CONGESTED&NOT_SUSPENDED&NOT_VCN_MANAGED LinkUpBandwidth>=32148Kbps LinkDnBandwidth>=32148Kbps Specifier: <TelephonyNetworkSpecifier [mSubId = 1]> SubscriptionIds: {1} UnderlyingNetworks: Null]
+06-12 00:52:47.359 15114 16019 I ModemStats: [DataStallDetectService] onCapabilitiesChanged networkCapabilities=[ Transports: CELLULAR Capabilities: SUPL&FOTA&INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN&VALIDATED&NOT_ROAMING&FOREGROUND&NOT_CONGESTED&NOT_SUSPENDED&NOT_VCN_MANAGED LinkUpBandwidth>=32148Kbps LinkDnBandwidth>=32148Kbps Specifier: <TelephonyNetworkSpecifier [mSubId = 1]> SubscriptionIds: {1} UnderlyingNetworks: Null]
+06-12 00:52:47.359 15114 16019 I ModemStats: [DataStallDetectService] onCapabilitiesChanged NET_CAPABILITY_VALIDATED=true
+06-12 00:52:47.359 15114 16019 I ModemStats: [DataStallDetectService] onCapabilitiesChanged mDataStallManager.mDataStallInstance=null
+06-12 00:52:47.359 15114 16019 I ModemStats: [DataStallDetectService] onCapabilitiesChanged mDataStallSmart5gManager.mDataStallInstance=null
+06-12 00:52:47.360  4027  4943 I QCNEJ/WwanInfoRelay: cacheWwanInfo subId = 1 phoneId = 0 slotId = 0
+06-12 00:52:47.360  4027  4883 D QCNEJ/NativeHalConnector: -> SND notifyDefaultNetworkChanged(0)
+06-12 00:52:47.791 25609 25609 W libc    : Access denied finding property "persist.adb.tls_server.enable"
+06-12 00:52:47.788 25609 25609 W getprop : type=1400 audit(0.0:67484): avc:  denied  { read } for  name="u:object_r:system_adbd_prop:s0" dev="tmpfs" ino=343 scontext=u:r:untrusted_app:s0:c208,c257,c512,c768 tcontext=u:object_r:system_adbd_prop:s0 tclass=file permissive=0 app=com.phonepe.app
+06-12 00:52:47.864 11847 19920 I NearbySharing: Network state changed: NetworkState(isRestricted=false, isOnline=true, isCongested=false, isMetered=true, isWifiConnected=false)
+06-12 00:52:48.216 20255  4713 I System.out: [[Dispatchers.Default][bolt-default][debug][bolt-v2][BoltControlManager]:message[bolt clock is registered for [2000] delay]
+06-12 00:52:48.217 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[bolt clock triggered, queue operations will be executed now..]
+06-12 00:52:48.219 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[execution called for name [StateValidationQueueOperation and item [StateInactiveTimeQueueOperation(uniqueName=StateValidationQueueOperation, retryConfig=com.phonepe.boltV2Sdk.external.RetryConfiguration@50aa402, logger=com.phonepe.boltV2Sdk.internal.logger.core.DebugLogger@f0ca113, analyticManager=com.phonepe.boltV2Sdk.internal.BoltAnalyticManager@9268f50, immediateExecute=true, queueOperationType=STATE_INACTIVE_TIME_QUEUE_OPERATION, block=(com.phonepe.boltV2Sdk.internal.boltctl.queueOperations.QueueOperation) -> kotlin.Boolean)]]
+06-12 00:52:48.219 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][StateInactiveTimeQueueOperation]:message[Queue operation with name [StateValidationQueueOperation retry started, checking for retry limits..]
+06-12 00:52:48.219 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][StateInactiveTimeQueueOperation]:message[Queue operation with name [StateValidationQueueOperation retry limits not reached, checking for waiting window before execution..]
+06-12 00:52:48.219 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][StateInactiveTimeQueueOperation]:message[Queue operation with name [StateValidationQueueOperation retry limits not reached, waiting window is completed, ready to execute in 3.2.1..]
+06-12 00:52:48.219 20255 20632 I System.out: [[BlockingEventLoop@b4bbda][unknown][info][bolt-v2][BoltManager]:message[state validation operation running]
+06-12 00:52:48.220 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][StateInactiveTimeQueueOperation]:message[Queue operation with name [StateValidationQueueOperation] retried.]
+06-12 00:52:48.220 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[execution completed for name [StateValidationQueueOperation and item [StateInactiveTimeQueueOperation(uniqueName=StateValidationQueueOperation, retryConfig=com.phonepe.boltV2Sdk.external.RetryConfiguration@50aa402, logger=com.phonepe.boltV2Sdk.internal.logger.core.DebugLogger@f0ca113, analyticManager=com.phonepe.boltV2Sdk.internal.BoltAnalyticManager@9268f50, immediateExecute=true, queueOperationType=STATE_INACTIVE_TIME_QUEUE_OPERATION, block=(com.phonepe.boltV2Sdk.internal.boltctl.queueOperations.QueueOperation) -> kotlin.Boolean)], checking for GC status]
+06-12 00:52:48.221 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[execution called for name [BoltCtl and item [PeriodicCheckQueueOperation(uniqueName=BoltCtl, retryConfig=com.phonepe.boltV2Sdk.external.RetryConfiguration@eed507c, logger=com.phonepe.boltV2Sdk.internal.logger.core.DebugLogger@5793d05, analyticManager=com.phonepe.boltV2Sdk.internal.BoltAnalyticManager@9268f50, immediateExecute=false, queueOperationType=BOLT_PERIODIC_OPERATION, block=(com.phonepe.boltV2Sdk.internal.boltctl.queueOperations.QueueOperation) -> kotlin.Boolean)]]
+06-12 00:52:48.222 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][PeriodicCheckQueueOperation]:message[Queue operation with name [BoltCtl retry started, checking for retry limits..]
+06-12 00:52:48.222 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][PeriodicCheckQueueOperation]:message[Queue operation with name [BoltCtl retry limits not reached, checking for waiting window before execution..]
+06-12 00:52:48.222 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][PeriodicCheckQueueOperation]:message[Queue operation with name [BoltCtl retry limits not reached, waiting window is not completed, skipping the execution this time...]
+06-12 00:52:48.223 20255 20632 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[execution completed for name [BoltCtl and item [PeriodicCheckQueueOperation(uniqueName=BoltCtl, retryConfig=com.phonepe.boltV2Sdk.external.RetryConfiguration@eed507c, logger=com.phonepe.boltV2Sdk.internal.logger.core.DebugLogger@5793d05, analyticManager=com.phonepe.boltV2Sdk.internal.BoltAnalyticManager@9268f50, immediateExecute=false, queueOperationType=BOLT_PERIODIC_OPERATION, block=(com.phonepe.boltV2Sdk.internal.boltctl.queueOperations.QueueOperation) -> kotlin.Boolean)], checking for GC status]
+06-12 00:52:48.393  1745  4536 I vendor.qti.bluetooth@1.0-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+06-12 00:52:48.393  1745  4536 D vendor.qti.bluetooth@1.0-ibs_handler: SerialClockVote: vote for UART CLK ON
+06-12 00:52:48.393  1745  4536 D vendor.qti.bluetooth@1.0-wake_lock: Acquire wakelock is acquired 
+06-12 00:52:48.393  1745  4536 I vendor.qti.bluetooth@1.0-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+06-12 00:52:48.395  4002  4539 I bt_stack: [INFO:btm_ble_gap.cc(3287)] btm_ble_process_adv_pkt_cont Data Complete 0d:31:8d:1d:25:73
+06-12 00:52:48.395  4002  4539 D bt_btm_ble: bool parse_adv_audio_uuids_from_adv_pkt(const uint8_t *, size_t, uint8_t): tmap_cap_pts: false
+06-12 00:52:48.437  1745  4536 I vendor.qti.bluetooth@1.0-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+06-12 00:52:48.437  1745  4536 D vendor.qti.bluetooth@1.0-ibs_handler: SerialClockVote: vote for UART CLK OFF
+06-12 00:52:48.504 28604 28792 I ThermalEngine: Monitor:ACTIVE:FREEZE-CHG:freeze_rule=1:DETECT-STANDBY=1
+06-12 00:52:48.504 28604 28792 I ThermalEngine: ACTION: freeze_rule - Setting freeze_rule to 1
+06-12 00:52:48.504 28604 28792 I ThermalEngine: Monitor:ACTIVE:OVERRIDE-CHG:internal_override=1:DETECT-STANDBY=1
+06-12 00:52:48.505 28604 28792 I ThermalEngine: ACTION: override_c - Setting override_c to 1
+06-12 00:52:48.505 28604 25621 I Thermal-Lib: Thermal-Lib-Client: Client request sent
+06-12 00:52:48.506 28604 28791 I ThermalEngine: Thermal-Server: Thermal received msg from  override_c
+06-12 00:52:48.507 28604 28791 I ThermalEngine: Thermal-Server: Thermal received msg from  freezing
+06-12 00:52:48.508 28604 25620 I Thermal-Lib: Thermal-Lib-Client: Client request sent
+06-12 00:52:48.589  1745  4279 D vendor.qti.bluetooth@1.0-wake_lock: Release wakelock is released 
+06-12 00:52:48.662 11847 19920 I NearbyMediums: Found Fast Ble Advertisements :
+06-12 00:52:48.662 11847 19920 I NearbyMediums: BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x57 0x47 0x32 0x44 0x11 0x32 0x3e 0xc0 0xab 0xae 0x09 0xa7 0x20 0x8c 0xb2 0xd5 0x49 0x44 0xd3 0xd5 0xb9 0x31 ], deviceToken=[ 0x21 0x56 ], rxAdvertisement=null } : 5 times.
+06-12 00:52:48.662 11847 19920 I NearbyMediums: Total 5 fast advertisements from 1 unique advertisers.
+06-12 00:52:48.662 11847 19920 I NearbyMediums: Current Tracked Scanning Clients are : {NearbyConnections.EnvironmentMonitor, NearbySharing, NearbyConnections.TxAdvertisement}
+06-12 00:52:49.352  3826  3826 D StatusBarIconController: ignoring old pipeline callbacks, because the new mobile icons are enabled
+06-12 00:52:49.646 19474 19514 I gle.android.gms: Explicit concurrent mark compact GC freed 684KB AllocSpace bytes, 0(0B) LOS objects, 50% free, 10163KB/19MB, paused 515us,2.217ms total 111.644ms
+06-12 00:52:49.692  1734  1865 E minksocket: MinkIPC_QRTR_Service: client with node 1 port 4efe went down
+06-12 00:52:49.692  1734  1865 E minksocket: MinkIPC_QRTR_Service: client with node 1 port 4eff went down
+06-12 00:52:49.694  1734  1865 E minksocket: MinkIPC_QRTR_Service: client with node 1 port 4f00 went down
+06-12 00:52:49.694  1734  1865 E minksocket: MinkIPC_QRTR_Service: client with node 1 port 4f01 went down
+06-12 00:52:50.219 20255 20632 I System.out: [[Dispatchers.Default][bolt-default][debug][bolt-v2][BoltControlManager]:message[bolt clock is registered for [2000] delay]
+06-12 00:52:50.220 20255 20633 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[bolt clock triggered, queue operations will be executed now..]
+06-12 00:52:50.222 20255 20633 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[execution called for name [StateValidationQueueOperation and item [StateInactiveTimeQueueOperation(uniqueName=StateValidationQueueOperation, retryConfig=com.phonepe.boltV2Sdk.external.RetryConfiguration@50aa402, logger=com.phonepe.boltV2Sdk.internal.logger.core.DebugLogger@f0ca113, analyticManager=com.phonepe.boltV2Sdk.internal.BoltAnalyticManager@9268f50, immediateExecute=true, queueOperationType=STATE_INACTIVE_TIME_QUEUE_OPERATION, block=(com.phonepe.boltV2Sdk.internal.boltctl.queueOperations.QueueOperation) -> kotlin.Boolean)]]
+06-12 00:52:50.222 20255 20633 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][StateInactiveTimeQueueOperation]:message[Queue operation with name [StateValidationQueueOperation retry started, checking for retry limits..]
+06-12 00:52:50.222 20255 20633 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][StateInactiveTimeQueueOperation]:message[Queue operation with name [StateValidationQueueOperation retry limits not reached, checking for waiting window before execution..]
+06-12 00:52:50.222 20255 20633 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][StateInactiveTimeQueueOperation]:message[Queue operation with name [StateValidationQueueOperation retry limits not reached, waiting window is completed, ready to execute in 3.2.1..]
+06-12 00:52:50.223 20255 20633 I System.out: [[BlockingEventLoop@2cc980b][unknown][info][bolt-v2][BoltManager]:message[state validation operation running]
+06-12 00:52:50.223 20255 20633 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][StateInactiveTimeQueueOperation]:message[Queue operation with name [StateValidationQueueOperation] retried.]
+06-12 00:52:50.224 20255 20633 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[execution completed for name [StateValidationQueueOperation and item [StateInactiveTimeQueueOperation(uniqueName=StateValidationQueueOperation, retryConfig=com.phonepe.boltV2Sdk.external.RetryConfiguration@50aa402, logger=com.phonepe.boltV2Sdk.internal.logger.core.DebugLogger@f0ca113, analyticManager=com.phonepe.boltV2Sdk.internal.BoltAnalyticManager@9268f50, immediateExecute=true, queueOperationType=STATE_INACTIVE_TIME_QUEUE_OPERATION, block=(com.phonepe.boltV2Sdk.internal.boltctl.queueOperations.QueueOperation) -> kotlin.Boolean)], checking for GC status]
+06-12 00:52:50.224 20255 20633 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[execution called for name [BoltCtl and item [PeriodicCheckQueueOperation(uniqueName=BoltCtl, retryConfig=com.phonepe.boltV2Sdk.external.RetryConfiguration@eed507c, logger=com.phonepe.boltV2Sdk.internal.logger.core.DebugLogger@5793d05, analyticManager=com.phonepe.boltV2Sdk.internal.BoltAnalyticManager@9268f50, immediateExecute=false, queueOperationType=BOLT_PERIODIC_OPERATION, block=(com.phonepe.boltV2Sdk.internal.boltctl.queueOperations.QueueOperation) -> kotlin.Boolean)]]
+06-12 00:52:50.225 20255 20633 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][PeriodicCheckQueueOperation]:message[Queue operation with name [BoltCtl retry started, checking for retry limits..]
+06-12 00:52:50.225 20255 20633 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][PeriodicCheckQueueOperation]:message[Queue operation with name [BoltCtl retry limits not reached, checking for waiting window before execution..]
+06-12 00:52:50.225 20255 20633 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][PeriodicCheckQueueOperation]:message[Queue operation with name [BoltCtl retry limits not reached, waiting window is not completed, skipping the execution this time...]
+06-12 00:52:50.226 20255 20633 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[execution completed for name [BoltCtl and item [PeriodicCheckQueueOperation(uniqueName=BoltCtl, retryConfig=com.phonepe.boltV2Sdk.external.RetryConfiguration@eed507c, logger=com.phonepe.boltV2Sdk.internal.logger.core.DebugLogger@5793d05, analyticManager=com.phonepe.boltV2Sdk.internal.BoltAnalyticManager@9268f50, immediateExecute=false, queueOperationType=BOLT_PERIODIC_OPERATION, block=(com.phonepe.boltV2Sdk.internal.boltctl.queueOperations.QueueOperation) -> kotlin.Boolean)], checking for GC status]
+06-12 00:52:50.357  3826  3826 D StatusBarIconController: ignoring old pipeline callbacks, because the new mobile icons are enabled
+06-12 00:52:50.550  1745  4536 I vendor.qti.bluetooth@1.0-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+06-12 00:52:50.550  1745  4536 D vendor.qti.bluetooth@1.0-ibs_handler: SerialClockVote: vote for UART CLK ON
+06-12 00:52:50.550  1745  4536 D vendor.qti.bluetooth@1.0-wake_lock: Acquire wakelock is acquired 
+06-12 00:52:50.550  1745  4536 I vendor.qti.bluetooth@1.0-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+06-12 00:52:50.552  4002  4539 I bt_stack: [INFO:btm_ble_gap.cc(3287)] btm_ble_process_adv_pkt_cont Data Complete 0d:31:8d:1d:25:73
+06-12 00:52:50.552  4002  4539 D bt_btm_ble: bool parse_adv_audio_uuids_from_adv_pkt(const uint8_t *, size_t, uint8_t): tmap_cap_pts: false
+06-12 00:52:50.593  1745  4536 I vendor.qti.bluetooth@1.0-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+06-12 00:52:50.593  1745  4536 D vendor.qti.bluetooth@1.0-ibs_handler: SerialClockVote: vote for UART CLK OFF
+06-12 00:52:50.746  1745  4279 D vendor.qti.bluetooth@1.0-wake_lock: Release wakelock is released 
+06-12 00:52:50.793  1734  1865 E minksocket: MinkIPC_QRTR_Service: client with node 1 port 4f02 went down
+06-12 00:52:50.794  1734  1865 E minksocket: MinkIPC_QRTR_Service: client with node 1 port 4f03 went down
+06-12 00:52:50.794  1734  1865 E minksocket: MinkIPC_QRTR_Service: client with node 1 port 4f04 went down
+06-12 00:52:50.795  1734  1865 E minksocket: MinkIPC_QRTR_Service: client with node 1 port 4f05 went down
+06-12 00:52:51.353  3064 15872 W ProcessStats: Tracking association SourceState{1897276 com.google.android.gms/10192 Service #426569} whose proc state 8 is better than process ProcessState{f37aa98 com.android.vending/10207 pkg=com.android.vending} proc state 14 (310 skipped)
+06-12 00:52:51.359  1745  4536 I vendor.qti.bluetooth@1.0-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+06-12 00:52:51.359  1745  4536 D vendor.qti.bluetooth@1.0-ibs_handler: SerialClockVote: vote for UART CLK ON
+06-12 00:52:51.359  1745  4536 D vendor.qti.bluetooth@1.0-wake_lock: Acquire wakelock is acquired 
+06-12 00:52:51.359  1745  4536 I vendor.qti.bluetooth@1.0-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+06-12 00:52:51.360  4002  4539 I bt_stack: [INFO:btm_ble_gap.cc(3287)] btm_ble_process_adv_pkt_cont Data Complete 0d:31:8d:1d:25:73
+06-12 00:52:51.360  4002  4539 D bt_btm_ble: bool parse_adv_audio_uuids_from_adv_pkt(const uint8_t *, size_t, uint8_t): tmap_cap_pts: false
+06-12 00:52:51.399  1745  4536 I vendor.qti.bluetooth@1.0-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+06-12 00:52:51.399  1745  4536 D vendor.qti.bluetooth@1.0-ibs_handler: SerialClockVote: vote for UART CLK OFF
+06-12 00:52:51.551  1745  4279 D vendor.qti.bluetooth@1.0-wake_lock: Release wakelock is released 
+06-12 00:52:52.223 20255 20633 I System.out: [[Dispatchers.Default][bolt-default][debug][bolt-v2][BoltControlManager]:message[bolt clock is registered for [2000] delay]
+06-12 00:52:52.224 20255  4713 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[bolt clock triggered, queue operations will be executed now..]
+06-12 00:52:52.226 20255  4713 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[execution called for name [StateValidationQueueOperation and item [StateInactiveTimeQueueOperation(uniqueName=StateValidationQueueOperation, retryConfig=com.phonepe.boltV2Sdk.external.RetryConfiguration@50aa402, logger=com.phonepe.boltV2Sdk.internal.logger.core.DebugLogger@f0ca113, analyticManager=com.phonepe.boltV2Sdk.internal.BoltAnalyticManager@9268f50, immediateExecute=true, queueOperationType=STATE_INACTIVE_TIME_QUEUE_OPERATION, block=(com.phonepe.boltV2Sdk.internal.boltctl.queueOperations.QueueOperation) -> kotlin.Boolean)]]
+06-12 00:52:52.226 20255  4713 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][StateInactiveTimeQueueOperation]:message[Queue operation with name [StateValidationQueueOperation retry started, checking for retry limits..]
+06-12 00:52:52.226 20255  4713 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][StateInactiveTimeQueueOperation]:message[Queue operation with name [StateValidationQueueOperation retry limits not reached, checking for waiting window before execution..]
+06-12 00:52:52.226 20255  4713 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][StateInactiveTimeQueueOperation]:message[Queue operation with name [StateValidationQueueOperation retry limits not reached, waiting window is completed, ready to execute in 3.2.1..]
+06-12 00:52:52.227 20255  4713 I System.out: [[BlockingEventLoop@af246e8][unknown][info][bolt-v2][BoltManager]:message[state validation operation running]
+06-12 00:52:52.227 20255  4713 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][StateInactiveTimeQueueOperation]:message[Queue operation with name [StateValidationQueueOperation] retried.]
+06-12 00:52:52.228 20255  4713 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[execution completed for name [StateValidationQueueOperation and item [StateInactiveTimeQueueOperation(uniqueName=StateValidationQueueOperation, retryConfig=com.phonepe.boltV2Sdk.external.RetryConfiguration@50aa402, logger=com.phonepe.boltV2Sdk.internal.logger.core.DebugLogger@f0ca113, analyticManager=com.phonepe.boltV2Sdk.internal.BoltAnalyticManager@9268f50, immediateExecute=true, queueOperationType=STATE_INACTIVE_TIME_QUEUE_OPERATION, block=(com.phonepe.boltV2Sdk.internal.boltctl.queueOperations.QueueOperation) -> kotlin.Boolean)], checking for GC status]
+06-12 00:52:52.229 20255  4713 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[execution called for name [BoltCtl and item [PeriodicCheckQueueOperation(uniqueName=BoltCtl, retryConfig=com.phonepe.boltV2Sdk.external.RetryConfiguration@eed507c, logger=com.phonepe.boltV2Sdk.internal.logger.core.DebugLogger@5793d05, analyticManager=com.phonepe.boltV2Sdk.internal.BoltAnalyticManager@9268f50, immediateExecute=false, queueOperationType=BOLT_PERIODIC_OPERATION, block=(com.phonepe.boltV2Sdk.internal.boltctl.queueOperations.QueueOperation) -> kotlin.Boolean)]]
+06-12 00:52:52.229 20255  4713 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][PeriodicCheckQueueOperation]:message[Queue operation with name [BoltCtl retry started, checking for retry limits..]
+06-12 00:52:52.229 20255  4713 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][PeriodicCheckQueueOperation]:message[Queue operation with name [BoltCtl retry limits not reached, checking for waiting window before execution..]
+06-12 00:52:52.229 20255  4713 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][PeriodicCheckQueueOperation]:message[Queue operation with name [BoltCtl retry limits not reached, waiting window is not completed, skipping the execution this time...]
+06-12 00:52:52.230 20255  4713 I System.out: [[Dispatchers.Default.limitedParallelism(1)][bolt-manager][debug][bolt-v2][BoltControlManager]:message[execution completed for name [BoltCtl and item [PeriodicCheckQueueOperation(uniqueName=BoltCtl, retryConfig=com.phonepe.boltV2Sdk.external.RetryConfiguration@eed507c, logger=com.phonepe.boltV2Sdk.internal.logger.core.DebugLogger@5793d05, analyticManager=com.phonepe.boltV2Sdk.internal.BoltAnalyticManager@9268f50, immediateExecute=false, queueOperationType=BOLT_PERIODIC_OPERATION, block=(com.phonepe.boltV2Sdk.internal.boltctl.queueOperations.QueueOperation) -> kotlin.Boolean)], checking for GC status]
+06-12 00:52:52.544 27689 28034 I BatchCreator: enqueueBatchForTransmission
+06-12 00:52:52.546 27689 28034 I StorageManager: addBatch to BoundedBatchQueue, then write to disk file...
+06-12 00:52:53.292 25646 25646 W getenforce: type=1400 audit(0.0:67485): avc:  denied  { read } for  name="enforce" dev="selinuxfs" ino=4 scontext=u:r:untrusted_app:s0:c208,c257,c512,c768 tcontext=u:object_r:selinuxfs:s0 tclass=file permissive=0 app=com.phonepe.app
+06-12 00:52:53.296 20255 20255 W Thread-3386: type=1400 audit(0.0:67486): avc:  denied  { read } for  name="enforce" dev="selinuxfs" ino=4 scontext=u:r:untrusted_app:s0:c208,c257,c512,c768 tcontext=u:object_r:selinuxfs:s0 tclass=file permissive=0 app=com.phonepe.app
+06-12 00:52:53.296 20255 20255 W Thread-3386: type=1400 audit(0.0:67487): avc:  denied  { read } for  name="cache" dev="dm-8" ino=16 scontext=u:r:untrusted_app:s0:c208,c257,c512,c768 tcontext=u:object_r:cache_file:s0 tclass=lnk_file permissive=0 app=com.phonepe.app
+06-12 00:52:53.296 20255 20255 W Thread-3386: type=1400 audit(0.0:67488): avc:  denied  { read } for  name="cache" dev="dm-8" ino=16 scontext=u:r:untrusted_app:s0:c208,c257,c512,c768 tcontext=u:object_r:cache_file:s0 tclass=lnk_file permissive=0 app=com.phonepe.app
