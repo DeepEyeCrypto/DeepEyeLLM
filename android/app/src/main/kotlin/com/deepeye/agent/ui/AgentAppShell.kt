@@ -11,6 +11,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -36,11 +38,17 @@ fun AgentAppShell() {
     val navController = rememberNavController()
 
     Box(modifier = Modifier.fillMaxSize()) {
+        val bgPainter = painterResource(id = R.drawable.vision_pro_bg)
         Image(
-            painter = painterResource(id = R.drawable.vision_pro_bg),
+            painter = bgPainter,
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    // Cache layer compositing strategy to prevent native alloc GC churn
+                    compositingStrategy = CompositingStrategy.Offscreen
+                }
         )
 
         AgentNavigation(navController = navController) {

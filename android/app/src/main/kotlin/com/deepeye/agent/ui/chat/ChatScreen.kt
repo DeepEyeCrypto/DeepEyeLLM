@@ -230,7 +230,9 @@ fun ChatBottomBar(
                         .padding(horizontal = 16.dp, vertical = 12.dp)
                         .fillMaxWidth()
                 ) {
-                    val canSend = !isLoading && prompt.isNotBlank()
+                    val canSend by remember(isLoading, prompt) {
+                        derivedStateOf { !isLoading && prompt.isNotBlank() }
+                    }
                     TextField(
                         value = prompt,
                         onValueChange = onPromptChange,
