@@ -13,6 +13,7 @@ import com.deepeye.agent.BuildConfig
 import dagger.hilt.android.HiltAndroidApp
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import kotlinx.coroutines.launch
 
 /**
  * DeepEyeLLM Application entry point.
@@ -52,31 +53,31 @@ class DeepEyeApp : Application(), Configuration.Provider {
             )
         }
 
-        // Auto-Update Configuration: Network connection required
-        val syncConstraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
-            
-        // 1. Immediate startup auto-update check
-        val immediateSyncRequest = androidx.work.OneTimeWorkRequestBuilder<com.deepeye.agent.services.SyncWorker>()
-            .setConstraints(syncConstraints)
-            .build()
+        // Offload WorkManager initialization to IO thread to prevent main-thread startup frame drops
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+            val syncConstraints = Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build()
+                
+            val immediateSyncRequest = androidx.work.OneTimeWorkRequestBuilder<com.deepeye.agent.services.SyncWorker>()
+                .setConstraints(syncConstraints)
+                .build()
 
-        WorkManager.getInstance(this).enqueueUniqueWork(
-            "immediate_startup_sync",
-            androidx.work.ExistingWorkPolicy.REPLACE,
-            immediateSyncRequest
-        )
-            
-        // 2. Periodic background auto-update sync (every 12 hours)
-        val periodicSyncRequest = PeriodicWorkRequestBuilder<com.deepeye.agent.services.SyncWorker>(12, TimeUnit.HOURS)
-            .setConstraints(syncConstraints)
-            .build()
-            
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            "upstream_sync",
-            ExistingPeriodicWorkPolicy.UPDATE,
-            periodicSyncRequest
-        )
+            WorkManager.getInstance(this@DeepEyeApp).enqueueUniqueWork(
+                "immediate_startup_sync",
+                androidx.work.ExistingWorkPolicy.REPLACE,
+                immediateSyncRequest
+            )
+                
+            val periodicSyncRequest = PeriodicWorkRequestBuilder<com.deepeye.agent.services.SyncWorker>(12, TimeUnit.HOURS)
+                .setConstraints(syncConstraints)
+                .build()
+                
+            WorkManager.getInstance(this@DeepEyeApp).enqueueUniquePeriodicWork(
+                "upstream_sync",
+                ExistingPeriodicWorkPolicy.UPDATE,
+                periodicSyncRequest
+            )
+        }
     }
 }

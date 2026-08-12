@@ -13,10 +13,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.deepeye.agent.core.diagnostics.SystemHealth
 import com.deepeye.agent.core.policy.PolicyAuditEntry
 import com.deepeye.agent.ui.components.GlassCard
+import com.deepeye.agent.ui.components.NeonStatusBadge
+import com.deepeye.agent.ui.theme.DeepEyeTheme
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -34,7 +38,7 @@ fun DiagnosticsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Diagnostics & Health") },
+                title = { Text("Diagnostics & Health", modifier = Modifier.semantics { heading() }) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -88,16 +92,21 @@ fun DiagnosticsScreen(
 
             item {
                 Spacer(modifier = Modifier.height(8.dp))
-                Text("Policy Audit Log", style = MaterialTheme.typography.titleLarge)
+                Text("Policy Audit Stream", style = MaterialTheme.typography.titleLarge)
             }
 
-            if (uiState.auditLogs.isEmpty()) {
-                item {
-                    Text("No logs recorded yet.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            } else {
-                items(uiState.auditLogs, key = { it.hashCode() }) { entry ->
-                    AuditLogItem(entry)
+            item {
+                GlassCard(tintColor = androidx.compose.ui.graphics.Color(0x88000000)) {
+                    Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
+                        if (uiState.auditLogs.isEmpty()) {
+                            Text("> No logs recorded yet.", style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        } else {
+                            uiState.auditLogs.forEach { entry ->
+                                AuditLogItem(entry)
+                                Spacer(modifier = Modifier.height(4.dp))
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -106,29 +115,43 @@ fun DiagnosticsScreen(
 
 @Composable
 fun HealthCard(health: SystemHealth) {
-    GlassCard {
-        Column(modifier = Modifier.padding(16.dp)) {
-            val ramColor = if (health.isLowMemory) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
-            Text(
-                "RAM: ${String.format(Locale.US, "%.1f", health.availableRamGb)} GB / ${String.format(Locale.US, "%.1f", health.totalRamGb)} GB",
-                color = ramColor
-            )
-            
-            val storageColor = if (health.isStorageLow) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
-            Text(
-                "Storage: ${String.format(Locale.US, "%.1f", health.availableStorageGb)} GB / ${String.format(Locale.US, "%.1f", health.totalStorageGb)} GB",
-                color = storageColor
-            )
-            
-            Spacer(modifier = Modifier.height(4.dp))
-            if (health.isLowMemory || health.isStorageLow) {
-                Text(
-                    "Warning: Resources are low. Model inference may fail or degrade.",
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        val ramColor = if (health.isLowMemory) DeepEyeTheme.colors.dangerAlt else DeepEyeTheme.colors.statusSuccess
+        val storageColor = if (health.isStorageLow) DeepEyeTheme.colors.warningAlt else DeepEyeTheme.colors.statusSuccess
+        
+        GlassCard(modifier = Modifier.weight(1f)) {
+            Column(modifier = Modifier.padding(16.dp), horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
+                Text("Memory", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(modifier = Modifier.height(8.dp))
+                NeonStatusBadge(
+                    text = "${String.format(Locale.US, "%.1f", health.availableRamGb)}GB",
+                    color = ramColor
                 )
-            } else {
-                Text("System is healthy for local inference.", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodySmall)
+            }
+        }
+        
+        GlassCard(modifier = Modifier.weight(1f)) {
+            Column(modifier = Modifier.padding(16.dp), horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
+                Text("Storage", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(modifier = Modifier.height(8.dp))
+                NeonStatusBadge(
+                    text = "${String.format(Locale.US, "%.1f", health.availableStorageGb)}GB",
+                    color = storageColor
+                )
+            }
+        }
+        
+        GlassCard(modifier = Modifier.weight(1f)) {
+            Column(modifier = Modifier.padding(16.dp), horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
+                Text("Engine", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(modifier = Modifier.height(8.dp))
+                NeonStatusBadge(
+                    text = if (health.isLowMemory || health.isStorageLow) "DEGRADED" else "ONLINE",
+                    color = if (health.isLowMemory || health.isStorageLow) DeepEyeTheme.colors.warningAlt else DeepEyeTheme.colors.statusSuccess
+                )
             }
         }
     }
@@ -137,22 +160,21 @@ fun HealthCard(health: SystemHealth) {
 @Composable
 fun AuditLogItem(entry: PolicyAuditEntry) {
     val time = AUDIT_LOG_DATE_FORMATTER.withZone(ZoneId.systemDefault()).format(entry.timestamp)
-    val color = if (entry.allowed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+    val color = if (entry.allowed) DeepEyeTheme.colors.statusSuccess else DeepEyeTheme.colors.dangerAlt
+    val badgeText = if (entry.allowed) "ALLOW" else "DENY"
     
-    GlassCard(tintColor = color.copy(alpha = 0.1f), borderColor = color.copy(alpha = 0.3f)) {
-        Column(modifier = Modifier.padding(12.dp).fillMaxWidth()) {
-            Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                Text("[$time] ${entry.action}", style = MaterialTheme.typography.labelMedium)
-                Text(if (entry.allowed) "ALLOW" else "DENY", color = color, style = MaterialTheme.typography.labelMedium)
-            }
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(entry.reason, style = MaterialTheme.typography.bodySmall)
-            if (entry.context.isNotEmpty()) {
-                Text(
-                    entry.context.toString(),
-                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text("> [$time]", style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        NeonStatusBadge(text = badgeText, color = color)
+        Column {
+            Text(entry.action, style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace), color = MaterialTheme.colorScheme.onSurface)
+            if (entry.reason.isNotBlank()) {
+                Text(entry.reason, style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace), color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }

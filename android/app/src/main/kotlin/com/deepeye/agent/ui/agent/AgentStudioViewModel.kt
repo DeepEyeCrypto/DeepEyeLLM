@@ -12,8 +12,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.Immutable
 import javax.inject.Inject
 
+@Immutable
 data class AgentStudioUiState(
     val agents: List<AgentSpec> = emptyList(),
     val selectedAgent: AgentSpec? = null,

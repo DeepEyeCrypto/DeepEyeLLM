@@ -28,6 +28,7 @@ import java.io.File
  */
 class LlamaCppEngine(
     val modelPath: String,
+    val context: android.content.Context? = null,
     val useGpu: Boolean = false,
     val gpuLayers: Int = 0,
     val customThreads: Int = 4,
@@ -130,13 +131,11 @@ class LlamaCppEngine(
                 throw IllegalArgumentException("Invalid or truncated GGUF file: $modelPath")
             }
 
-            val layersToOffload = if (useGpu) gpuLayers else 0
-            runCatching { Log.d(TAG, "Initializing GGUF model: ${file.name} (${file.length() / (1024 * 1024)} MB), GPU layers: $layersToOffload, threads: $customThreads, nCtx: $maxContextTokens") }
-            runCatching { Log.d(TAG, "Model signature verified OK (or check skipped): ${file.name}") }
-
             if (isNativeLibLoaded) {
+                val config = com.deepeye.agent.core.hardware.HardwareBackendSelector.applyBackendConfig(nativeContextHandle, context)
+                nativeSetBackendConfig(nativeContextHandle, config.backendType, config.nGpuLayers)
                 val threads = customThreads.coerceIn(1, Runtime.getRuntime().availableProcessors())
-                nativeContextHandle = nativeInitModel(modelPath, nCtx = maxContextTokens, nThreads = threads, nGpuLayers = layersToOffload)
+                nativeContextHandle = nativeInitModel(modelPath, nCtx = maxContextTokens, nThreads = threads, nGpuLayers = config.nGpuLayers)
                 if (nativeContextHandle == 0L) {
                     throw IllegalStateException("Native llama_model_load_from_file returned null — check logcat for details")
                 }
@@ -223,11 +222,18 @@ class LlamaCppEngine(
 
         // Fallback simulation for non-native test environments
         val fullText = chatWithHistory(history)
-        val tokens = fullText.split(" ")
-        for (token in tokens) {
-            onChunk("$token ")
-            delay(30)
+        onChunk(fullText)
+    }
+
+    fun abortGeneration() {
+        if (isNativeLibLoaded && nativeContextHandle != 0L) {
+            nativeAbortGeneration(nativeContextHandle)
         }
+    }
+
+    fun getPerformanceStats(): PerformanceStats? {
+        if (!isNativeLibLoaded || nativeContextHandle == 0L) return null
+        return nativeGetPerformanceStats(nativeContextHandle)
     }
 
     override suspend fun close(): Unit = withContext(Dispatchers.IO) {
@@ -241,6 +247,7 @@ class LlamaCppEngine(
 
     // ─── Native JNI Declarations ────────────────────────────────────────────
 
+    private external fun nativeSetBackendConfig(handle: Long, backendType: Int, nGpuLayers: Int)
     private external fun nativeInitModel(modelPath: String, nCtx: Int, nThreads: Int, nGpuLayers: Int): Long
     private external fun nativeGenerateResponse(handle: Long, prompt: String): String
     private external fun nativeGenerateResponseStream(
@@ -248,6 +255,7 @@ class LlamaCppEngine(
     )
     private external fun nativeAbortGeneration(handle: Long)
     private external fun nativeFreeModel(handle: Long)
+    private external fun nativeGetPerformanceStats(handle: Long): PerformanceStats?
 }
 
 private const val MAX_GENERATION_TOKENS = 512

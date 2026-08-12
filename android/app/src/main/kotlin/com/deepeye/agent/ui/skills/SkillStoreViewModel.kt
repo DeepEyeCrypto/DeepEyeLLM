@@ -11,12 +11,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.Immutable
 import javax.inject.Inject
 
+@Immutable
 data class SkillStoreUiState(
     val isLoading: Boolean = false,
     val skills: List<Skill> = emptyList(),
-    val error: String? = null
+    val error: String? = null,
+    val toastMessage: String? = null
 )
 
 @HiltViewModel
@@ -31,7 +34,7 @@ class SkillStoreViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             skillRegistry.communitySkills.collect { skills ->
-                _uiState.value = _uiState.value.copy(skills = skills)
+                _uiState.update { it.copy(skills = skills) }
             }
         }
         // Initial fetch if empty
@@ -42,7 +45,7 @@ class SkillStoreViewModel @Inject constructor(
 
     fun refreshSkills() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            _uiState.update { it.copy(isLoading = true, error = null) }
             try {
                 val response = skillService.getCommunitySkills()
                 if (response.isSuccessful && !response.body().isNullOrEmpty()) {
@@ -57,20 +60,24 @@ class SkillStoreViewModel @Inject constructor(
                 skillRegistry.updateSkills(SkillRegistry.BUILTIN_SKILLS)
                 _uiState.update { it.copy(error = "Could not fetch remote skills. Showing cached skills.") }
             } finally {
-                _uiState.value = _uiState.value.copy(isLoading = false, skills = skillRegistry.communitySkills.value)
+                _uiState.update { it.copy(isLoading = false, skills = skillRegistry.communitySkills.value) }
             }
         }
     }
 
-    fun installSkill(skill: Skill, context: android.content.Context) {
+    fun installSkill(skill: Skill) {
         viewModelScope.launch {
             skillRegistry.markInstalled(skill.id)
-            _uiState.value = _uiState.value.copy(skills = skillRegistry.communitySkills.value)
-            android.widget.Toast.makeText(
-                context,
-                "Installed & Activated: ${skill.name}",
-                android.widget.Toast.LENGTH_SHORT
-            ).show()
+            _uiState.update {
+                it.copy(
+                    skills = skillRegistry.communitySkills.value,
+                    toastMessage = "Installed & Activated: ${skill.name}"
+                )
+            }
         }
+    }
+
+    fun clearToast() {
+        _uiState.update { it.copy(toastMessage = null) }
     }
 }

@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("kotlin-android")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("org.jetbrains.kotlin.plugin.serialization")
     id("com.google.devtools.ksp")
     id("dagger.hilt.android.plugin")
 }
@@ -31,6 +32,34 @@ android {
                     "-DCMAKE_BUILD_TYPE=Release",
                     "-DCMAKE_CXX_FLAGS_RELEASE=-O3 -fno-finite-math-only -march=armv8.2-a+dotprod+fp16"
                 )
+            }
+        }
+    }
+
+    flavorDimensions += "backend"
+    productFlavors {
+        create("vulkan") {
+            dimension = "backend"
+            externalNativeBuild {
+                cmake {
+                    arguments += listOf("-DGGML_VULKAN=ON", "-DVulkan_GLSLC_EXECUTABLE=/usr/local/bin/glslc")
+                }
+            }
+        }
+        create("opencl") {
+            dimension = "backend"
+            externalNativeBuild {
+                cmake {
+                    arguments += listOf("-DGGML_OPENCL=ON")
+                }
+            }
+        }
+        create("qnn") {
+            dimension = "backend"
+            externalNativeBuild {
+                cmake {
+                    arguments += listOf("-DGGML_QNN=ON")
+                }
             }
         }
     }
@@ -104,6 +133,8 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material3:material3-window-size-class")
+    implementation("androidx.window:window:1.2.0")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.material3.adaptive:adaptive:1.0.0-beta03")
     implementation("androidx.compose.material3.adaptive:adaptive-layout:1.0.0-beta03")
@@ -118,7 +149,8 @@ dependencies {
     ksp(libs.room.compiler)
 
     // Navigation
-    implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation("androidx.navigation:navigation-compose:2.8.5")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
     // Hilt DI
     implementation("com.google.dagger:hilt-android:2.55")

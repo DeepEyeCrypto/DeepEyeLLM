@@ -13,9 +13,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.Immutable
 import java.io.File
 import javax.inject.Inject
 
+@Immutable
 data class IdeUiState(
     val files: List<File> = emptyList(),
     val selectedFile: File? = null,

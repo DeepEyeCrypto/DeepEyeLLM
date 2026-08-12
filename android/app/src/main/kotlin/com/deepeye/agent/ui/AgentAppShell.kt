@@ -1,149 +1,126 @@
 package com.deepeye.agent.ui
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.CompositingStrategy
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
+import androidx.compose.ui.graphics.Color
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.deepeye.agent.R
-import com.deepeye.agent.ui.chat.ChatScreen
-import com.deepeye.agent.ui.chat.ChatViewModel
-import com.deepeye.agent.ui.file.FileAnalysisScreen
-import com.deepeye.agent.ui.file.FileAnalysisViewModel
-import com.deepeye.agent.ui.history.HistoryScreen
-import com.deepeye.agent.ui.history.HistoryViewModel
-import com.deepeye.agent.ui.models.ModelCatalogViewModel
-import com.deepeye.agent.ui.navigation.AgentNavigation
-import com.deepeye.agent.ui.navigation.TopLevelDestination
-import com.deepeye.agent.ui.settings.ModelManagerScreen
-import com.deepeye.agent.ui.settings.SettingsScreen
-import com.deepeye.agent.ui.settings.SettingsViewModel
+import com.deepeye.agent.ui.navigation.AgentDestinations
+import com.deepeye.agent.ui.navigation.DeepEyeNavHost
+import com.deepeye.agent.ui.navigation.agentDestinationsList
+import com.deepeye.agent.ui.navigation.startDestination
+import com.deepeye.agent.ui.navigation.withArgs
+import com.deepeye.agent.ui.theme.DeepEyeTheme
+import com.deepeye.agent.ui.utils.UiLayoutMode
+import com.deepeye.agent.ui.utils.currentUiLayoutMode
 
 @Composable
-fun AgentAppShell() {
-    val navController = rememberNavController()
+fun AgentAppShell(
+    modifier: Modifier = Modifier,
+    navController: NavHostController = rememberNavController()
+) {
+    val layoutMode = currentUiLayoutMode()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route ?: startDestination
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        val bgPainter = painterResource(id = R.drawable.vision_pro_bg)
-        Image(
-            painter = bgPainter,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer {
-                    // Cache layer compositing strategy to prevent native alloc GC churn
-                    compositingStrategy = CompositingStrategy.Offscreen
-                }
-        )
+    val navSuiteType = when (layoutMode) {
+        UiLayoutMode.COMPACT -> NavigationSuiteType.NavigationBar
+        UiLayoutMode.MEDIUM -> NavigationSuiteType.NavigationRail
+        UiLayoutMode.EXPANDED -> NavigationSuiteType.NavigationDrawer
+    }
 
-        AgentNavigation(navController = navController) {
-            NavHost(
-                navController = navController,
-                startDestination = TopLevelDestination.Models.route
-            ) {
-                composable(TopLevelDestination.Models.route) {
-                    val chatViewModel = hiltViewModel<ChatViewModel>()
-                    ChatScreen(viewModel = chatViewModel)
-                }
+    val colors = DeepEyeTheme.colors
+    val unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
 
-                composable(TopLevelDestination.Skills.route) {
-                    val context = androidx.compose.ui.platform.LocalContext.current
-                    val skillViewModel = hiltViewModel<com.deepeye.agent.ui.skills.SkillStoreViewModel>()
-                    val state by skillViewModel.uiState.collectAsState()
-                    com.deepeye.agent.ui.skills.SkillStoreScreen(
-                        state = state,
-                        onRefresh = skillViewModel::refreshSkills,
-                        onDownloadSkill = { skill -> 
-                            skillViewModel.installSkill(skill, context)
+    NavigationSuiteScaffold(
+        layoutType = navSuiteType,
+        containerColor = Color.Transparent,
+        navigationSuiteColors = NavigationSuiteDefaults.colors(
+            navigationBarContainerColor = Color(0xCC070A12),
+            navigationRailContainerColor = Color(0xCC070A12),
+            navigationDrawerContainerColor = Color(0xCC070A12)
+        ),
+        navigationSuiteItems = {
+            agentDestinationsList.forEach { destination ->
+                val isSelected = currentRoute == destination.route
+                val itemTint = if (isSelected) Color(0xFF00E5FF) else unselectedColor
+
+                item(
+                    selected = isSelected,
+                    onClick = {
+                        when (destination) {
+                            is AgentDestinations.BraveBrowser -> {
+                                navController.navigate(
+                                    AgentDestinations.BraveBrowser().withArgs(
+                                        url = "https://example.com",
+                                        dexSource = "DexScreener",
+                                        securityScore = 98
+                                    )
+                                ) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                            is AgentDestinations.SkillStore -> {
+                                navController.navigate(
+                                    AgentDestinations.SkillStore().withArgs(
+                                        category = "AI Agents",
+                                        selectedSkillId = "skill_123",
+                                        installMode = "INSTALL"
+                                    )
+                                ) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                            else -> {
+                                navController.navigate(destination.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
                         }
-                    )
-                }
-
-                composable(TopLevelDestination.AgentStudio.route) {
-                    val agentStudioViewModel = hiltViewModel<com.deepeye.agent.ui.agent.AgentStudioViewModel>()
-                    com.deepeye.agent.ui.agent.AgentStudioScreen(viewModel = agentStudioViewModel)
-                }
-
-                composable(TopLevelDestination.Browser.route) {
-                    val browserViewModel = hiltViewModel<com.deepeye.agent.ui.browser.BraveBrowserViewModel>()
-                    com.deepeye.agent.ui.browser.BraveBrowserScreen(viewModel = browserViewModel)
-                }
-
-                composable(TopLevelDestination.History.route) {
-                    val historyViewModel = hiltViewModel<HistoryViewModel>()
-                    val state by historyViewModel.historyState.collectAsState()
-                    HistoryScreen(
-                        state = state,
-                        onQueryChange = historyViewModel::setSearchQuery,
-                        onFilterChange = historyViewModel::setFilterType,
-                        onItemClick = { item -> historyViewModel.setSearchQuery(item.title) }, // Fallback since selectItem doesn't exist
-                        onOpenItem = { item -> navController.navigate(TopLevelDestination.Models.route) },
-                        onDeleteItem = { historyViewModel.deleteItem(it.id) },
-                        onShareItem = { historyViewModel.shareItem(it.id) }
-                    )
-                }
-
-                composable(TopLevelDestination.Settings.route) {
-                    val settingsViewModel = hiltViewModel<SettingsViewModel>()
-                    val state by settingsViewModel.settingsState.collectAsState()
-                    SettingsScreen(
-                        state = state,
-                        onOfflineModeChange = settingsViewModel::toggleOfflineMode,
-                        onAutoUpdateSkillsChange = settingsViewModel::toggleAutoUpdate,
-                        onPolicyCheckChange = settingsViewModel::togglePolicyChecks,
-                        onDiagnosticsChange = settingsViewModel::toggleDiagnostics,
-                        onManageModels = {
-                            navController.navigate("model_manager")
-                        },
-                        onExportDiagnostics = { navController.navigate("diagnostics") },
-                        onViewPolicyLogs = { navController.navigate("diagnostics") }
-                    )
-                }
-
-                composable("diagnostics") {
-                    com.deepeye.agent.ui.settings.DiagnosticsScreen(
-                        onNavigateBack = { navController.popBackStack() }
-                    )
-                }
-
-                composable("model_manager") {
-                    val modelViewModel = hiltViewModel<ModelCatalogViewModel>()
-                    val catalog by modelViewModel.modelCatalog.collectAsState()
-                    
-                    val filePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-                        uri?.let { modelViewModel.importModel(it) }
+                    },
+                    icon = {
+                        Icon(
+                            imageVector = destination.icon,
+                            contentDescription = destination.contentDescription,
+                            tint = itemTint
+                        )
+                    },
+                    label = {
+                        Text(
+                            text = destination.label,
+                            color = itemTint,
+                            style = MaterialTheme.typography.labelSmall
+                        )
                     }
-
-                    ModelManagerScreen(
-                        availableModels = catalog,
-                        onBack = { navController.popBackStack() },
-                        onDownloadModel = modelViewModel::downloadModel,
-                        onDeleteModel = modelViewModel::deleteModel,
-                        onSelectModel = modelViewModel::selectModel,
-                        onImportModel = { filePickerLauncher.launch("*/*") },
-                        onRescanModels = modelViewModel::rescanLocalModels,
-                        onCancelDownload = modelViewModel::cancelDownload,
-                        onPauseDownload = modelViewModel::pauseDownload,
-                        onResumeDownload = modelViewModel::resumeDownload,
-                        onRefreshCatalog = modelViewModel::refreshCatalog
-                    )
-                }
+                )
             }
-        }
+        },
+        modifier = modifier
+    ) {
+        DeepEyeNavHost(
+            navController = navController,
+            modifier = Modifier
+        )
     }
 }

@@ -14,23 +14,32 @@ include_directories("/usr/local/include")
 add_compile_options(-isystem/usr/local/include -O3 -fno-finite-math-only -march=armv8.2-a+dotprod+fp16)
 
 # ── llama.cpp build options ──────────────────────────────────────────────────
-# Disable everything we don't need to speed up the build
+option(GGML_VULKAN "Enable Vulkan GPU backend" OFF)
+option(GGML_OPENCL "Enable OpenCL GPU backend" OFF)
+option(GGML_QNN    "Enable Hexagon QNN NPU backend" OFF)
+
 set(LLAMA_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
 set(LLAMA_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(LLAMA_BUILD_SERVER   OFF CACHE BOOL "" FORCE)
 set(GGML_OPENMP          OFF CACHE BOOL "" FORCE)   # OpenMP not available on Android NDK
-set(GGML_VULKAN          OFF CACHE BOOL "" FORCE)   # Uses ARM NEON CPU SIMD acceleration to prevent Adreno driver buffer crashes
 
-# ── Vulkan GPU acceleration setup for Android NDK ──────────────────────────────
-set(Vulkan_GLSLC_EXECUTABLE "${ANDROID_NDK}/shader-tools/darwin-x86_64/glslc" CACHE FILEPATH "" FORCE)
+if(GGML_VULKAN)
+    add_compile_definitions(GGML_USE_VULKAN=1)
+    set(GGML_VULKAN ON CACHE BOOL "" FORCE)
+    if(NOT Vulkan_GLSLC_EXECUTABLE)
+        find_program(Vulkan_GLSLC_EXECUTABLE NAMES glslc HINTS "/usr/local/bin" "/usr/local/share/android-commandlinetools/ndk/27.0.12077973/shader-tools/darwin-x86_64")
+    endif()
+endif()
 
-if(NOT TARGET SPIRV-Headers::SPIRV-Headers)
-    add_library(SPIRV-Headers INTERFACE)
-    target_include_directories(SPIRV-Headers INTERFACE
-        "${ANDROID_NDK}/sources/third_party/shaderc/third_party/spirv-tools/external/spirv-headers/include"
-    )
-    add_library(SPIRV-Headers::SPIRV-Headers ALIAS SPIRV-Headers)
-    set(SPIRV-Headers_FOUND TRUE CACHE BOOL "" FORCE)
+if(GGML_OPENCL)
+    add_compile_definitions(GGML_USE_OPENCL=1)
+    set(GGML_OPENCL ON CACHE BOOL "" FORCE)
+endif()
+
+if(GGML_QNN)
+    add_compile_definitions(GGML_USE_QNN=1)
+    set(GGML_QNN ON CACHE BOOL "" FORCE)
+    set(GGML_QNN_ENABLE_QNN_BACKEND ON CACHE BOOL "" FORCE)
 endif()
 
 # ── Add llama.cpp source tree ────────────────────────────────────────────────

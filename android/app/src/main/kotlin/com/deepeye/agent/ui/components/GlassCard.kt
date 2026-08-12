@@ -1,30 +1,33 @@
 package com.deepeye.agent.ui.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.deepeye.agent.ui.theme.DeepEyeTheme
+import com.deepeye.agent.ui.utils.accessibleFocusRing
+import com.deepeye.agent.ui.utils.rememberIsReduceTransparencyEnabled
 
 /**
- * A glassmorphism-styled card component.
- * Uses the AEOS design system glass tokens for consistent styling.
- *
- * @param modifier Modifier for the card
- * @param isActive Whether the card shows an active/highlighted border
- * @param tintColor Optional tint override for the surface
- * @param borderColor Optional border color override
- * @param shape Card shape, defaults to 16dp rounded corners
- * @param elevation Card elevation
- * @param content Card content
+ * Volumetric Glassmorphism Card Component.
+ * Supports dynamic specular highlights, Z-axis elevation depth, active glowing borders,
+ * and automatic fallback to opaque surfaces when OS "Reduce Transparency" is enabled.
  */
 @Composable
 fun GlassCard(
@@ -37,23 +40,51 @@ fun GlassCard(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val colors = DeepEyeTheme.colors
-    val containerColor = tintColor ?: colors.glassSurface
+    val isReduceTransparency = rememberIsReduceTransparencyEnabled()
+
+    // Opaque fallback for WCAG accessibility when transparency is reduced
+    val containerColor = when {
+        isReduceTransparency -> Color(0xFF0E1322)
+        tintColor != null -> tintColor
+        else -> colors.glassSurface
+    }
+
     val border = borderColor ?: if (isActive) colors.glassBorderActive else colors.glassBorder
+    val borderWidth = if (isActive) 1.5.dp else 1.dp
 
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .accessibleFocusRing(shapeRadius = 16.dp),
         shape = shape,
         colors = CardDefaults.cardColors(
             containerColor = containerColor
         ),
-        border = BorderStroke(1.dp, border),
-        elevation = CardDefaults.cardElevation(defaultElevation = elevation),
-        content = content
-    )
+        border = BorderStroke(borderWidth, border),
+        elevation = CardDefaults.cardElevation(defaultElevation = elevation)
+    ) {
+        Box(
+            modifier = Modifier.drawWithContent {
+                drawContent()
+                // Volumetric specular top-highlight line for glass depth
+                if (!isReduceTransparency) {
+                    drawRect(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(Color.White.copy(alpha = 0.12f), Color.Transparent),
+                            startY = 0f,
+                            endY = 30f
+                        )
+                    )
+                }
+            }
+        ) {
+            Column(content = content)
+        }
+    }
 }
 
 /**
- * Elevated variant with stronger glass surface for prominent UI elements.
+ * Elevated Volumetric GlassCard variant for prominent dashboard or agent cards.
  */
 @Composable
 fun GlassCardElevated(
@@ -68,7 +99,7 @@ fun GlassCardElevated(
         isActive = isActive,
         tintColor = colors.glassSurfaceElevated,
         shape = shape,
-        elevation = 2.dp,
+        elevation = 4.dp,
         content = content
     )
 }

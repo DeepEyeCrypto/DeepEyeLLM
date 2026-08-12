@@ -9,6 +9,7 @@ buildscript {
         classpath("org.jetbrains.kotlin.plugin.compose:org.jetbrains.kotlin.plugin.compose.gradle.plugin:2.1.0")
         classpath("com.google.dagger:hilt-android-gradle-plugin:2.55")
         classpath("com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:2.1.0-1.0.29")
+        classpath("org.jetbrains.kotlin:kotlin-serialization:2.1.0")
     }
 }
 

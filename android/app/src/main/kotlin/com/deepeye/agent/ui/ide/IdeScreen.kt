@@ -4,7 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -18,7 +18,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.deepeye.agent.ui.components.GlassCard
-import com.deepeye.agent.ui.theme.PrimaryLocal
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,22 +50,22 @@ fun IdeScreen(viewModel: IdeViewModel = hiltViewModel()) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(max = 150.dp)
-                    .background(Color.DarkGray.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
                     .padding(8.dp)
             ) {
                 if (state.files.isEmpty()) {
-                    item { Text("No files in workspace. Create one!", color = Color.Gray) }
+                    item { Text("No files in workspace. Create one!", color = MaterialTheme.colorScheme.outline) }
                 }
-                items(state.files, key = { it.hashCode() }) { file ->
+                itemsIndexed(state.files, key = { index, item -> "file_${item.hashCode()}_$index" }) { index, file ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { viewModel.selectFile(file) }
                             .padding(8.dp)
                     ) {
-                        Icon(Icons.Default.Code, contentDescription = null, tint = PrimaryLocal)
+                        Icon(Icons.Default.Code, contentDescription = "Code file", tint = MaterialTheme.colorScheme.secondary)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(file.name, color = if (state.selectedFile == file) PrimaryLocal else Color.White)
+                        Text(file.name, color = if (state.selectedFile == file) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface)
                     }
                 }
             }
@@ -109,8 +108,8 @@ fun IdeScreen(viewModel: IdeViewModel = hiltViewModel()) {
                     .height(120.dp),
                 reverseLayout = true
             ) {
-                items(state.chatLog.reversed(), key = { it.hashCode() }) { msg ->
-                    val color = if (msg.startsWith("User")) Color.LightGray else PrimaryLocal
+                itemsIndexed(state.chatLog.reversed(), key = { index, _ -> "chat_$index" }) { index, msg ->
+                    val color = if (msg.startsWith("User")) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.secondary
                     Text(msg, color = color, style = MaterialTheme.typography.bodySmall)
                 }
             }

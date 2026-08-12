@@ -144,6 +144,21 @@ class EngineController(
         return status to response
     }
 
+    suspend fun executeChatStream(prompt: String, onChunk: (String) -> Unit): ModelStatus {
+        if (!isEngineReady) {
+            val status = ModelStatus.LOCAL_ACTIVE
+            val msg = "Engine not initialized. Please load or download a model file in Settings."
+            _engineStatus.update { EngineStatus(status, "Engine Not Ready", msg) }
+            onChunk(msg)
+            return status
+        }
+        engine.chatStream(prompt, onChunk)
+        val status = ModelStatus.LOCAL_ACTIVE
+        val modelName = engine.activeModelPath?.let { java.io.File(it).nameWithoutExtension } ?: "Local Engine"
+        _engineStatus.update { EngineStatus(status, modelName, "Generation completed.") }
+        return status
+    }
+
     fun getActiveEngineName(): String = engine.activeModelPath?.let { java.io.File(it).nameWithoutExtension } ?: "No Model Loaded"
 
     fun getEngineStatusMessage(): String = _engineStatus.value.statusMessage

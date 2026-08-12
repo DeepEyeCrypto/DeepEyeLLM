@@ -8,14 +8,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.Immutable
 import javax.inject.Inject
 
+@Immutable
 data class DexBookmark(
     val name: String,
     val url: String,
     val iconEmoji: String
 )
 
+@Immutable
 data class BraveBrowserUiState(
     val currentUrl: String = "https://dexscreener.com",
     val isLoading: Boolean = false,

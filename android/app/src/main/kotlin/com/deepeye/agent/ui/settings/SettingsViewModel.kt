@@ -18,7 +18,9 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.Immutable
 
+@Immutable
 data class SettingsUiState(
     val offlineMode: Boolean = true,
     val policyCheckEnabled: Boolean = true,

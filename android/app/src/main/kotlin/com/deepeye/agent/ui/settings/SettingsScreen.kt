@@ -1,6 +1,7 @@
 package com.deepeye.agent.ui.settings
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,7 +14,33 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.deepeye.agent.ui.theme.DeepEyeTheme
+import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import com.deepeye.agent.ui.components.GlassCard
 
+
+@Composable
+fun SettingsScreen(
+    viewModel: SettingsViewModel = hiltViewModel(),
+    onNavigateToModelManager: () -> Unit = {}
+) {
+    val state by viewModel.settingsState.collectAsStateWithLifecycle()
+    SettingsScreen(
+        state = state,
+        onOfflineModeChange = viewModel::toggleOfflineMode,
+        onAutoUpdateSkillsChange = viewModel::toggleAutoUpdate,
+        onPolicyCheckChange = viewModel::togglePolicyChecks,
+        onDiagnosticsChange = viewModel::toggleDiagnostics,
+        onManageModels = onNavigateToModelManager,
+        onExportDiagnostics = { },
+        onViewPolicyLogs = { },
+        viewModel = viewModel
+    )
+}
 
 @Composable
 fun SettingsScreen(
@@ -32,7 +59,7 @@ fun SettingsScreen(
         topBar = { 
             @OptIn(ExperimentalMaterial3Api::class) 
             TopAppBar(
-                title = { Text("Settings", color = Color.White) },
+                title = { Text("Settings", color = MaterialTheme.colorScheme.onSurface) },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             ) 
         }
@@ -41,16 +68,15 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            contentPadding = PaddingValues(10.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            item { SectionHeader("Privacy") }
-
+            item { SectionHeader("Security & Policy") }
             item {
                 SettingCard {
                     SettingToggleRow(
                         icon = Icons.Default.Lock,
-                        title = "Offline-only mode",
+                        title = "Offline Mode",
                         subtitle = "All analysis stays on-device.",
                         checked = state.offlineMode,
                         onCheckedChange = onOfflineModeChange
@@ -58,7 +84,7 @@ fun SettingsScreen(
                     HorizontalDivider()
                     SettingToggleRow(
                         icon = Icons.Default.VerifiedUser,
-                        title = "Policy checks",
+                        title = "RBAC Checks",
                         subtitle = "Validate local safety rules before analysis.",
                         checked = state.policyCheckEnabled,
                         onCheckedChange = onPolicyCheckChange
@@ -66,18 +92,33 @@ fun SettingsScreen(
                     HorizontalDivider()
                     SettingToggleRow(
                         icon = Icons.Default.Info,
-                        title = "Auto-update skills",
+                        title = "Policy Audit Logging",
+                        subtitle = "Collect security events and traces.",
+                        checked = state.diagnosticsEnabled,
+                        onCheckedChange = onDiagnosticsChange
+                    )
+                    HorizontalDivider()
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        TextButton(onClick = onViewPolicyLogs) { Text("View Policy Logs", color = DeepEyeTheme.colors.link) }
+                    }
+                }
+            }
+
+            item { SectionHeader("Performance & AI Engine") }
+            item {
+                SettingCard {
+                    SettingToggleRow(
+                        icon = Icons.Default.Info,
+                        title = "Auto Update Skills",
                         subtitle = "Sync local skill updates when available.",
                         checked = state.autoUpdateSkills,
                         onCheckedChange = onAutoUpdateSkillsChange
                     )
-                }
-            }
+                    HorizontalDivider()
 
-            item { SectionHeader("Inference Engine Options") }
-
-            item {
-                SettingCard {
                     SettingToggleRow(
                         icon = Icons.Default.VerifiedUser,
                         title = "Hardware Acceleration (Vulkan GPU)",
@@ -87,24 +128,22 @@ fun SettingsScreen(
                     )
                     HorizontalDivider()
 
-                    // CPU Threads Slider
                     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                        Text("CPU Inference Threads: ${state.engineSettings.cpuThreads}", style = MaterialTheme.typography.titleMedium, color = Color.White)
+                        Text("CPU Inference Threads: ${state.engineSettings.cpuThreads}", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
                         Spacer(Modifier.height(4.dp))
-                        Text("Range: 1 to ${Runtime.getRuntime().availableProcessors()} cores (Recommended: 4 for ARM big.LITTLE)", style = MaterialTheme.typography.bodySmall, color = Color.LightGray)
+                        Text("Range: 1 to ${Runtime.getRuntime().availableProcessors()} cores", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Slider(
                             value = state.engineSettings.cpuThreads.toFloat(),
                             onValueChange = { viewModel.updateCpuThreads(it.toInt()) },
                             valueRange = 1f..Runtime.getRuntime().availableProcessors().toFloat(),
                             steps = Runtime.getRuntime().availableProcessors() - 1,
-                            colors = SliderDefaults.colors(thumbColor = Color.White, activeTrackColor = Color(0xFF64B5F6))
+                            colors = SliderDefaults.colors(thumbColor = MaterialTheme.colorScheme.onSurface, activeTrackColor = DeepEyeTheme.colors.link)
                         )
                     }
                     HorizontalDivider()
 
-                    // Context Window Size Selection
                     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                        Text("Context Window Size: ${state.engineSettings.contextSize} tokens", style = MaterialTheme.typography.titleMedium, color = Color.White)
+                        Text("Context Window Size: ${state.engineSettings.contextSize} tokens", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
                         Spacer(Modifier.height(4.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             listOf(512, 1024, 2048, 4096).forEach { size ->
@@ -113,10 +152,10 @@ fun SettingsScreen(
                                     onClick = { viewModel.updateContextSize(size) },
                                     label = { Text("$size") },
                                     colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = Color(0xFF64B5F6),
-                                        selectedLabelColor = Color.Black,
-                                        containerColor = Color.DarkGray,
-                                        labelColor = Color.White
+                                        selectedContainerColor = DeepEyeTheme.colors.link,
+                                        selectedLabelColor = MaterialTheme.colorScheme.scrim,
+                                        containerColor = MaterialTheme.colorScheme.outlineVariant,
+                                        labelColor = MaterialTheme.colorScheme.onSurface
                                     )
                                 )
                             }
@@ -124,47 +163,17 @@ fun SettingsScreen(
                     }
                     HorizontalDivider()
 
-                    // Temperature Slider
-                    Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                        Text("Temperature: ${"%.2f".format(state.engineSettings.temperature)}", style = MaterialTheme.typography.titleMedium, color = Color.White)
-                        Slider(
-                            value = state.engineSettings.temperature,
-                            onValueChange = { viewModel.updateTemperature(it) },
-                            valueRange = 0.0f..1.5f,
-                            colors = SliderDefaults.colors(thumbColor = Color.White, activeTrackColor = Color(0xFF64B5F6))
-                        )
-                    }
-                    HorizontalDivider()
-
-                    // Top-P Slider
-                    Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                        Text("Top-P (Nucleus Sampling): ${"%.2f".format(state.engineSettings.topP)}", style = MaterialTheme.typography.titleMedium, color = Color.White)
-                        Slider(
-                            value = state.engineSettings.topP,
-                            onValueChange = { viewModel.updateTopP(it) },
-                            valueRange = 0.1f..1.0f,
-                            colors = SliderDefaults.colors(thumbColor = Color.White, activeTrackColor = Color(0xFF64B5F6))
-                        )
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Diagnostics Monitor (Logs: ${state.recentLogsCount})", color = MaterialTheme.colorScheme.onSurface)
+                        TextButton(onClick = onExportDiagnostics) { Text("Export", color = DeepEyeTheme.colors.link) }
                     }
                 }
             }
 
-            item { SectionHeader("Security") }
-
-            item {
-                SettingCard {
-                    SettingToggleRow(
-                        icon = Icons.Default.VerifiedUser,
-                        title = "Diagnostics and logs",
-                        subtitle = "Collect crash reports and local traces.",
-                        checked = state.diagnosticsEnabled,
-                        onCheckedChange = onDiagnosticsChange
-                    )
-                }
-            }
-
-            item { SectionHeader("Models") }
-
+            item { SectionHeader("Storage & System Models") }
             item {
                 SettingCard {
                     Column(
@@ -178,11 +187,11 @@ fun SettingsScreen(
                                 .padding(16.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Icon(Icons.Default.Storage, contentDescription = null, tint = Color.White)
+                            Icon(Icons.Default.Storage, contentDescription = "Model storage", tint = MaterialTheme.colorScheme.onSurface)
                             Column(modifier = Modifier.weight(1f)) {
-                                Text("Downloaded model storage", style = MaterialTheme.typography.titleMedium, color = Color.White)
+                                Text("Storage Breakdown", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
                                 Spacer(Modifier.height(4.dp))
-                                Text("${state.modelStorageUsed} used of ${state.modelStorageTotal}", color = Color.LightGray)
+                                Text("${state.modelStorageUsed} used of ${state.modelStorageTotal}", color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                         HorizontalDivider()
@@ -192,34 +201,8 @@ fun SettingsScreen(
                                 .padding(16.dp),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("Manage Models", color = Color(0xFF64B5F6), style = MaterialTheme.typography.titleSmall)
+                            Text("Model Management", color = DeepEyeTheme.colors.link, style = MaterialTheme.typography.titleSmall)
                         }
-                    }
-                }
-            }
-
-            item { SectionHeader("Diagnostics") }
-
-            item {
-                SettingCard {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text("Recent logs", color = Color.White)
-                        Text("${state.recentLogsCount}", color = Color.LightGray)
-                    }
-                    HorizontalDivider()
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        TextButton(onClick = onExportDiagnostics) { Text("Export diagnostics", color = Color(0xFF64B5F6)) }
-                        TextButton(onClick = onViewPolicyLogs) { Text("View policy logs", color = Color(0xFF64B5F6)) }
                     }
                 }
             }
@@ -228,9 +211,9 @@ fun SettingsScreen(
                 item {
                     ElevatedCard {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text("Settings error", style = MaterialTheme.typography.titleMedium, color = Color.White)
+                            Text("Settings error", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
                             Spacer(Modifier.height(8.dp))
-                            Text(err, color = Color(0xFFE57373))
+                            Text(err, color = DeepEyeTheme.colors.dangerAlt)
                         }
                     }
                 }
@@ -241,16 +224,14 @@ fun SettingsScreen(
 
 @Composable
 private fun SectionHeader(title: String) {
-    Text(title, style = MaterialTheme.typography.titleLarge, color = Color.White)
+    Text(title, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.semantics { heading() })
 }
 
 @Composable
 private fun SettingCard(content: @Composable ColumnScope.() -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.Black.copy(alpha = 0.7f)),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.2f))
-    ) { Column(content = content) }
+    GlassCard {
+        Column(modifier = Modifier.fillMaxWidth(), content = content)
+    }
 }
 
 @Composable
@@ -264,23 +245,24 @@ private fun SettingToggleRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .background(Color(0x1AFFFFFF))
             .padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Icon(icon, contentDescription = null, tint = Color.White)
+        Icon(icon, contentDescription = title, tint = MaterialTheme.colorScheme.onSurface)
         Column(modifier = Modifier.weight(1f)) {
-            Text(title, style = MaterialTheme.typography.titleMedium, color = Color.White)
+            Text(title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
             Spacer(Modifier.height(4.dp))
-            Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = Color.LightGray)
+            Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
-                checkedThumbColor = Color.White,
-                checkedTrackColor = Color(0xFF64B5F6),
-                uncheckedThumbColor = Color.Gray,
-                uncheckedTrackColor = Color.DarkGray
+                checkedThumbColor = Color(0xFF00E5FF),
+                checkedTrackColor = DeepEyeTheme.colors.link,
+                uncheckedThumbColor = MaterialTheme.colorScheme.outline,
+                uncheckedTrackColor = MaterialTheme.colorScheme.outlineVariant
             )
         )
     }

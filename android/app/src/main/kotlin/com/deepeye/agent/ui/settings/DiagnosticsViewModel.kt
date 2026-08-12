@@ -13,8 +13,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.Immutable
 import javax.inject.Inject
 
+@Immutable
 data class DiagnosticsUiState(
     val systemHealth: SystemHealth? = null,
     val auditLogs: List<PolicyAuditEntry> = emptyList(),

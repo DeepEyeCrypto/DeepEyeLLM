@@ -3,51 +3,73 @@ package com.deepeye.agent.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // ═══════════════════════════════════════════
-// AEOS v2027 Design Tokens
+// AEOS v2027 Futuristic Color Tokens & Palette
 // ═══════════════════════════════════════════
 
-// Primary: Deep Blue
+// Primary: Deep Blue / Electric Cyan
 val DeepBluePrimary = Color(0xFF0D47A1)
 val DeepBluePrimaryDark = Color(0xFF1565C0)
 val DeepBluePrimaryLight = Color(0xFF42A5F5)
 
-// Secondary: Teal / Cyan
+// Secondary: Teal / Mint / Cyber Cyan
 val TealCyanSecondary = Color(0xFF00BFA5)
-val TealCyanSecondaryDark = Color(0xFF1DE9B6)
+val TealCyanSecondaryDark = Color(0xFF00E5FF)
 val TealCyanSecondaryLight = Color(0xFF64FFDA)
 
-// Accent: Amber
+// Accent: Amber / Solar Gold
 val AmberAccent = Color(0xFFFFB300)
 val AmberAccentDark = Color(0xFFFFCA28)
 val AmberAccentLight = Color(0xFFFFE082)
 
-// Policy: Purple
+// Policy / AI Purple
 val PolicyPurple = Color(0xFF651FFF)
 val PolicyPurpleDark = Color(0xFFB388FF)
 
-// Status Colors
-val StatusSuccess = Color(0xFF00C853)
-val StatusWarning = Color(0xFFFF6D00)
-val StatusError = Color(0xFFD50000)
-val StatusInfo = Color(0xFF2979FF)
+// Status Colors (WCAG 2.2 Compliant >= 4.5:1)
+val StatusSuccess = Color(0xFF00E676)
+val StatusWarning = Color(0xFFFF9100)
+val StatusError = Color(0xFFFF1744)
+val StatusInfo = Color(0xFF00E5FF)
+
+// Extended UI Colors
+val LinkBlue = Color(0xFF64B5F6)
+val LinkBlueDark = Color(0xFF1565C0)
+val WarningAlt = Color(0xFFFFB74D)
+val WarningAltDark = Color(0xFFE65100)
+val DangerAlt = Color(0xFFE57373)
+val DangerAltDark = Color(0xFFC62828)
+val BrandOrange = Color(0xFFFF5722)
+val BrandOrangeDark = Color(0xFFE64A19)
 
 // ═══════════════════════════════════════════
-// Glassmorphism Tokens
+// AEOS Volumetric Glassmorphism Tokens
 // ═══════════════════════════════════════════
-val GlassDarkBackground = Color(0xFF0A0E1A)
-val GlassDarkSurface = Color(0xCC1A1A2E) // 80% opacity
-val GlassDarkSurfaceElevated = Color(0xE61A1A2E) // 90% opacity
-val GlassLightOverlay = Color(0x26FFFFFF) // 15% white
-val GlassBorder = Color(0x1AFFFFFF) // 10% white
-val GlassBorderActive = Color(0x4DFFFFFF) // 30% white
-val GlassHighlight = Color(0x0DFFFFFF) // 5% white subtle highlight
+val CyberBackground = Color(0xFF070A12)
+val CyberSurfaceDark = Color(0xFF0E1322)
+val CyberCyan = Color(0xFF00E5FF)
+val ElectricTeal = Color(0xFF00E676)
+val NeonViolet = Color(0xFFB388FF)
+val AmberFlare = Color(0xFFFFB300)
+
+val GlassSurfaceCyber = Color(0xCC121826) // 80% opacity dark slate glass
+val GlassSurfaceCyberElevated = Color(0xE61A233A) // 90% opacity elevated glass
+val GlassBorderGlow = Color(0x6600E5FF) // Active cyber glow border
+val GlassBorderSpecular = Color(0x33FFFFFF) // Specular top edge highlight
+
+val GlassDarkBackground = CyberBackground
+val GlassDarkSurface = GlassSurfaceCyber
+val GlassDarkSurfaceElevated = GlassSurfaceCyberElevated
+val GlassLightOverlay = Color(0x26FFFFFF) // 15% white overlay
+val GlassBorder = Color(0x26FFFFFF) // 15% white border
+val GlassBorderActive = GlassBorderGlow
+val GlassHighlight = Color(0x19FFFFFF) // 10% specular white highlight
 
 // ═══════════════════════════════════════════
-// Legacy Compatibility (keep existing names)
+// Legacy Compatibility Tokens
 // ═══════════════════════════════════════════
 val PrimaryLocal = TealCyanSecondary
 val PrimaryLocalDark = TealCyanSecondaryDark
 val SecondaryCloud = AmberAccent
 val SecondaryCloudDark = AmberAccentDark
-val SurfaceDark = Color(0x66000000) // 40% Black (Glass) — legacy
-val SurfaceLight = Color(0x66FFFFFF) // 40% White (Glass) — legacy
+val SurfaceDark = Color(0x66000000)
+val SurfaceLight = Color(0x66FFFFFF)

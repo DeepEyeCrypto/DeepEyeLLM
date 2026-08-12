@@ -99,7 +99,7 @@ private fun SearchBarSection(
         onValueChange = onQueryChange,
         modifier = Modifier.fillMaxWidth(),
         leadingIcon = {
-            Icon(Icons.Default.Search, contentDescription = null)
+            Icon(Icons.Default.Search, contentDescription = "Search")
         },
         placeholder = { Text("Search conversations, files, debug sessions...") },
         singleLine = true
@@ -123,7 +123,7 @@ private fun FilterChipRow(
                 label = { Text(filter.name) },
                 leadingIcon = if (selectedFilter == filter) {
                     {
-                        Icon(Icons.Default.FilterAlt, contentDescription = null)
+                        Icon(Icons.Default.FilterAlt, contentDescription = "Filter")
                     }
                 } else null
             )
@@ -140,7 +140,7 @@ private fun HistoryItemCard(
     ElevatedCard(onClick = onClick) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(Icons.Default.Description, contentDescription = null)
+                Icon(Icons.Default.Description, contentDescription = "History entry")
                 Text(item.title, style = MaterialTheme.typography.titleMedium)
             }
             Spacer(Modifier.height(6.dp))

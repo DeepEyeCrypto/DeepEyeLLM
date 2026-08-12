@@ -51,10 +51,25 @@ struct LlamaState {
     int n_ctx     = 2048;
     int n_threads = 4;
 
+    // Performance tracking
+    double ttft_ms = 0.0;
+    int tokens_generated = 0;
+    double tokens_per_sec = 0.0;
+
     // Set to true by nativeAbortGeneration() to break out of the decode loop.
     // Checked every iteration — safe for cross-thread access.
     std::atomic<bool> abort_flag{false};
 };
+
+// Global backend state variables
+static int g_backend_type = 0;
+static int g_n_gpu_layers = 0;
+
+// Performance counters
+static std::chrono::steady_clock::time_point g_first_token_time;
+static int g_tokens_generated = 0;
+static double g_last_ttft_ms = 0.0;
+static double g_last_tps = 0.0;
 
 // Global JavaVM pointer — cached in JNI_OnLoad for thread-attach operations.
 static JavaVM* g_vm = nullptr;
@@ -81,25 +96,53 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
 // They handle null checks and prevent JNI local reference table overflow
 // by deleting jstring refs inside the loop.
 
-static void safeCallToken(JNIEnv* env, jobject callback, jmethodID method,
-                           const std::string& token) {
+static void safeCallToken(JNIEnv* env, jobject callback, jmethodID method, const std::string& token) {
     if (!callback || !method) return;
-    jstring jtoken = env->NewStringUTF(token.c_str());
-    env->CallVoidMethod(callback, method, jtoken);
-    env->DeleteLocalRef(jtoken);  // CRITICAL: prevent ref table overflow in long loops
+    bool needsDetach = false;
+    JNIEnv* currentEnv = env;
+    if (g_vm && g_vm->GetEnv(reinterpret_cast<void**>(&currentEnv), JNI_VERSION_1_6) == JNI_EDETACHED) {
+        if (g_vm->AttachCurrentThread(&currentEnv, nullptr) == JNI_OK) {
+            needsDetach = true;
+        } else {
+            return;
+        }
+    }
+    jstring jtoken = currentEnv->NewStringUTF(token.c_str());
+    currentEnv->CallVoidMethod(callback, method, jtoken);
+    currentEnv->DeleteLocalRef(jtoken);
+    if (needsDetach && g_vm) g_vm->DetachCurrentThread();
 }
 
 static void safeCallComplete(JNIEnv* env, jobject callback, jmethodID method) {
     if (!callback || !method) return;
-    env->CallVoidMethod(callback, method);
+    bool needsDetach = false;
+    JNIEnv* currentEnv = env;
+    if (g_vm && g_vm->GetEnv(reinterpret_cast<void**>(&currentEnv), JNI_VERSION_1_6) == JNI_EDETACHED) {
+        if (g_vm->AttachCurrentThread(&currentEnv, nullptr) == JNI_OK) {
+            needsDetach = true;
+        } else {
+            return;
+        }
+    }
+    currentEnv->CallVoidMethod(callback, method);
+    if (needsDetach && g_vm) g_vm->DetachCurrentThread();
 }
 
-static void safeCallError(JNIEnv* env, jobject callback, jmethodID method,
-                           const std::string& errorMsg) {
+static void safeCallError(JNIEnv* env, jobject callback, jmethodID method, const std::string& errorMsg) {
     if (!callback || !method) return;
-    jstring jmsg = env->NewStringUTF(errorMsg.c_str());
-    env->CallVoidMethod(callback, method, jmsg);
-    env->DeleteLocalRef(jmsg);
+    bool needsDetach = false;
+    JNIEnv* currentEnv = env;
+    if (g_vm && g_vm->GetEnv(reinterpret_cast<void**>(&currentEnv), JNI_VERSION_1_6) == JNI_EDETACHED) {
+        if (g_vm->AttachCurrentThread(&currentEnv, nullptr) == JNI_OK) {
+            needsDetach = true;
+        } else {
+            return;
+        }
+    }
+    jstring jmsg = currentEnv->NewStringUTF(errorMsg.c_str());
+    currentEnv->CallVoidMethod(callback, method, jmsg);
+    currentEnv->DeleteLocalRef(jmsg);
+    if (needsDetach && g_vm) g_vm->DetachCurrentThread();
 }
 
 // =============================================================================
@@ -291,8 +334,10 @@ static int run_inference(
          n_prompt, prefill_ms, prefill_tok_s, max_gen);
 
     // ── Step 6: Autoregressive generation loop ──────────────────────────────
-    auto t_start = std::chrono::high_resolution_clock::now();
+    auto t_start = std::chrono::steady_clock::now();
     int n_generated = 0;
+    bool first_token = true;
+    state->tokens_generated = 0;
 
     for (int i = 0; i < max_gen; i++) {
         // Check abort flag (set by nativeAbortGeneration from another thread)
@@ -305,9 +350,13 @@ static int run_inference(
         // idx = -1 means "use logits from the last token in the context"
         llama_token new_token = llama_sampler_sample(state->sampler, state->ctx, -1);
 
+        if (first_token) {
+            auto t_first = std::chrono::steady_clock::now();
+            state->ttft_ms = std::chrono::duration<double, std::milli>(t_first - t_start).count();
+            first_token = false;
+        }
+
         // ── Check for End-Of-Generation ─────────────────────────────────────
-        // llama_vocab_is_eog returns true for EOS, EOT, and any model-specific
-        // end-of-generation tokens (e.g., <|im_end|> for ChatML models).
         if (llama_vocab_is_eog(llama_model_get_vocab(state->model), new_token)) {
             LOGI("EOG token reached after %d generated tokens", n_generated);
             break;
@@ -331,13 +380,17 @@ static int run_inference(
         }
 
         n_generated++;
+        state->tokens_generated++;
     }
 
     // ── Performance logging ─────────────────────────────────────────────────
-    auto t_end = std::chrono::high_resolution_clock::now();
+    auto t_end = std::chrono::steady_clock::now();
     double elapsed_s = std::chrono::duration<double>(t_end - t_start).count();
-    double tok_per_sec = (elapsed_s > 0.0) ? n_generated / elapsed_s : 0.0;
-    LOGI("Generation complete: %d tokens in %.2fs (%.1f tok/s)", n_generated, elapsed_s, tok_per_sec);
+    state->tokens_per_sec = (elapsed_s > 0.0) ? n_generated / elapsed_s : 0.0;
+    int ttft = static_cast<int>(state->ttft_ms);
+
+    LOGI("Performance: TTFT=%d ms, tokens/sec=%.2f", ttft, state->tokens_per_sec);
+    LOGI("Generation complete: %d tokens in %.2fs (%.1f tok/s)", n_generated, elapsed_s, state->tokens_per_sec);
 
     return n_generated;
 }
@@ -356,60 +409,37 @@ Java_com_deepeye_agent_domain_engine_LlamaCppEngine_nativeInitModel(
     JNIEnv* env, jobject thiz, jstring jmodel_path, jint n_ctx, jint n_threads, jint n_gpu_layers) {
 
     const char* path = env->GetStringUTFChars(jmodel_path, nullptr);
+    LOGI("Using backend type %d with %d GPU layers", g_backend_type, g_n_gpu_layers);
     LOGI("═══════════════════════════════════════════════════════");
     LOGI("Loading GGUF model: %s", path);
     LOGI("  Context size: %d tokens", n_ctx);
     LOGI("  Threads: %d", n_threads);
-    LOGI("  Requested GPU layers: %d", n_gpu_layers);
+    LOGI("  Requested GPU layers: %d (global: %d)", n_gpu_layers, g_n_gpu_layers);
     LOGI("═══════════════════════════════════════════════════════");
 
     auto t_start = std::chrono::high_resolution_clock::now();
+    int effective_gpu_layers = (g_n_gpu_layers > 0) ? g_n_gpu_layers : n_gpu_layers;
 
-    // ── Model parameters ────────────────────────────────────────────────────
     auto model_params = llama_model_default_params();
-    model_params.n_gpu_layers = n_gpu_layers;
-    model_params.load_mode    = (n_gpu_layers > 0) ? LLAMA_LOAD_MODE_NONE : LLAMA_LOAD_MODE_MMAP;
+    model_params.n_gpu_layers = effective_gpu_layers;
+    model_params.main_gpu     = 0;
+    model_params.split_mode   = static_cast<enum llama_split_mode>(0);
+    model_params.load_mode    = (effective_gpu_layers > 0) ? LLAMA_LOAD_MODE_NONE : LLAMA_LOAD_MODE_MMAP;
 
-    // ── Load model from GGUF file ───────────────────────────────────────────
-    llama_model* model = nullptr;
-    if (n_gpu_layers > 0) {
-        LOGI("Attempting to load model with %d GPU layers...", n_gpu_layers);
-        model = llama_model_load_from_file(path, model_params);
-    }
-
-    // Prepare explicit CPU device array for CPU fallback to bypass uninitialized Vulkan backends
-    ggml_backend_dev_t cpu_dev = ggml_backend_dev_by_type(GGML_BACKEND_DEVICE_TYPE_CPU);
-    ggml_backend_dev_t cpu_devices[] = { cpu_dev, nullptr };
-
-    if (!model) {
-        if (n_gpu_layers > 0) {
-            LOGW("GPU model loading failed or unavailable. Falling back to CPU (0 GPU layers)...");
-        }
-        model_params.n_gpu_layers = 0;
-        model_params.load_mode    = LLAMA_LOAD_MODE_NONE; // Disable mmap page thrashing to prevent LMK (Low Memory Killer) process termination
-        if (cpu_dev != nullptr) {
-            model_params.devices = cpu_devices;
-        }
-        model = llama_model_load_from_file(path, model_params);
-    }
-
+    llama_model* model = llama_model_load_from_file(path, model_params);
     if (!model) {
         LOGE("FATAL: Failed to load model from: %s", path);
         env->ReleaseStringUTFChars(jmodel_path, path);
-        return 0;  // Kotlin side checks for 0 and throws IllegalStateException
+        return 0;
     }
 
-    // ── Context parameters ──────────────────────────────────────────────────
     auto ctx_params = llama_context_default_params();
     ctx_params.n_ctx            = n_ctx;
     ctx_params.n_threads        = n_threads;
-    ctx_params.n_threads_batch  = n_threads;  // Same thread count for prompt processing
-    ctx_params.n_batch          = 512;        // Fast prompt batch processing
-    ctx_params.n_ubatch         = 512;        // Physical batch size
-    ctx_params.flash_attn_type  = LLAMA_FLASH_ATTN_TYPE_ENABLED; // Flash attention optimization
-    ctx_params.no_perf          = false;      // Enable perf counters for debugging
+    ctx_params.n_threads_batch  = n_threads;
+    ctx_params.n_batch          = 512;
+    ctx_params.n_ubatch         = 512;
 
-    // ── Create inference context ────────────────────────────────────────────
     llama_context* ctx = llama_init_from_model(model, ctx_params);
     if (!ctx) {
         LOGE("FATAL: Failed to create llama context");
@@ -418,19 +448,14 @@ Java_com_deepeye_agent_domain_engine_LlamaCppEngine_nativeInitModel(
         return 0;
     }
 
-    // ── Build sampler chain ─────────────────────────────────────────────────
-    // Order matters: penalties → top-k → top-p → min-p → temperature → dist
-    // These defaults work well for Qwen3 and most chat models.
     auto sparams = llama_sampler_chain_default_params();
     llama_sampler* sampler = llama_sampler_chain_init(sparams);
+    llama_sampler_chain_add(sampler, llama_sampler_init_top_k(40));
+    llama_sampler_chain_add(sampler, llama_sampler_init_top_p(0.9f, 1));
+    llama_sampler_chain_add(sampler, llama_sampler_init_min_p(0.1f, 1));
+    llama_sampler_chain_add(sampler, llama_sampler_init_temp(0.7f));
+    llama_sampler_chain_add(sampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));
 
-    llama_sampler_chain_add(sampler, llama_sampler_init_top_k(40));         // Keep top 40 tokens
-    llama_sampler_chain_add(sampler, llama_sampler_init_top_p(0.9f, 1));    // Nucleus sampling p=0.9
-    llama_sampler_chain_add(sampler, llama_sampler_init_min_p(0.1f, 1));    // Min-p filtering
-    llama_sampler_chain_add(sampler, llama_sampler_init_temp(0.7f));        // Temperature
-    llama_sampler_chain_add(sampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED)); // Final random pick
-
-    // ── Assemble state struct ───────────────────────────────────────────────
     auto* state = new LlamaState();
     state->model      = model;
     state->ctx        = ctx;
@@ -443,12 +468,7 @@ Java_com_deepeye_agent_domain_engine_LlamaCppEngine_nativeInitModel(
 
     auto t_end = std::chrono::high_resolution_clock::now();
     double load_time = std::chrono::duration<double>(t_end - t_start).count();
-
-    LOGI("═══════════════════════════════════════════════════════");
-    LOGI("Model loaded successfully in %.1fs", load_time);
-    LOGI("  Context: %d tokens", n_ctx);
-    LOGI("  Threads: %d", n_threads);
-    LOGI("═══════════════════════════════════════════════════════");
+    LOGI("Model loaded successfully in %.1fs (handle created)", load_time);
 
     return reinterpret_cast<jlong>(state);
 }
@@ -610,4 +630,45 @@ Java_com_deepeye_agent_domain_engine_LlamaCppEngine_nativeFreeModel(
 
     delete state;
     LOGI("Native resources freed successfully.");
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// nativeSetBackendConfig — Configure GPU/NPU hardware backend offloading.
+// ─────────────────────────────────────────────────────────────────────────────
+extern "C" JNIEXPORT void JNICALL
+Java_com_deepeye_agent_domain_engine_LlamaCppEngine_nativeSetBackendConfig(
+    JNIEnv* env, jobject thiz, jlong handle, jint backend_type, jint n_gpu_layers) {
+
+    g_backend_type = backend_type;
+    g_n_gpu_layers = n_gpu_layers;
+
+    llama_backend_init();
+
+    LOGI("Native backend config updated: type=%d, layers=%d", g_backend_type, g_n_gpu_layers);
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_deepeye_agent_core_hardware_HardwareBackendSelector_nativeSetBackendConfig(
+    JNIEnv* env, jobject thiz, jlong handle, jint backend_type, jint n_gpu_layers) {
+    Java_com_deepeye_agent_domain_engine_LlamaCppEngine_nativeSetBackendConfig(env, thiz, handle, backend_type, n_gpu_layers);
+}
+
+extern "C" JNIEXPORT jobject JNICALL
+Java_com_deepeye_agent_domain_engine_LlamaCppEngine_nativeGetPerformanceStats(
+    JNIEnv* env, jobject thiz, jlong handle) {
+
+    if (handle == 0) return nullptr;
+    auto* state = reinterpret_cast<LlamaState*>(handle);
+
+    jclass statsClass = env->FindClass("com/deepeye/agent/domain/engine/PerformanceStats");
+    if (!statsClass) {
+        return nullptr;
+    }
+    jmethodID ctor = env->GetMethodID(statsClass, "<init>", "(ID)V");
+    if (!ctor) {
+        return nullptr;
+    }
+
+    int ttft = static_cast<int>(state->ttft_ms);
+    return env->NewObject(statsClass, ctor, ttft, state->tokens_per_sec);
 }

@@ -18,7 +18,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.setFormat(android.graphics.PixelFormat.RGBA_8888)
         enableEdgeToEdge()
 
         setContent {

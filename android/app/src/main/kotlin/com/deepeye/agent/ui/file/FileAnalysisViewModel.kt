@@ -14,8 +14,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.Immutable
 import javax.inject.Inject
 
+@Immutable
 data class FileAnalysisUiState(
     val currentFileUri: Uri? = null,
     val isAnalyzing: Boolean = false,
@@ -32,6 +34,7 @@ data class FileAnalysisUiState(
     val suggestions: List<String> = emptyList()
 )
 
+@Immutable
 data class FindingUi(
     val title: String,
     val description: String,

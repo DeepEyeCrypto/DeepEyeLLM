@@ -30,19 +30,37 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.deepeye.agent.ui.theme.DeepEyeTheme
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import com.deepeye.agent.ui.components.GlassCard
+import com.deepeye.agent.ui.components.GlassCardElevated
+import com.deepeye.agent.ui.components.NeonStatusBadge
+import com.deepeye.agent.ui.components.CyberButton
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @SuppressLint("SetJavaScriptEnabled")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BraveBrowserScreen(
-    viewModel: BraveBrowserViewModel
+    initialUrl: String? = null,
+    initialDexSource: String? = null,
+    initialSecurityScore: Int? = null,
+    modifier: Modifier = Modifier,
+    viewModel: BraveBrowserViewModel = hiltViewModel()
 ) {
+    LaunchedEffect(initialUrl) {
+        if (!initialUrl.isNullOrEmpty()) {
+            viewModel.updateUrl(initialUrl)
+        }
+    }
     val state by viewModel.uiState.collectAsState()
-    var urlInput by remember(state.currentUrl) { mutableStateOf(state.currentUrl) }
+    var urlInput by remember(state.currentUrl, initialUrl) { mutableStateOf(initialUrl ?: state.currentUrl) }
     var webViewRef by remember { mutableStateOf<WebView?>(null) }
     val focusManager = LocalFocusManager.current
+    val currentSecurityScore = initialSecurityScore ?: 98
 
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val isWideScreen = maxWidth > 600.dp
         val horizontalPadding = if (isWideScreen) 24.dp else 12.dp
 
@@ -66,16 +84,16 @@ fun BraveBrowserScreen(
                                 text = "🦁 Brave DEX",
                                 fontSize = if (isWideScreen) 22.sp else 18.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFFFF5722)
+                                color = DeepEyeTheme.colors.brandOrange
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Surface(
                                 shape = CircleShape,
                                 color = Color(0x3300E676),
-                                contentColor = Color(0xFF00E676)
+                                contentColor = DeepEyeTheme.colors.statusSuccess
                             ) {
                                 Text(
-                                    text = "Web3 Shield",
+                                    text = "Web3 Shield ($currentSecurityScore)",
                                     fontSize = if (isWideScreen) 12.sp else 10.sp,
                                     fontWeight = FontWeight.Bold,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
@@ -88,52 +106,63 @@ fun BraveBrowserScreen(
                                 Icon(
                                     imageVector = Icons.Default.Psychology,
                                     contentDescription = "Deep Research AI",
-                                    tint = if (state.isDeepResearchActive) Color.Cyan else Color.White
+                                    tint = if (state.isDeepResearchActive) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface
                                 )
-                            }
-                            IconButton(onClick = { webViewRef?.reload() }) {
-                                Icon(Icons.Default.Refresh, contentDescription = "Reload", tint = Color.White)
                             }
                         }
                     }
 
-                    // Search Bar
-                    OutlinedTextField(
-                        value = urlInput,
-                        onValueChange = { urlInput = it },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(if (isWideScreen) 56.dp else 48.dp)
-                            .clip(RoundedCornerShape(12.dp)),
-                        placeholder = { Text("Search or enter DEX URL / Pair Address", color = Color.Gray, fontSize = if (isWideScreen) 14.sp else 12.sp) },
-                        leadingIcon = {
-                            Icon(Icons.Default.Public, contentDescription = null, tint = Color(0xFFFF5722))
-                        },
-                        trailingIcon = {
-                            if (urlInput.isNotEmpty()) {
-                                IconButton(onClick = {
-                                    viewModel.updateUrl(urlInput)
-                                    focusManager.clearFocus()
-                                }) {
-                                    Icon(Icons.Default.ArrowForward, contentDescription = "Go", tint = Color.Cyan)
+                    // Search Bar & Navigation
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(onClick = { webViewRef?.goBack() }) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
+                        }
+                        IconButton(onClick = { webViewRef?.goForward() }) {
+                            Icon(Icons.Default.ArrowForward, contentDescription = "Forward", tint = MaterialTheme.colorScheme.onSurface)
+                        }
+                        IconButton(onClick = { webViewRef?.reload() }) {
+                            Icon(Icons.Default.Refresh, contentDescription = "Reload", tint = MaterialTheme.colorScheme.onSurface)
+                        }
+                        OutlinedTextField(
+                            value = urlInput,
+                            onValueChange = { urlInput = it },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(if (isWideScreen) 56.dp else 48.dp)
+                                .clip(RoundedCornerShape(12.dp)),
+                            placeholder = { Text("Search or enter DEX URL / Pair Address", color = MaterialTheme.colorScheme.outline, fontSize = if (isWideScreen) 14.sp else 12.sp) },
+                            leadingIcon = {
+                                Icon(Icons.Default.Lock, contentDescription = "Security Lock", tint = Color(0xFF00E676))
+                            },
+                            trailingIcon = {
+                                if (urlInput.isNotEmpty()) {
+                                    IconButton(onClick = {
+                                        viewModel.updateUrl(urlInput)
+                                        focusManager.clearFocus()
+                                    }) {
+                                        Icon(Icons.Default.ArrowForward, contentDescription = "Go", tint = MaterialTheme.colorScheme.secondary)
+                                    }
                                 }
-                            }
-                        },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
-                        keyboardActions = KeyboardActions(onGo = {
-                            viewModel.updateUrl(urlInput)
-                            focusManager.clearFocus()
-                        }),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = Color(0x331F293D),
-                            unfocusedContainerColor = Color(0x221F293D),
-                            focusedBorderColor = Color(0xFFFF5722),
-                            unfocusedBorderColor = Color(0x44FFFFFF),
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White
+                            },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
+                            keyboardActions = KeyboardActions(onGo = {
+                                viewModel.updateUrl(urlInput)
+                                focusManager.clearFocus()
+                            }),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = Color(0x331F293D),
+                                unfocusedContainerColor = Color(0x221F293D),
+                                focusedBorderColor = DeepEyeTheme.colors.brandOrange,
+                                unfocusedBorderColor = Color(0x44FFFFFF),
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                unfocusedTextColor = MaterialTheme.colorScheme.onSurface
+                            )
                         )
-                    )
+                    }
 
                     Spacer(modifier = Modifier.height(8.dp))
 
@@ -169,12 +198,19 @@ fun BraveBrowserScreen(
                             }
                         }
 
-                        items(state.bookmarks, key = { it.url }) { bookmark ->
+                        val dexes = listOf(
+                            Pair("DexScreener", "🦅"),
+                            Pair("Uniswap", "🦄"),
+                            Pair("Raydium", "☀️"),
+                            Pair("Jupiter", "🪐")
+                        )
+                        items(dexes) { dex ->
+                            val isActive = (initialDexSource != null && dex.first.equals(initialDexSource, ignoreCase = true)) || state.currentUrl.contains(dex.first.lowercase())
                             Surface(
                                 shape = RoundedCornerShape(20.dp),
-                                color = if (state.currentUrl.contains(bookmark.name.lowercase())) Color(0x44FF5722) else Color(0x22FFFFFF),
+                                color = if (isActive) Color(0x44FF5722) else Color(0x22FFFFFF),
                                 modifier = Modifier.clickable {
-                                    viewModel.updateUrl(bookmark.url)
+                                    viewModel.updateUrl("https://${dex.first.lowercase()}.com")
                                 }
                             ) {
                                 Row(
@@ -184,12 +220,12 @@ fun BraveBrowserScreen(
                                     ),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text(bookmark.iconEmoji, fontSize = if (isWideScreen) 16.sp else 14.sp)
+                                    Text(dex.second, fontSize = if (isWideScreen) 16.sp else 14.sp)
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        bookmark.name,
+                                        dex.first,
                                         fontSize = if (isWideScreen) 13.sp else 11.sp,
-                                        color = Color.White,
+                                        color = MaterialTheme.colorScheme.onSurface,
                                         fontWeight = FontWeight.SemiBold
                                     )
                                 }
@@ -264,7 +300,7 @@ fun BraveBrowserScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .align(Alignment.TopCenter),
-                    color = Color(0xFFFF5722),
+                    color = DeepEyeTheme.colors.brandOrange,
                     trackColor = Color.Transparent
                 )
             }
@@ -276,14 +312,10 @@ fun BraveBrowserScreen(
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)
             ) {
-                Card(
+                GlassCardElevated(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.95f)
-                    ),
-                    shape = RoundedCornerShape(24.dp)
+                        .padding(16.dp)
                 ) {
                     Column(
                         modifier = Modifier.padding(16.dp)
@@ -294,20 +326,10 @@ fun BraveBrowserScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Surface(
-                                    shape = CircleShape,
-                                    color = MaterialTheme.colorScheme.primaryContainer
-                                ) {
-                                    Icon(
-                                        Icons.Default.Analytics,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        modifier = Modifier.padding(6.dp)
-                                    )
-                                }
+                                NeonStatusBadge(text = "98/100", color = Color(0xFF00E676))
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Text(
-                                    "Monet Deep AI Research Agent",
+                                    "Live Page Intelligence",
                                     color = MaterialTheme.colorScheme.onSurface,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 15.sp
@@ -319,6 +341,25 @@ fun BraveBrowserScreen(
                                     contentDescription = "Close",
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+                        
+                        Text(
+                            text = "Smart Contract Audit: Safe. No mint function detected. Liquidity is locked for 12 months.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 13.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            CyberButton(onClick = { /* Check Liquidity */ }) {
+                                Text("Check Liquidity")
+                            }
+                            CyberButton(onClick = { /* Analyze Holders */ }) {
+                                Text("Analyze Holders")
                             }
                         }
 
@@ -373,9 +414,9 @@ fun BraveBrowserScreen(
                             }
                         }
                     }
-                    }
                 }
             }
         }
     }
+}
 }

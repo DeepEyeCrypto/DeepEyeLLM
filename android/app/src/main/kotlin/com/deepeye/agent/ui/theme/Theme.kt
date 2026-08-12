@@ -13,9 +13,23 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import com.deepeye.agent.ui.utils.rememberIsReduceTransparencyEnabled
 
 /**
- * Extended color tokens not covered by Material3's ColorScheme.
+ * Volumetric glass tokens representing refractive index, specular lighting, and blur attributes.
+ */
+@Immutable
+data class RefractiveTokens(
+    val blurRadius: Dp = 24.dp,
+    val specularAlpha: Float = 0.25f,
+    val borderAlpha: Float = 0.35f,
+    val zDepth: Dp = 4.dp
+)
+
+/**
+ * Extended color tokens for DeepEyeLLM cyber-glass aesthetics.
  */
 @Immutable
 data class DeepEyeColors(
@@ -30,7 +44,12 @@ data class DeepEyeColors(
     val statusWarning: Color = StatusWarning,
     val statusError: Color = StatusError,
     val statusInfo: Color = StatusInfo,
-    val policyPurple: Color = PolicyPurple
+    val policyPurple: Color = PolicyPurple,
+    val link: Color = LinkBlue,
+    val warningAlt: Color = WarningAlt,
+    val dangerAlt: Color = DangerAlt,
+    val brandOrange: Color = BrandOrange,
+    val refractive: RefractiveTokens = RefractiveTokens()
 )
 
 val LocalDeepEyeColors = staticCompositionLocalOf { DeepEyeColors() }
@@ -63,12 +82,12 @@ private val LightColorScheme = lightColorScheme(
     secondaryContainer = TealCyanSecondaryLight,
     tertiary = PolicyPurple,
     onTertiary = Color.White,
-    background = Color(0xFFF5F5F5),
-    surface = Color.White,
-    surfaceVariant = Color(0xFFEEEEEE),
-    onBackground = Color(0xFF1A1A2E),
-    onSurface = Color(0xFF1A1A2E),
-    onSurfaceVariant = Color(0xFF546E7A),
+    background = Color(0xFF070A12),
+    surface = Color(0xFF0E1322),
+    surfaceVariant = Color(0xFF161E33),
+    onBackground = Color.White,
+    onSurface = Color.White,
+    onSurfaceVariant = Color(0xFFB0BEC5),
     error = StatusError,
     onError = Color.White
 )
@@ -76,41 +95,61 @@ private val LightColorScheme = lightColorScheme(
 private val DarkDeepEyeColors = DeepEyeColors()
 
 private val LightDeepEyeColors = DeepEyeColors(
-    glassSurface = Color(0xE6FFFFFF),
-    glassSurfaceElevated = Color(0xF2FFFFFF),
-    glassOverlay = Color(0x1A000000),
-    glassBorder = Color(0x1A000000),
-    glassBorderActive = Color(0x4D000000),
-    glassHighlight = Color(0x0D000000),
+    glassSurface = Color(0xE6121826),
+    glassSurfaceElevated = Color(0xF21A233A),
+    glassOverlay = Color(0x1AFFFFFF),
+    glassBorder = Color(0x33FFFFFF),
+    glassBorderActive = Color(0x6600E5FF),
+    glassHighlight = Color(0x1AFFFFFF),
     accent = AmberAccent,
     statusSuccess = StatusSuccess,
     statusWarning = StatusWarning,
     statusError = StatusError,
     statusInfo = StatusInfo,
-    policyPurple = PolicyPurple
+    policyPurple = PolicyPurple,
+    link = LinkBlue,
+    warningAlt = WarningAlt,
+    dangerAlt = DangerAlt,
+    brandOrange = BrandOrange
 )
 
 @Composable
 fun DeepEyeTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = isSystemInDarkTheme() || true,
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
+    val context = LocalContext.current
+    val isReduceTransparency = rememberIsReduceTransparencyEnabled()
+
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
 
-    val deepEyeColors = if (darkTheme) DarkDeepEyeColors else LightDeepEyeColors
+    val baseDeepEyeColors = if (darkTheme) DarkDeepEyeColors else LightDeepEyeColors
 
-    CompositionLocalProvider(LocalDeepEyeColors provides deepEyeColors) {
+    // WCAG 2.2 Reduce Transparency Fallback: Force high opacity surfaces if OS transparency is disabled
+    val deepEyeColors = if (isReduceTransparency) {
+        baseDeepEyeColors.copy(
+            glassSurface = Color(0xFF0E1322),
+            glassSurfaceElevated = Color(0xFF161E33),
+            refractive = baseDeepEyeColors.refractive.copy(blurRadius = 0.dp)
+        )
+    } else {
+        baseDeepEyeColors
+    }
+
+    CompositionLocalProvider(
+        LocalDeepEyeColors provides deepEyeColors
+    ) {
         MaterialTheme(
             colorScheme = colorScheme,
             typography = Typography,
+            shapes = DeepEyeShapes,
             content = content
         )
     }
