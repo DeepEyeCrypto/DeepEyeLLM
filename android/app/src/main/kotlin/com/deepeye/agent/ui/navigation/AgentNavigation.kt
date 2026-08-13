@@ -4,9 +4,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CompassCalibration
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -61,7 +64,7 @@ sealed class AgentDestinations(
     data class BraveBrowser(
         val url: String? = null,
         val dexSource: String? = null,
-        val securityScore: Int = 0
+        val securityScore: String? = null
     ) : AgentDestinations(
         route = "brave_browser",
         label = "DEX",
@@ -104,6 +107,30 @@ sealed class AgentDestinations(
         icon = Icons.Default.Storage,
         contentDescription = "Model Manager & Catalog"
     )
+
+    @Serializable
+    data object KnowledgeBase : AgentDestinations(
+        route = "knowledge_base",
+        label = "RAG",
+        icon = Icons.Default.Description,
+        contentDescription = "Knowledge Base & RAG Index"
+    )
+
+    @Serializable
+    data object P2PShare : AgentDestinations(
+        route = "p2p_share",
+        label = "P2P",
+        icon = Icons.Default.Share,
+        contentDescription = "P2P Model & Data Share"
+    )
+
+    @Serializable
+    data object Security : AgentDestinations(
+        route = "security_audit",
+        label = "Guard",
+        icon = Icons.Default.Security,
+        contentDescription = "Zero-Trust Security Audit"
+    )
 }
 
 val startDestination: String = AgentDestinations.Chat.route
@@ -111,11 +138,11 @@ val startDestination: String = AgentDestinations.Chat.route
 val agentDestinationsList: List<AgentDestinations> = listOf(
     AgentDestinations.Chat,
     AgentDestinations.AgentStudio,
-    AgentDestinations.BraveBrowser(),
+    AgentDestinations.KnowledgeBase,
+    AgentDestinations.P2PShare,
+    AgentDestinations.Security,
     AgentDestinations.SkillStore(),
-    AgentDestinations.Settings,
-    AgentDestinations.Diagnostics,
-    AgentDestinations.ModelManager
+    AgentDestinations.Settings
 )
 
 fun List<AgentDestinations>.toNavigationItems(): List<NavigationItemModel> {
@@ -136,7 +163,7 @@ fun AgentDestinations.BraveBrowser.withArgs(
 ): AgentDestinations.BraveBrowser = copy(
     url = url,
     dexSource = dexSource,
-    securityScore = securityScore
+    securityScore = securityScore.toString()
 )
 
 fun AgentDestinations.SkillStore.withArgs(

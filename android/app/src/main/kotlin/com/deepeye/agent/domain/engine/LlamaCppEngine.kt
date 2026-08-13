@@ -29,8 +29,9 @@ import java.io.File
 class LlamaCppEngine(
     val modelPath: String,
     val context: android.content.Context? = null,
-    val useGpu: Boolean = false,
-    val gpuLayers: Int = 0,
+    val useGpu: Boolean = true,
+    val selectedBackend: Int = -1,
+    val gpuLayers: Int = 99,
     val customThreads: Int = 4,
     val customContextSize: Int = 1024,
     /** Public key bytes (X.509 DER) used to verify the model's Ed25519 signature.
@@ -132,7 +133,14 @@ class LlamaCppEngine(
             }
 
             if (isNativeLibLoaded) {
-                val config = com.deepeye.agent.core.hardware.HardwareBackendSelector.applyBackendConfig(nativeContextHandle, context)
+                val targetBackend = if (useGpu) selectedBackend else com.deepeye.agent.core.hardware.HardwareBackendSelector.BACKEND_CPU
+                val targetLayers = if (useGpu) gpuLayers else 0
+                val config = com.deepeye.agent.core.hardware.HardwareBackendSelector.applyBackendConfig(
+                    nativeHandle = nativeContextHandle,
+                    context = context,
+                    userBackend = targetBackend,
+                    userGpuLayers = targetLayers
+                )
                 nativeSetBackendConfig(nativeContextHandle, config.backendType, config.nGpuLayers)
                 val threads = customThreads.coerceIn(1, Runtime.getRuntime().availableProcessors())
                 nativeContextHandle = nativeInitModel(modelPath, nCtx = maxContextTokens, nThreads = threads, nGpuLayers = config.nGpuLayers)
@@ -142,7 +150,7 @@ class LlamaCppEngine(
             }
 
             isInitialized = true
-            runCatching { Log.d(TAG, "GGUF engine initialized successfully (GPU enabled: $useGpu).") }
+            runCatching { Log.d(TAG, "GGUF engine initialized successfully (Backend: ${selectedBackend}, GPU enabled: $useGpu, Layers: $gpuLayers).") }
             Unit
         }
     }

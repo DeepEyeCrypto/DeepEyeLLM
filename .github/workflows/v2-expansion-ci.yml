@@ -1,0 +1,137 @@
+name: DeepEye v2.0 Expansion CI/CD
+
+on:
+  push:
+    branches: [ "main", "develop", "feature/rag-*", "feature/multimodal-*", "feature/p2p-*" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+env:
+  JAVA_VERSION: '17'
+  NDK_VERSION: '26.1.10909125'
+
+jobs:
+  # ─────────────────────────────────────────────
+  # FORGE Agent: RAG Engine Tests
+  # ─────────────────────────────────────────────
+  test-rag-engine:
+    name: "⚙️ FORGE: RAG Engine Tests"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { submodules: recursive }
+      - uses: actions/setup-java@v4
+        with: { distribution: 'zulu', java-version: ${{ env.JAVA_VERSION }}, cache: 'gradle' }
+      - name: Run RAG Unit Tests
+        working-directory: ./android
+        run: |
+          chmod +x ./gradlew
+          ./gradlew testDebugUnitTest --tests "com.deepeye.agent.core.rag.*"
+          ./gradlew testDebugUnitTest --tests "com.deepeye.agent.analysis.*"
+
+  # ─────────────────────────────────────────────
+  # ECHO Agent: Multi-Modal Engine Tests
+  # ─────────────────────────────────────────────
+  test-multimodal:
+    name: "🔊 ECHO: Multi-Modal Tests"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { submodules: recursive }
+      - uses: actions/setup-java@v4
+        with: { distribution: 'zulu', java-version: ${{ env.JAVA_VERSION }}, cache: 'gradle' }
+      - name: Run Voice & Vision Unit Tests
+        working-directory: ./android
+        run: |
+          chmod +x ./gradlew
+          ./gradlew testDebugUnitTest --tests "com.deepeye.agent.core.voice.*"
+          ./gradlew testDebugUnitTest --tests "com.deepeye.agent.core.vision.*"
+
+  # ─────────────────────────────────────────────
+  # MESH Agent: P2P Transfer Tests
+  # ─────────────────────────────────────────────
+  test-p2p:
+    name: "📡 MESH: P2P Transfer Tests"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { submodules: recursive }
+      - uses: actions/setup-java@v4
+        with: { distribution: 'zulu', java-version: ${{ env.JAVA_VERSION }}, cache: 'gradle' }
+      - name: Run P2P & Quarantine Tests
+        working-directory: ./android
+        run: |
+          chmod +x ./gradlew
+          ./gradlew testDebugUnitTest --tests "com.deepeye.agent.core.p2p.*"
+          ./gradlew testDebugUnitTest --tests "com.deepeye.agent.core.quarantine.*"
+
+  # ─────────────────────────────────────────────
+  # GLASS Agent: UI Instrumented Tests
+  # ─────────────────────────────────────────────
+  test-ui:
+    name: "🎨 GLASS: Compose UI Tests"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { submodules: recursive }
+      - uses: actions/setup-java@v4
+        with: { distribution: 'zulu', java-version: ${{ env.JAVA_VERSION }}, cache: 'gradle' }
+      - name: Run UI Snapshot Tests
+        working-directory: ./android
+        run: |
+          chmod +x ./gradlew
+          ./gradlew testDebugUnitTest --tests "com.deepeye.agent.ui.*"
+
+  # ─────────────────────────────────────────────
+  # Security Gate (Existing Pipeline)
+  # ─────────────────────────────────────────────
+  security-scan:
+    name: "🔒 Security Gate"
+    needs: [test-rag-engine, test-multimodal, test-p2p, test-ui]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { submodules: recursive }
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: java-kotlin
+          queries: security-extended
+      - name: Build for Analysis
+        working-directory: ./android
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleDebug
+      - name: Run CodeQL
+        uses: github/codeql-action/analyze@v3
+
+  # ─────────────────────────────────────────────
+  # Build & Release APK
+  # ─────────────────────────────────────────────
+  build-release:
+    name: "🚀 Build Release APK"
+    needs: [security-scan]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+        with: { submodules: recursive }
+      - uses: actions/setup-java@v4
+        with: { distribution: 'zulu', java-version: ${{ env.JAVA_VERSION }}, cache: 'gradle' }
+      - name: Build Release APK
+        working-directory: ./android
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleRelease
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: deepeyellm-v2.0-release
+          path: android/app/build/outputs/apk/release/*.apk
+          retention-days: 30
+      - name: Upload AAB for Play Store
+        uses: actions/upload-artifact@v4
+        with:
+          name: deepeyellm-v2.0-bundle
+          path: android/app/build/outputs/bundle/release/*.aab
+          retention-days: 30

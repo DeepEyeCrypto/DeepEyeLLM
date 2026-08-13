@@ -1,0 +1,56 @@
+name: DeepEye Android CI/CD
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  build:
+    name: Build & Test (Zero-Latency Core)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive # Important for llama.cpp
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Cache NDK
+        uses: actions/cache@v3
+        with:
+          path: /usr/local/lib/android/sdk/ndk
+          key: ${{ runner.os }}-ndk-${{ hashFiles('**/build.gradle.kts') }}
+
+      - name: Make Gradle executable
+        run: chmod +x ./gradlew
+        working-directory: ./android
+
+      - name: Run Linting (Ktlint)
+        run: ./gradlew lint
+        working-directory: ./android
+
+      - name: Run Unit Tests (Engine & Orchestrator)
+        run: ./gradlew testDebugUnitTest
+        working-directory: ./android
+
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug
+        working-directory: ./android
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deepeyellm-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk

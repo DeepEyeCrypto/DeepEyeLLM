@@ -86,7 +86,9 @@ class EngineController(
             engine = if (file.name.endsWith(".gguf")) {
                 LlamaCppEngine(
                     modelPath = newModelPath,
+                    context = context,
                     useGpu = settings.useGpu,
+                    selectedBackend = settings.selectedBackend,
                     gpuLayers = settings.gpuLayers,
                     customThreads = settings.cpuThreads,
                     customContextSize = settings.contextSize

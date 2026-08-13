@@ -26,6 +26,7 @@ class SettingsDataStore @Inject constructor(
 
     companion object {
         val KEY_USE_GPU = booleanPreferencesKey("use_gpu")
+        val KEY_SELECTED_BACKEND = intPreferencesKey("selected_backend")
         val KEY_GPU_LAYERS = intPreferencesKey("gpu_layers")
         val KEY_CPU_THREADS = intPreferencesKey("cpu_threads")
         val KEY_CONTEXT_SIZE = intPreferencesKey("context_size")
@@ -35,8 +36,9 @@ class SettingsDataStore @Inject constructor(
 
     val engineSettingsFlow: Flow<EngineSettings> = context.dataStore.data.map { prefs ->
         EngineSettings(
-            useGpu = prefs[KEY_USE_GPU] ?: false,
-            gpuLayers = prefs[KEY_GPU_LAYERS] ?: 0,
+            useGpu = prefs[KEY_USE_GPU] ?: true,
+            selectedBackend = prefs[KEY_SELECTED_BACKEND] ?: -1,
+            gpuLayers = prefs[KEY_GPU_LAYERS] ?: 99,
             cpuThreads = prefs[KEY_CPU_THREADS] ?: 4,
             contextSize = prefs[KEY_CONTEXT_SIZE] ?: 1024,
             temperature = prefs[KEY_TEMPERATURE] ?: 0.7f,
@@ -46,6 +48,10 @@ class SettingsDataStore @Inject constructor(
 
     suspend fun updateUseGpu(useGpu: Boolean) {
         context.dataStore.edit { prefs -> prefs[KEY_USE_GPU] = useGpu }
+    }
+
+    suspend fun updateSelectedBackend(selectedBackend: Int) {
+        context.dataStore.edit { prefs -> prefs[KEY_SELECTED_BACKEND] = selectedBackend }
     }
 
     suspend fun updateGpuLayers(gpuLayers: Int) {
@@ -70,8 +76,9 @@ class SettingsDataStore @Inject constructor(
 }
 
 data class EngineSettings(
-    val useGpu: Boolean = false,
-    val gpuLayers: Int = 0,
+    val useGpu: Boolean = true,
+    val selectedBackend: Int = -1, // -1 = Auto, 0 = CPU, 1 = Vulkan, 2 = OpenCL, 3 = Hexagon QNN, 4 = KleidiAI
+    val gpuLayers: Int = 99,
     val cpuThreads: Int = 4,
     val contextSize: Int = 1024,
     val temperature: Float = 0.7f,

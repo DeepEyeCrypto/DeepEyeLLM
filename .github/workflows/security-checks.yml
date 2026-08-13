@@ -1,0 +1,58 @@
+name: DeepEye Security & CodeQL Scan
+
+on:
+  push:
+    branches: [ "main", "release/*" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '0 4 * * 1' # Run every Monday at 4 AM
+
+jobs:
+  analyze:
+    name: CodeQL Security Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'java-kotlin', 'c-cpp' ] # Scanning both Android and llama.cpp JNI layers
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+        queries: security-extended,security-and-quality
+
+    - name: Build C/C++ JNI (if applicable)
+      if: matrix.language == 'c-cpp'
+      run: |
+        cd android
+        chmod +x ./gradlew
+        ./gradlew assembleDebug
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{matrix.language}}"
+
+  model-signature-verification:
+    name: Verify GGUF Secure Manifesto
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Checksums
+        run: |
+          echo "Verifying baseline model signatures in repository..."
+          # Mock verification step: In production, this runs a Kotlin script validating the hashes.
+          ./android/gradlew runSignatureChecks

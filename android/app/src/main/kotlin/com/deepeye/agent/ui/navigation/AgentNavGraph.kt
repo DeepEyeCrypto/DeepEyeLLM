@@ -12,6 +12,9 @@ import kotlin.reflect.typeOf
 import com.deepeye.agent.ui.agent.AgentStudioScreen
 import com.deepeye.agent.ui.browser.BraveBrowserScreen
 import com.deepeye.agent.ui.chat.ChatScreen
+import com.deepeye.agent.ui.p2p.P2PShareScreen
+import com.deepeye.agent.ui.rag.KnowledgeBaseScreen
+import com.deepeye.agent.ui.security.SecurityDashboardScreen
 import com.deepeye.agent.ui.settings.DiagnosticsScreen
 import com.deepeye.agent.ui.settings.ModelManagerScreen
 import com.deepeye.agent.ui.settings.SettingsScreen
@@ -38,7 +41,7 @@ fun DeepEyeNavGraph(
             BraveBrowserScreen(
                 initialUrl = args.url,
                 initialDexSource = args.dexSource,
-                initialSecurityScore = args.securityScore
+                initialSecurityScore = args.securityScore?.toIntOrNull()
             )
         }
         composable<AgentDestinations.SkillStore> { entry ->
@@ -67,6 +70,15 @@ fun DeepEyeNavGraph(
             ModelManagerScreen(
                 onBack = { navController.popBackStack() }
             )
+        }
+        composable(route = AgentDestinations.KnowledgeBase.route) {
+            KnowledgeBaseScreen()
+        }
+        composable(route = AgentDestinations.P2PShare.route) {
+            P2PShareScreen()
+        }
+        composable(route = AgentDestinations.Security.route) {
+            SecurityDashboardScreen()
         }
     }
 }

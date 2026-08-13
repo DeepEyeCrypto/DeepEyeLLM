@@ -14,6 +14,7 @@ import javax.inject.Inject
 import androidx.lifecycle.viewModelScope
 import com.deepeye.agent.core.datastore.EngineSettings
 import com.deepeye.agent.core.datastore.SettingsDataStore
+import com.deepeye.agent.updater.UpdateManager
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
@@ -38,7 +39,8 @@ data class SettingsUiState(
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val settingsDataStore: SettingsDataStore
+    private val settingsDataStore: SettingsDataStore,
+    private val updateManager: UpdateManager
 ) : ViewModel() {
 
     private val _settingsState = MutableStateFlow(SettingsUiState())
@@ -72,6 +74,10 @@ class SettingsViewModel @Inject constructor(
         _settingsState.update { it.copy(offlineMode = enabled) }
     }
 
+    fun checkForUpdates() {
+        updateManager.checkForUpdates(force = true)
+    }
+
     fun togglePolicyChecks(enabled: Boolean) {
         _settingsState.update { it.copy(policyCheckEnabled = enabled) }
     }
@@ -90,6 +96,14 @@ class SettingsViewModel @Inject constructor(
 
     fun updateUseGpu(enabled: Boolean) {
         viewModelScope.launch { settingsDataStore.updateUseGpu(enabled) }
+    }
+
+    fun updateSelectedBackend(backend: Int) {
+        viewModelScope.launch { settingsDataStore.updateSelectedBackend(backend) }
+    }
+
+    fun updateGpuLayers(layers: Int) {
+        viewModelScope.launch { settingsDataStore.updateGpuLayers(layers) }
     }
 
     fun updateCpuThreads(threads: Int) {

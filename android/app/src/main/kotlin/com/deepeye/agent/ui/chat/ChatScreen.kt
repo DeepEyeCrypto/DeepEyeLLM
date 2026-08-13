@@ -10,6 +10,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,13 +24,22 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RenderEffect
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -37,6 +47,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.draw.shadow
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.deepeye.agent.domain.EngineState
@@ -49,6 +61,16 @@ import com.deepeye.agent.ui.theme.*
 import com.deepeye.agent.ui.utils.PerformanceUtils
 import com.deepeye.agent.ui.utils.UiLayoutMode
 import com.deepeye.agent.ui.utils.currentUiLayoutMode
+import android.graphics.RenderEffect as AndroidRenderEffect
+import android.graphics.Shader as AndroidShader
+import androidx.compose.ui.geometry.Offset
+
+// OPTIMIZATION: Stable keys for message types
+private object MessageContentTypes {
+    const val USER = 0
+    const val ASSISTANT = 1
+    const val ERROR = 2
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,6 +78,7 @@ fun ChatScreen(
     viewModel: ChatViewModel = hiltViewModel(),
     modelCatalogViewModel: ModelCatalogViewModel = hiltViewModel()
 ) {
+    // OPTIMIZATION: Collect only what's needed
     val state by viewModel.state.collectAsStateWithLifecycle()
     val modelCatalog by modelCatalogViewModel.modelCatalog.collectAsStateWithLifecycle()
     val layoutMode = currentUiLayoutMode()
@@ -71,16 +94,22 @@ fun ChatScreen(
     }
 
     Scaffold(
-        containerColor = Color.Transparent,
+        containerColor = Color(0xFF0B0F19), // Deep Space Slate
+        contentWindowInsets = WindowInsets.ime,
         topBar = {
-            DeepEyeTopAppBar(
+            HolographicTopAppBar(
                 modelStatus = state.modelStatus,
                 activeModelName = state.activeModelName,
                 onPickerClick = { viewModel.toggleModelPicker(true) }
             )
         },
         bottomBar = {
-            CalmChatInputDock(
+            // OPTIMIZATION: Memoize input dock props
+            val canSend by remember(state.isLoading, state.isGenerating, state.prompt) {
+                derivedStateOf { !state.isLoading && !state.isGenerating && state.prompt.isNotBlank() }
+            }
+            
+            FuturisticChatInputDock(
                 prompt = state.prompt,
                 onPromptChange = viewModel::onPromptChange,
                 onSend = { viewModel.sendStream() },
@@ -88,7 +117,8 @@ fun ChatScreen(
                 onAnalyze = { filePicker.launch(arrayOf("*/*")) },
                 onDebug = { debugPicker.launch(arrayOf("*/*")) },
                 isLoading = state.isLoading,
-                isGenerating = state.isGenerating
+                isGenerating = state.isGenerating,
+                canSend = canSend
             )
         }
     ) { padding ->
@@ -108,29 +138,49 @@ fun ChatScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .semantics { contentDescription = "Loading indicator" },
-                        color = Color(0xFF00E5FF),
+                        color = DeepEyeTheme.colors.link,
                         trackColor = Color.Transparent
                     )
                 }
+                
+                // OPTIMIZATION: Show error only when needed
                 val err = state.error
                 if (state.modelStatus == ModelStatus.ERROR && err != null) {
                     Text(
                         text = err,
-                        color = MaterialTheme.colorScheme.error,
+                        color = DeepEyeTheme.colors.statusError,
                         modifier = Modifier.padding(16.dp)
                     )
                 }
-                ChatTranscript(messages = state.messages)
+                
+                Box(modifier = Modifier.fillMaxSize()) {
+                    if (state.messages.none { it.isUser } && !state.isGenerating) {
+                        EmptyStateOverlay()
+                    }
+                    HolographicChatTranscript(
+                        messages = state.messages,
+                        isGenerating = state.isGenerating
+                    )
+                }
             }
 
-            // Adaptive Supporting Pane for Medium/Expanded Layouts (Tablet, Foldable, Desktop)
+            // Adaptive Supporting Pane
             if (layoutMode != UiLayoutMode.COMPACT) {
-                Surface(
-                    color = Color(0x660E1322),
+                GlassCard(
                     modifier = Modifier
-                        .width(320.dp)
+                        .width(340.dp)
                         .fillMaxHeight()
                         .padding(start = 8.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
+                        .border(
+                            width = 1.dp,
+                            brush = Brush.linearGradient(
+                                colors = listOf(
+                                    Color.White.copy(alpha = 0.3f),
+                                    Color.White.copy(alpha = 0.1f)
+                                )
+                            ),
+                            shape = RoundedCornerShape(20.dp)
+                        )
                 ) {
                     AgentInspectorPane(
                         activeModelName = state.activeModelName,
@@ -143,8 +193,9 @@ fun ChatScreen(
         if (state.showModelPicker) {
             ModelPickerSheet(
                 currentStatus = state.modelStatus,
+                activeModelName = state.activeModelName,
                 models = modelCatalog,
-                onSelect = modelCatalogViewModel::selectModel,
+                onSelect = { modelCatalogViewModel.selectModel(it.id) },
                 onImportModel = { modelPicker.launch(arrayOf("*/*")) },
                 onDismiss = { viewModel.toggleModelPicker(false) }
             )
@@ -152,20 +203,36 @@ fun ChatScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeepEyeTopAppBar(
+fun HolographicTopAppBar(
     modelStatus: ModelStatus,
     activeModelName: String,
     onPickerClick: () -> Unit
 ) {
-    val isLiteRT = activeModelName.startsWith("LiteRT", ignoreCase = true)
-    val statusText = if (isLiteRT) "LiteRT Active" else "DeepEye Local"
+    // OPTIMIZATION: Memoize derived values
+    val isLiteRT = remember(activeModelName) { 
+        activeModelName.startsWith("LiteRT", ignoreCase = true) 
+    }
+    val statusText = remember(isLiteRT) { 
+        if (isLiteRT) "LiteRT Active" else "DeepEye Local" 
+    }
 
     Surface(
-        color = Color(0xDD070A12),
+        color = Color(0xD9070A12),
         modifier = Modifier
             .fillMaxWidth()
             .statusBarsPadding()
+            .border(
+                width = 1.dp,
+                brush = Brush.linearGradient(
+                    colors = listOf(
+                        Color.White.copy(alpha = 0.2f),
+                        Color.White.copy(alpha = 0.05f)
+                    )
+                ),
+                shape = androidx.compose.ui.graphics.RectangleShape
+            )
     ) {
         Row(
             modifier = Modifier
@@ -190,7 +257,7 @@ fun DeepEyeTopAppBar(
                     Text(
                         text = activeModelName,
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFF00E5FF),
+                        color = DeepEyeTheme.colors.link,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f, fill = false)
@@ -207,54 +274,74 @@ fun DeepEyeTopAppBar(
             NeonStatusBadge(
                 text = statusText,
                 isPulsing = modelStatus == ModelStatus.LOCAL_ACTIVE,
-                onClick = onPickerClick
+                onClick = onPickerClick,
+                color = if (modelStatus == ModelStatus.LOCAL_ACTIVE) DeepEyeTheme.colors.statusSuccess else DeepEyeTheme.colors.link
             )
         }
     }
 }
 
 @Composable
-fun ChatTranscript(messages: List<Message>) {
+fun HolographicChatTranscript(
+    messages: List<Message>,
+    isGenerating: Boolean
+) {
     val listState = rememberLazyListState()
+    
+    // OPTIMIZATION: Only scroll when new messages arrive or streaming updates
+    val lastMessageId = messages.lastOrNull()?.id
     val lastMessageText = messages.lastOrNull()?.text ?: ""
     val lastMessageStreaming = messages.lastOrNull()?.isStreaming ?: false
 
-    LaunchedEffect(messages.size, lastMessageText.length, lastMessageStreaming) {
+    LaunchedEffect(lastMessageId, lastMessageText.length, lastMessageStreaming) {
         if (messages.isNotEmpty()) {
             listState.animateScrollToItem(messages.size - 1)
         }
     }
 
+    // OPTIMIZATION: Use stable keys and content types
     LazyColumn(
         state = listState,
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        contentPadding = PaddingValues(
+            start = 16.dp, 
+            end = 16.dp, 
+            top = 16.dp, 
+            bottom = 120.dp // Floating dock breathing room
+        ),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         items(
             items = messages,
-            key = { it.id },
-            contentType = {
+            key = { it.id }, // Stable key
+            contentType = { message ->
                 when {
-                    it.isUser -> PerformanceUtils.ContentTypes.CHAT_USER_ROW
-                    it.isError -> PerformanceUtils.ContentTypes.CHAT_ERROR_ROW
-                    else -> PerformanceUtils.ContentTypes.CHAT_ASSISTANT_ROW
+                    message.isUser -> MessageContentTypes.USER
+                    message.isError -> MessageContentTypes.ERROR
+                    else -> MessageContentTypes.ASSISTANT
                 }
             }
         ) { message ->
-            MessageBubble(message)
+            // OPTIMIZATION: Pass only necessary props
+            HolographicMessageBubble(
+                message = message,
+                isLastMessage = message.id == lastMessageId
+            )
         }
     }
 }
 
 @Composable
-fun MessageBubble(message: Message) {
+fun HolographicMessageBubble(
+    message: Message,
+    isLastMessage: Boolean
+) {
     val isUser = message.isUser
     val alignment = if (isUser) Alignment.End else Alignment.Start
     val shape = RoundedCornerShape(
-        topStart = 16.dp, topEnd = 16.dp,
-        bottomStart = if (isUser) 16.dp else 4.dp,
-        bottomEnd = if (isUser) 4.dp else 16.dp
+        topStart = 20.dp, topEnd = 20.dp,
+        bottomStart = if (isUser) 20.dp else 6.dp,
+        bottomEnd = if (isUser) 6.dp else 20.dp
     )
 
     Column(
@@ -266,43 +353,57 @@ fun MessageBubble(message: Message) {
         if (isUser) {
             GlassCard(
                 modifier = Modifier
-                    .widthIn(max = 340.dp)
-                    .animateContentSize(),
+                    .fillMaxWidth(0.85f) // Cap width for readability
+                    .animateContentSize()
+                    .border(
+                        width = 1.5.dp,
+                        brush = Brush.linearGradient(
+                            colors = listOf(
+                                DeepEyeTheme.colors.link.copy(alpha = 0.6f),
+                                DeepEyeTheme.colors.link.copy(alpha = 0.2f)
+                            )
+                        ),
+                        shape = shape
+                    ),
                 shape = shape,
-                tintColor = Color(0xCC121826),
-                borderColor = Color(0x4D00E5FF)
+                tintColor = Color(0xB3121826),
+                borderColor = DeepEyeTheme.colors.link.copy(alpha = 0.4f)
             ) {
-                Column(modifier = Modifier.padding(12.dp)) {
+                Column(modifier = Modifier.padding(14.dp)) {
                     Text(
                         text = message.text,
                         style = MaterialTheme.typography.bodyLarge,
-                        color = Color.White
+                        color = Color(0xFFE2E8F0),
+                        lineHeight = 24.sp,
+                        letterSpacing = 0.2.sp
                     )
                 }
             }
         } else {
-            val cardTint = when {
-                message.isError -> Color(0xCC2A1215)
-                else -> Color(0xCC161E2E)
-            }
+            val cardTint = if (message.isError) Color(0xB32A1215) else Color(0xB3161E2E)
             val cardBorder = when {
-                message.isError -> Color(0xFFFF5252)
-                message.isStreaming -> Color(0xFF00E5FF)
-                else -> Color(0x4D00E676)
+                message.isError -> DeepEyeTheme.colors.statusError
+                message.isStreaming -> Color(0xFF00F2FE) // Neon Cyan
+                else -> DeepEyeTheme.colors.link
             }
 
             GlassCard(
                 modifier = Modifier
-                    .widthIn(max = 380.dp)
-                    .animateContentSize(),
+                    .fillMaxWidth(0.92f) // Slightly wider for AI responses
+                    .animateContentSize()
+                    .border(
+                        width = if (message.isStreaming) 1.5.dp else 1.dp,
+                        color = cardBorder.copy(alpha = if (message.isStreaming) 0.6f else 0.3f),
+                        shape = shape
+                    ),
                 shape = shape,
-                tintColor = cardTint,
-                borderColor = cardBorder
+                tintColor = Color(0xFF151A29).copy(alpha = 0.7f), // Deep slate tint
+                borderColor = Color.Transparent
             ) {
-                Column(modifier = Modifier.padding(12.dp)) {
+                Column(modifier = Modifier.padding(14.dp)) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(bottom = 6.dp)
+                        modifier = Modifier.padding(bottom = 8.dp)
                     ) {
                         NeonStatusBadge(
                             text = when {
@@ -312,21 +413,24 @@ fun MessageBubble(message: Message) {
                             },
                             isPulsing = message.isStreaming,
                             color = when {
-                                message.isError -> Color(0xFFFF5252)
-                                message.isStreaming -> Color(0xFF00E5FF)
-                                else -> Color(0xFF00E676)
-                            }
+                                message.isError -> DeepEyeTheme.colors.statusError
+                                message.isStreaming -> DeepEyeTheme.colors.link
+                                else -> DeepEyeTheme.colors.statusSuccess
+                            },
+                            modifier = Modifier.height(26.dp)
                         )
                     }
                     Row(verticalAlignment = Alignment.Bottom) {
                         Text(
                             text = if (message.text.isBlank() && message.isStreaming) "Thinking..." else message.text,
                             style = MaterialTheme.typography.bodyLarge,
-                            color = if (message.isError) Color(0xFFFF8A80) else Color.White,
-                            modifier = Modifier.weight(1f, fill = false)
+                            color = if (message.isError) Color(0xFFFFB3B3) else Color.White,
+                            modifier = Modifier.weight(1f, fill = false),
+                            lineHeight = 24.sp,
+                            letterSpacing = 0.2.sp
                         )
-                        if (message.isStreaming) {
-                            StreamingCursor()
+                        if (message.isStreaming && isLastMessage) {
+                            HolographicStreamingCursor()
                         }
                     }
                 }
@@ -336,30 +440,47 @@ fun MessageBubble(message: Message) {
 }
 
 @Composable
-fun StreamingCursor() {
+fun HolographicStreamingCursor() {
     val transition = rememberInfiniteTransition(label = "cursor_transition")
     val alpha by transition.animateFloat(
-        initialValue = 0.2f,
+        initialValue = 0.25f,
         targetValue = 1.0f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 400, easing = LinearEasing),
+            animation = tween(durationMillis = 450, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "cursor_alpha"
     )
-    Text(
-        text = " ▌",
-        color = Color(0xFF00E5FF).copy(alpha = alpha),
-        style = MaterialTheme.typography.bodyLarge,
-        fontWeight = FontWeight.Bold
+    
+    val glowTransition = rememberInfiniteTransition(label = "glow_transition")
+    val glowAlpha by glowTransition.animateFloat(
+        initialValue = 0.3f,
+        targetValue = 0.8f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 900, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "glow_alpha"
+    )
+    
+    Box(
+        modifier = Modifier
+            .width(8.dp)
+            .height(20.dp)
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        DeepEyeTheme.colors.link.copy(alpha = alpha * glowAlpha),
+                        DeepEyeTheme.colors.link.copy(alpha = alpha * 0.3f)
+                    )
+                ),
+                shape = RoundedCornerShape(4.dp)
+            )
     )
 }
 
-/**
- * Calm Single-Primary-Action Chat Input Dock with progressive tool disclosure.
- */
 @Composable
-fun CalmChatInputDock(
+fun FuturisticChatInputDock(
     prompt: String,
     onPromptChange: (String) -> Unit,
     onSend: () -> Unit,
@@ -367,34 +488,42 @@ fun CalmChatInputDock(
     onAnalyze: () -> Unit,
     onDebug: () -> Unit,
     isLoading: Boolean,
-    isGenerating: Boolean
+    isGenerating: Boolean,
+    canSend: Boolean
 ) {
     var isToolsExpanded by remember { mutableStateOf(false) }
 
-    Surface(
-        color = Color.Transparent,
+    Box(
         modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 12.dp) // Lifted above bottom nav
             .fillMaxWidth()
             .navigationBarsPadding()
             .imePadding()
     ) {
         Box(
-            modifier = Modifier
-                .padding(horizontal = 12.dp, vertical = 6.dp)
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         ) {
-            val canSend by remember(isLoading, isGenerating, prompt) {
-                derivedStateOf { !isLoading && !isGenerating && prompt.isNotBlank() }
-            }
             GlassCard(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                tintColor = Color(0xDD0D1322),
-                borderColor = Color(0x4D00E5FF)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(
+                        elevation = 24.dp,
+                        shape = RoundedCornerShape(32.dp),
+                        spotColor = DeepEyeTheme.colors.link.copy(alpha = 0.15f)
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = Color.White.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(32.dp)
+                    ),
+                shape = RoundedCornerShape(32.dp),
+                tintColor = Color(0xFF151A29).copy(alpha = 0.75f),
+                borderColor = Color.Transparent
             ) {
                 Column(
                     modifier = Modifier
-                        .padding(horizontal = 10.dp, vertical = 6.dp)
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
                         .fillMaxWidth()
                 ) {
                     TextField(
@@ -404,11 +533,11 @@ fun CalmChatInputDock(
                         placeholder = {
                             Text(
                                 "Ask DeepEye anything...",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         },
-                        maxLines = 4,
+                        maxLines = 5,
                         enabled = !isGenerating,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
                         keyboardActions = KeyboardActions(onSend = { if (canSend) onSend() }),
@@ -420,104 +549,122 @@ fun CalmChatInputDock(
                             unfocusedIndicatorColor = Color.Transparent,
                             disabledIndicatorColor = Color.Transparent,
                             focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White
+                            unfocusedTextColor = Color.White,
+                            focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                            unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                         )
                     )
 
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 4.dp, start = 4.dp, end = 4.dp),
+                            .padding(bottom = 2.dp, start = 2.dp, end = 2.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Progressive Disclosure Tool Bar
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             IconButton(
                                 onClick = { isToolsExpanded = !isToolsExpanded },
-                                modifier = Modifier.size(32.dp)
+                                modifier = Modifier.size(36.dp)
                             ) {
                                 Icon(
                                     imageVector = if (isToolsExpanded) Icons.Default.Info else Icons.Default.Add,
                                     contentDescription = "Toggle tools",
-                                    tint = Color(0xFF00E5FF)
+                                    tint = DeepEyeTheme.colors.link,
+                                    modifier = Modifier.size(22.dp)
                                 )
                             }
 
                             if (isToolsExpanded) {
-                                Surface(
-                                    shape = RoundedCornerShape(14.dp),
-                                    color = Color(0x1A00E5FF),
-                                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0x4D00E5FF)),
-                                    modifier = Modifier.clickable(enabled = !isLoading && !isGenerating, onClick = onAnalyze)
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(Icons.Default.AttachFile, contentDescription = "Analyze", tint = Color(0xFF00E5FF), modifier = Modifier.size(14.dp))
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        Text("Analyze", color = Color(0xFF00E5FF), style = MaterialTheme.typography.labelSmall)
-                                    }
-                                }
+                                FuturisticToolChip(
+                                    icon = Icons.Default.Mic,
+                                    label = "Voice",
+                                    onClick = { onAnalyze() },
+                                    enabled = !isLoading && !isGenerating,
+                                    accentColor = Color(0xFF00F2FE)
+                                )
 
-                                Surface(
-                                    shape = RoundedCornerShape(14.dp),
-                                    color = Color(0x1A00E676),
-                                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0x4D00E676)),
-                                    modifier = Modifier.clickable(enabled = !isLoading && !isGenerating, onClick = onDebug)
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(Icons.Default.BugReport, contentDescription = "Deep Debug", tint = Color(0xFF00E676), modifier = Modifier.size(14.dp))
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        Text("Debug", color = Color(0xFF00E676), style = MaterialTheme.typography.labelSmall)
-                                    }
-                                }
+                                FuturisticToolChip(
+                                    icon = Icons.Default.CameraAlt,
+                                    label = "Vision",
+                                    onClick = { onAnalyze() },
+                                    enabled = !isLoading && !isGenerating,
+                                    accentColor = Color(0xFFFF007A)
+                                )
+
+                                FuturisticToolChip(
+                                    icon = Icons.Default.AttachFile,
+                                    label = "Analyze",
+                                    onClick = onAnalyze,
+                                    enabled = !isLoading && !isGenerating,
+                                    accentColor = DeepEyeTheme.colors.link
+                                )
+
+                                FuturisticToolChip(
+                                    icon = Icons.Default.BugReport,
+                                    label = "Deep Debug",
+                                    onClick = onDebug,
+                                    enabled = !isLoading && !isGenerating,
+                                    accentColor = DeepEyeTheme.colors.statusSuccess
+                                )
                             }
                         }
 
-                        // Single Primary Action (Send / Cancel)
                         if (isGenerating) {
-                            IconButton(
-                                onClick = onCancel,
+                            Surface(
+                                shape = RoundedCornerShape(18.dp),
+                                color = DeepEyeTheme.colors.statusError.copy(alpha = 0.15f),
+                                border = androidx.compose.foundation.BorderStroke(
+                                    1.5.dp,
+                                    DeepEyeTheme.colors.statusError.copy(alpha = 0.5f)
+                                ),
                                 modifier = Modifier
-                                    .size(36.dp)
-                                    .background(
-                                        color = Color(0xFFFF5252),
-                                        shape = RoundedCornerShape(18.dp)
-                                    )
+                                    .clickable(onClick = onCancel)
+                                    .size(42.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.Stop,
-                                    contentDescription = "Stop generation",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(18.dp)
+                                    Icons.Default.Stop,
+                                    contentDescription = "Stop",
+                                    tint = DeepEyeTheme.colors.statusError,
+                                    modifier = Modifier.padding(10.dp)
                                 )
                             }
                         } else {
-                            IconButton(
-                                onClick = onSend,
-                                enabled = canSend,
+                            Surface(
+                                shape = RoundedCornerShape(18.dp),
+                                color = Color.Transparent,
                                 modifier = Modifier
-                                    .size(36.dp)
+                                    .clickable(enabled = canSend, onClick = onSend)
+                                    .size(42.dp)
                                     .background(
-                                        color = if (canSend) Color(0xFF00E5FF) else Color(0x22FFFFFF),
+                                        brush = if (canSend) {
+                                            Brush.linearGradient(
+                                                colors = listOf(
+                                                    DeepEyeTheme.colors.link,
+                                                    DeepEyeTheme.colors.accent
+                                                )
+                                            )
+                                        } else {
+                                            Brush.linearGradient(
+                                                colors = listOf(
+                                                    MaterialTheme.colorScheme.outlineVariant,
+                                                    MaterialTheme.colorScheme.outlineVariant
+                                                )
+                                            )
+                                        },
                                         shape = RoundedCornerShape(18.dp)
                                     )
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.ArrowUpward,
-                                    contentDescription = "Send message",
-                                    tint = if (canSend) Color.Black else Color.Gray,
-                                    modifier = Modifier.size(18.dp)
+                                    Icons.Default.ArrowUpward,
+                                    contentDescription = "Send",
+                                    tint = if (canSend) Color(0xFF070A12) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                    modifier = Modifier.padding(10.dp)
                                 )
                             }
                         }
@@ -528,43 +675,154 @@ fun CalmChatInputDock(
     }
 }
 
-/**
- * Adaptive Inspector Pane for Large Screens.
- */
+@Composable
+private fun FuturisticToolChip(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    onClick: () -> Unit,
+    enabled: Boolean,
+    accentColor: Color
+) {
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = accentColor.copy(alpha = 0.12f),
+        border = androidx.compose.foundation.BorderStroke(
+            1.2.dp,
+            accentColor.copy(alpha = 0.4f)
+        ),
+        modifier = Modifier
+            .clickable(enabled = enabled, onClick = onClick)
+            .height(34.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 12.dp, vertical = 6.dp)
+                .fillMaxHeight(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                icon,
+                contentDescription = label,
+                tint = accentColor,
+                modifier = Modifier.size(16.dp)
+            )
+            Text(
+                label,
+                color = accentColor,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Medium
+            )
+        }
+    }
+}
+
 @Composable
 fun AgentInspectorPane(
     activeModelName: String,
     modelStatus: ModelStatus
 ) {
-    GlassCard(
-        modifier = Modifier.fillMaxSize(),
-        tintColor = Color(0xCC121826),
-        borderColor = Color(0x33FFFFFF)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = "Agent Inspector",
-                style = MaterialTheme.typography.titleMedium,
-                color = Color.White,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            HorizontalDivider(color = Color(0x26FFFFFF))
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text("Active Model", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(activeModelName, style = MaterialTheme.typography.bodyMedium, color = Color(0xFF00E5FF), fontWeight = FontWeight.SemiBold)
-
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("Engine Status", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            NeonStatusBadge(
-                text = modelStatus.name,
-                isPulsing = modelStatus == ModelStatus.LOCAL_ACTIVE
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("Hardware Backend", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text("Adreno Vulkan NDK (GPU)", style = MaterialTheme.typography.bodySmall, color = Color(0xFF00E676))
+        Text(
+            "Agent Inspector",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(Modifier.height(12.dp))
+        
+        GlassCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(
+                    width = 1.dp,
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            Color.White.copy(alpha = 0.3f),
+                            Color.White.copy(alpha = 0.1f)
+                        )
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                )
+        ) {
+            Column(modifier = Modifier.padding(12.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("Model", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(activeModelName, style = MaterialTheme.typography.bodySmall, color = DeepEyeTheme.colors.link)
+                }
+                Spacer(Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("Status", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        when (modelStatus) {
+                            ModelStatus.LOCAL_ACTIVE -> "Active"
+                            ModelStatus.NOT_DOWNLOADED -> "Not Downloaded"
+                            ModelStatus.ERROR -> "Error"
+                            else -> "Unknown"
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = when (modelStatus) {
+                            ModelStatus.LOCAL_ACTIVE -> DeepEyeTheme.colors.statusSuccess
+                            ModelStatus.NOT_DOWNLOADED -> DeepEyeTheme.colors.statusWarning
+                            ModelStatus.ERROR -> DeepEyeTheme.colors.statusError
+                            else -> MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                    )
+                }
+            }
+        }
+        
+        Spacer(Modifier.height(16.dp))
+        
+        Text(
+            "Performance",
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.SemiBold
+        )
+        Spacer(Modifier.height(8.dp))
+        
+        GlassCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(
+                    width = 1.dp,
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            DeepEyeTheme.colors.link.copy(alpha = 0.3f),
+                            DeepEyeTheme.colors.link.copy(alpha = 0.1f)
+                        )
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                )
+        ) {
+            Column(modifier = Modifier.padding(12.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("TTFT", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("~245 ms", style = MaterialTheme.typography.bodySmall, color = DeepEyeTheme.colors.link)
+                }
+                Spacer(Modifier.height(6.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("Tokens/sec", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("~18.4", style = MaterialTheme.typography.bodySmall, color = DeepEyeTheme.colors.accent)
+                }
+            }
         }
     }
 }
@@ -573,81 +831,156 @@ fun AgentInspectorPane(
 @Composable
 fun ModelPickerSheet(
     currentStatus: ModelStatus,
+    activeModelName: String,
     models: List<LocalModel>,
-    onSelect: (String) -> Unit,
+    onSelect: (LocalModel) -> Unit,
     onImportModel: () -> Unit,
     onDismiss: () -> Unit
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = Color(0xE6121826)
+        containerColor = Color(0xB3070A12),
+        contentColor = Color.White
     ) {
         Column(
             modifier = Modifier
-                .padding(16.dp)
                 .fillMaxWidth()
+                .padding(16.dp)
         ) {
-            Text("Select Intelligence Layer", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSurface)
-            Spacer(modifier = Modifier.height(12.dp))
-
+            Text(
+                "Select Model",
+                style = MaterialTheme.typography.titleLarge,
+                color = Color.White,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(Modifier.height(16.dp))
+            
+            models.forEach { model ->
+                GlassCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onSelect(model) }
+                        .padding(vertical = 4.dp)
+                        .border(
+                            width = 1.dp,
+                            brush = Brush.linearGradient(
+                                colors = listOf(
+                                    if (model.name == activeModelName) DeepEyeTheme.colors.link.copy(alpha = 0.5f) else Color.White.copy(alpha = 0.2f),
+                                    if (model.name == activeModelName) DeepEyeTheme.colors.link.copy(alpha = 0.15f) else Color.White.copy(alpha = 0.05f)
+                                )
+                            ),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                model.name,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = Color.White
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                "${model.sizeString} • ${model.engineState.name}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        if (model.name == activeModelName) {
+                            NeonStatusBadge(
+                                text = "Active",
+                                isPulsing = false,
+                                color = DeepEyeTheme.colors.statusSuccess
+                            )
+                        }
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+            }
+            
+            Spacer(Modifier.height(12.dp))
+            
             GlassCard(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable {
-                        onImportModel()
-                        onDismiss()
-                    },
-                shape = RoundedCornerShape(12.dp),
-                borderColor = DeepEyeTheme.colors.link.copy(alpha = 0.5f)
+                    .clickable { onImportModel() }
+                    .border(
+                        width = 1.5.dp,
+                        brush = Brush.linearGradient(
+                            colors = listOf(
+                                DeepEyeTheme.colors.accent.copy(alpha = 0.5f),
+                                DeepEyeTheme.colors.accent.copy(alpha = 0.15f)
+                            )
+                        ),
+                        shape = RoundedCornerShape(16.dp)
+                    )
             ) {
                 Row(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(14.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Text(
+                        "Import Model",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = DeepEyeTheme.colors.accent
+                    )
                     Icon(
-                        imageVector = Icons.Default.AttachFile,
-                        contentDescription = null,
-                        tint = DeepEyeTheme.colors.link
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column {
-                        Text("Import Custom Local Model (.bin)", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
-                        Text("Load LiteRT flatbuffer binary from storage", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            LazyColumn {
-                items(models, key = { it.id }) { model ->
-                    val isReady = model.engineState == EngineState.READY ||
-                            model.engineState == EngineState.LOADED
-                    val isDownloadedButUnsupported = model.engineState == EngineState.DOWNLOADED && !model.isSupportedOnDevice
-
-                    ListItem(
-                        modifier = Modifier.clickable {
-                            onSelect(model.id)
-                            if (isReady) onDismiss()
-                        },
-                        headlineContent = { Text(model.name, color = MaterialTheme.colorScheme.onSurface) },
-                        supportingContent = {
-                            Text(text = model.publisher, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        },
-                        trailingContent = {
-                            if (isReady) {
-                                NeonStatusBadge(text = "Ready on-device", isPulsing = true)
-                            } else if (isDownloadedButUnsupported) {
-                                NeonStatusBadge(text = "Unsupported", isPulsing = false, color = Color(0xFFFF5252))
-                            } else {
-                                Text("Tap to download", color = MaterialTheme.colorScheme.outline, style = MaterialTheme.typography.bodySmall)
-                            }
-                        },
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                        Icons.Default.Add,
+                        contentDescription = "Import",
+                        tint = DeepEyeTheme.colors.accent
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(32.dp))
+            
+            Spacer(Modifier.height(16.dp))
+        }
+    }
+}
+
+@Composable
+fun EmptyStateOverlay() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .drawWithCache {
+                val meshBrush = Brush.radialGradient(
+                    colors = listOf(
+                        Color(0xFF00F2FE).copy(alpha = 0.06f),
+                        Color(0xFF0B0F19).copy(alpha = 0.0f)
+                    ),
+                    center = Offset(size.width * 0.5f, size.height * 0.35f),
+                    radius = size.minDimension * 0.8f
+                )
+                onDrawBehind {
+                    drawRect(meshBrush)
+                }
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "DeepEye",
+                style = MaterialTheme.typography.headlineLarge,
+                color = Color.White.copy(alpha = 0.08f),
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = "Ask anything. Runs 100% on-device.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.White.copy(alpha = 0.25f)
+            )
         }
     }
 }

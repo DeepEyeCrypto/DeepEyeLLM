@@ -6,7 +6,10 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.deepeye.agent.ui.AgentAppShell
 import com.deepeye.agent.ui.theme.DeepEyeTheme
+import com.deepeye.agent.updater.UpdateManager
+import com.deepeye.agent.updater.UpdateDialog
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 import android.content.Context
 import com.deepeye.agent.automation.TestAutomationReceiver
@@ -14,15 +17,20 @@ import com.deepeye.agent.automation.TestAutomationReceiver
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    @Inject lateinit var updateManager: UpdateManager
+
     private val automationReceiver = TestAutomationReceiver()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        updateManager.checkForUpdates()
+
         setContent {
             DeepEyeTheme {
                 AgentAppShell()
+                UpdateDialog(updateManager = updateManager)
             }
         }
         

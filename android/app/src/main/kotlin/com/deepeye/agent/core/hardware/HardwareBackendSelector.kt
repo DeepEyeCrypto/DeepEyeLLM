@@ -5,32 +5,116 @@ import android.content.pm.PackageManager
 import android.os.Build
 
 data class BackendConfig(
-    val backendType: Int, // 0 = CPU, 1 = Vulkan, 2 = OpenCL, 3 = Hexagon QNN
-    val nGpuLayers: Int
+    val backendType: Int, // -1 = Auto, 0 = CPU, 1 = Vulkan, 2 = OpenCL, 3 = Hexagon QNN, 4 = KleidiAI
+    val nGpuLayers: Int,
+    val name: String = ""
+)
+
+data class HardwareBackendOption(
+    val id: Int,
+    val label: String,
+    val description: String,
+    val isAvailable: Boolean
 )
 
 object HardwareBackendSelector {
 
-    fun selectOptimalBackend(context: Context? = null): BackendConfig {
+    const val BACKEND_AUTO = -1
+    const val BACKEND_CPU = 0
+    const val BACKEND_VULKAN = 1
+    const val BACKEND_OPENCL = 2
+    const val BACKEND_HEXAGON_QNN = 3
+    const val BACKEND_KLEIDIAI = 4
+
+    fun selectOptimalBackend(
+        context: Context? = null,
+        userBackend: Int = BACKEND_AUTO,
+        userGpuLayers: Int = 99
+    ): BackendConfig {
+        if (userBackend != BACKEND_AUTO) {
+            val layers = if (userBackend == BACKEND_CPU) 0 else userGpuLayers
+            return BackendConfig(
+                backendType = userBackend,
+                nGpuLayers = layers,
+                name = getBackendName(userBackend)
+            )
+        }
+
         return when {
-            isHexagonNpuAvailable() -> BackendConfig(backendType = 3, nGpuLayers = 99)
-            isVulkanAvailable(context) -> BackendConfig(backendType = 1, nGpuLayers = 99)
-            isOpenCLAvailable() -> BackendConfig(backendType = 2, nGpuLayers = 99)
-            else -> BackendConfig(backendType = 0, nGpuLayers = 0)
+            isHexagonNpuAvailable() -> BackendConfig(backendType = BACKEND_HEXAGON_QNN, nGpuLayers = userGpuLayers, name = "Snapdragon Hexagon NPU")
+            isVulkanAvailable(context) -> BackendConfig(backendType = BACKEND_VULKAN, nGpuLayers = userGpuLayers, name = "Vulkan GPU Acceleration")
+            isOpenCLAvailable() -> BackendConfig(backendType = BACKEND_OPENCL, nGpuLayers = userGpuLayers, name = "OpenCL GPU")
+            else -> BackendConfig(backendType = BACKEND_CPU, nGpuLayers = 0, name = "CPU Only (ARM NEON)")
         }
     }
 
-    fun applyBackendConfig(nativeHandle: Long = 0L, context: Context? = null): BackendConfig {
-        return selectOptimalBackend(context)
+    fun applyBackendConfig(
+        nativeHandle: Long = 0L,
+        context: Context? = null,
+        userBackend: Int = BACKEND_AUTO,
+        userGpuLayers: Int = 99
+    ): BackendConfig {
+        return selectOptimalBackend(context, userBackend, userGpuLayers)
     }
 
-    private fun isHexagonNpuAvailable(): Boolean {
+    fun getBackendName(type: Int): String = when (type) {
+        BACKEND_AUTO -> "Auto (Smart Detect)"
+        BACKEND_VULKAN -> "Vulkan GPU"
+        BACKEND_HEXAGON_QNN -> "Qualcomm Hexagon NPU"
+        BACKEND_OPENCL -> "OpenCL GPU"
+        BACKEND_KLEIDIAI -> "ARM KleidiAI"
+        BACKEND_CPU -> "CPU Only"
+        else -> "Auto (Smart Detect)"
+    }
+
+    fun getAvailableBackends(context: Context? = null): List<HardwareBackendOption> {
+        return listOf(
+            HardwareBackendOption(
+                id = BACKEND_AUTO,
+                label = "⚡ Auto (Smart Select)",
+                description = "Automatically detects fastest NPU / GPU hardware available",
+                isAvailable = true
+            ),
+            HardwareBackendOption(
+                id = BACKEND_VULKAN,
+                label = "🌋 Vulkan GPU",
+                description = "Universal cross-vendor GPU acceleration (Adreno, Mali, PowerVR)",
+                isAvailable = isVulkanAvailable(context)
+            ),
+            HardwareBackendOption(
+                id = BACKEND_HEXAGON_QNN,
+                label = "🧠 Hexagon NPU (QNN)",
+                description = "Snapdragon Neural Processing Unit for ultra-low power inference",
+                isAvailable = isHexagonNpuAvailable()
+            ),
+            HardwareBackendOption(
+                id = BACKEND_OPENCL,
+                label = "🌀 OpenCL GPU",
+                description = "OpenCL compute shaders offloading for mobile GPUs",
+                isAvailable = isOpenCLAvailable()
+            ),
+            HardwareBackendOption(
+                id = BACKEND_KLEIDIAI,
+                label = "🧬 ARM KleidiAI",
+                description = "Optimized ARM SIMD micro-kernels for Cortex-A cores",
+                isAvailable = true
+            ),
+            HardwareBackendOption(
+                id = BACKEND_CPU,
+                label = "💻 CPU Only",
+                description = "Standard multi-threaded ARM CPU processing",
+                isAvailable = true
+            )
+        )
+    }
+
+    fun isHexagonNpuAvailable(): Boolean {
         val platform = getSystemProperty("ro.board.platform").lowercase()
         val hardware = Build.HARDWARE.lowercase()
         return platform.startsWith("msm") || platform.startsWith("sdm") || platform.startsWith("sm") || hardware.contains("qcom")
     }
 
-    private fun isVulkanAvailable(context: Context?): Boolean {
+    fun isVulkanAvailable(context: Context?): Boolean {
         if (context != null) {
             val pm = context.packageManager
             return pm.hasSystemFeature(PackageManager.FEATURE_VULKAN_HARDWARE_COMPUTE)
@@ -43,7 +127,7 @@ object HardwareBackendSelector {
         }
     }
 
-    private fun isOpenCLAvailable(): Boolean {
+    fun isOpenCLAvailable(): Boolean {
         return try {
             System.loadLibrary("OpenCL")
             true
