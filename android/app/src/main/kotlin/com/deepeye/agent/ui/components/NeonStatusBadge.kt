@@ -91,7 +91,9 @@ fun NeonStatusBadge(
             text = text,
             color = Color.White,
             style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+            softWrap = false
         )
     }
 }

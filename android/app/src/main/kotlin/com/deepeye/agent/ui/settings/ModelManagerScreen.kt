@@ -1,6 +1,7 @@
 package com.deepeye.agent.ui.settings
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,14 +22,21 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
+import com.deepeye.agent.core.hardware.HardwareFitEvaluator
+import com.deepeye.agent.core.hardware.MemoryFitLevel
 import com.deepeye.agent.domain.EngineState
 import com.deepeye.agent.domain.DownloadError
 import com.deepeye.agent.domain.LocalModel
 import com.deepeye.agent.ui.components.GlassCard
 import com.deepeye.agent.ui.components.NeonStatusBadge
-import com.deepeye.agent.ui.theme.DeepEyeTheme
+import com.deepeye.agent.ui.theme.*
 import com.deepeye.agent.ui.utils.PerformanceUtils
 import com.deepeye.agent.ui.utils.UiLayoutMode
 import com.deepeye.agent.ui.utils.currentUiLayoutMode
@@ -44,14 +52,20 @@ fun ModelManagerScreen(
     onBack: () -> Unit = {}
 ) {
     val modelCatalog by viewModel.modelCatalog.collectAsStateWithLifecycle()
+    val modelPicker = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let { viewModel.importModel(it) }
+    }
+
     ModelManagerScreen(
         availableModels = modelCatalog,
         onBack = onBack,
         onDownloadModel = viewModel::downloadModel,
         onDeleteModel = viewModel::deleteModel,
         onSelectModel = viewModel::selectModel,
-        onImportModel = { },
-        onRescanModels = { }
+        onImportModel = { modelPicker.launch(arrayOf("*/*")) },
+        onRescanModels = viewModel::rescanLocalModels
     )
 }
 
@@ -89,22 +103,49 @@ fun ModelManagerScreen(
     val failed = remember(availableModels, deviceRamGb) { availableModels.filter { it.engineState == EngineState.FAILED && it.requiredRamGb <= deviceRamGb } }
 
     Scaffold(
-        containerColor = Color.Transparent,
+        containerColor = Color(0xFF070A12),
         topBar = {
-            TopAppBar(
-                title = { Text("Manage Models", color = MaterialTheme.colorScheme.onSurface) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
+            Surface(
+                color = Color(0xF2070A12),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)))
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f).padding(end = 8.dp)
+                    ) {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = CyberCyan)
+                        }
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Column {
+                            Text(
+                                text = "Model Manager",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                                color = Color.White
+                            )
+                            Text(
+                                text = "Quantization Fit, LiteRT NPU & GGUF",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = CyberCyan
+                            )
+                        }
                     }
-                },
-                actions = {
+
                     IconButton(onClick = onRefreshCatalog) {
-                        Icon(Icons.Default.Sync, contentDescription = "Sync Catalog", tint = MaterialTheme.colorScheme.onSurface)
+                        Icon(Icons.Default.Sync, contentDescription = "Sync Catalog", tint = CyberCyan)
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.scrim.copy(alpha = 0.5f))
-            )
+                }
+            }
         }
     ) { padding ->
         Column(
@@ -114,15 +155,21 @@ fun ModelManagerScreen(
         ) {
             ScrollableTabRow(
                 selectedTabIndex = selectedTabIndex,
-                containerColor = MaterialTheme.colorScheme.scrim.copy(alpha = 0.5f),
-                contentColor = MaterialTheme.colorScheme.onSurface,
+                containerColor = Color(0xFF0E1322),
+                contentColor = CyberCyan,
                 edgePadding = 8.dp
             ) {
                 tabs.forEachIndexed { index, title ->
                     Tab(
                         selected = selectedTabIndex == index,
                         onClick = { selectedTabIndex = index },
-                        text = { Text(title, color = MaterialTheme.colorScheme.onSurface) }
+                        text = {
+                            Text(
+                                text = title,
+                                color = if (selectedTabIndex == index) CyberCyan else ThinkingMutedSlate,
+                                fontWeight = if (selectedTabIndex == index) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal
+                            )
+                        }
                     )
                 }
             }
@@ -269,15 +316,13 @@ fun ModelItemCard(
     onResume: () -> Unit = {},
     isUnsupported: Boolean
 ) {
+    val canSelect = (model.engineState == EngineState.READY || model.engineState == EngineState.LOADED) && !isUnsupported
     GlassCard(
+        onClick = if (canSelect) onSelect else null,
         modifier = Modifier
             .fillMaxWidth()
-            .animateContentSize()
-            .clickable(
-                enabled = (model.engineState == EngineState.READY || model.engineState == EngineState.LOADED) && !isUnsupported,
-                onClick = onSelect
-            ),
-        borderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+            .animateContentSize(),
+        borderColor = if (model.engineState == EngineState.READY) DeepEyeTheme.colors.statusSuccess.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Row(
@@ -295,12 +340,53 @@ fun ModelItemCard(
                         }
                     }
 
+                    val context = androidx.compose.ui.platform.LocalContext.current
+                    val estimatedBytes = remember(model.requiredRamGb) {
+                        (model.requiredRamGb.toLong() * 1024L * 1024L * 1024L) / 2L
+                    }
+                    val fitReport = remember(estimatedBytes) {
+                        HardwareFitEvaluator.evaluateModelFit(context, estimatedBytes)
+                    }
+
                     val tierBadge = when {
                         model.name.contains("LiteRT", ignoreCase = true) -> "LiteRT On-Device"
                         model.name.contains("Q4", ignoreCase = true) -> "GGUF Q4_K_M"
                         else -> "Custom"
                     }
-                    NeonStatusBadge(text = tierBadge, isPulsing = false)
+
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                        NeonStatusBadge(text = tierBadge, isPulsing = false)
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(
+                                    when (fitReport.fitLevel) {
+                                        MemoryFitLevel.PERFECT_FIT -> StatusSuccess.copy(alpha = 0.15f)
+                                        MemoryFitLevel.MODERATE_LOAD -> AmberAccent.copy(alpha = 0.15f)
+                                        MemoryFitLevel.HAZARDOUS_OOM_RISK -> StatusError.copy(alpha = 0.15f)
+                                    }
+                                )
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = when (fitReport.fitLevel) {
+                                    MemoryFitLevel.PERFECT_FIT -> "Perfect RAM Fit"
+                                    MemoryFitLevel.MODERATE_LOAD -> "Moderate Load"
+                                    MemoryFitLevel.HAZARDOUS_OOM_RISK -> "OOM Warning"
+                                },
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                                    fontSize = 9.sp,
+                                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                                ),
+                                color = when (fitReport.fitLevel) {
+                                    MemoryFitLevel.PERFECT_FIT -> StatusSuccess
+                                    MemoryFitLevel.MODERATE_LOAD -> AmberAccent
+                                    MemoryFitLevel.HAZARDOUS_OOM_RISK -> StatusError
+                                }
+                            )
+                        }
+                    }
 
                     Spacer(modifier = Modifier.height(4.dp))
 

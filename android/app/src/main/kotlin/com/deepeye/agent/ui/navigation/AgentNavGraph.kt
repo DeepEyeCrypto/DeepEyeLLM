@@ -10,9 +10,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import kotlin.reflect.typeOf
 import com.deepeye.agent.ui.agent.AgentStudioScreen
+import com.deepeye.agent.ui.benchmark.BenchmarkScreen
 import com.deepeye.agent.ui.browser.BraveBrowserScreen
 import com.deepeye.agent.ui.chat.ChatScreen
+import com.deepeye.agent.ui.home.WorkstationHomeScreen
 import com.deepeye.agent.ui.p2p.P2PShareScreen
+import com.deepeye.agent.ui.promptlab.PromptLabScreen
 import com.deepeye.agent.ui.rag.KnowledgeBaseScreen
 import com.deepeye.agent.ui.security.SecurityDashboardScreen
 import com.deepeye.agent.ui.settings.DiagnosticsScreen
@@ -30,27 +33,26 @@ fun DeepEyeNavGraph(
         startDestination = startDestination,
         modifier = modifier
     ) {
+        composable(route = AgentDestinations.WorkstationHome.route) {
+            WorkstationHomeScreen(
+                onNavigate = { targetRoute ->
+                    navController.navigate(targetRoute) {
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
         composable(route = AgentDestinations.Chat.route) {
             ChatScreen()
         }
         composable(route = AgentDestinations.AgentStudio.route) {
             AgentStudioScreen(viewModel = hiltViewModel())
         }
-        composable<AgentDestinations.BraveBrowser> { entry ->
-            val args = entry.toRoute<AgentDestinations.BraveBrowser>()
-            BraveBrowserScreen(
-                initialUrl = args.url,
-                initialDexSource = args.dexSource,
-                initialSecurityScore = args.securityScore?.toIntOrNull()
-            )
+        composable(route = AgentDestinations.BraveBrowser.route) {
+            BraveBrowserScreen()
         }
-        composable<AgentDestinations.SkillStore> { entry ->
-            val args = entry.toRoute<AgentDestinations.SkillStore>()
-            SkillStoreScreen(
-                initialCategory = args.category,
-                selectedSkillId = args.selectedSkillId,
-                installMode = args.installMode
-            )
+        composable(route = AgentDestinations.SkillStore.route) {
+            SkillStoreScreen()
         }
         composable(route = AgentDestinations.Settings.route) {
             SettingsScreen(
@@ -76,6 +78,12 @@ fun DeepEyeNavGraph(
         }
         composable(route = AgentDestinations.P2PShare.route) {
             P2PShareScreen()
+        }
+        composable(route = AgentDestinations.PromptLab.route) {
+            PromptLabScreen()
+        }
+        composable(route = AgentDestinations.Benchmark.route) {
+            BenchmarkScreen()
         }
         composable(route = AgentDestinations.Security.route) {
             SecurityDashboardScreen()

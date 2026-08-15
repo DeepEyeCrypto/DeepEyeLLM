@@ -17,6 +17,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -30,13 +32,12 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.deepeye.agent.ui.theme.DeepEyeTheme
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
+import com.deepeye.agent.ui.components.CryptoSentinelCard
+import com.deepeye.agent.ui.components.CyberButton
 import com.deepeye.agent.ui.components.GlassCard
 import com.deepeye.agent.ui.components.GlassCardElevated
 import com.deepeye.agent.ui.components.NeonStatusBadge
-import com.deepeye.agent.ui.components.CyberButton
+import com.deepeye.agent.ui.theme.*
 import androidx.hilt.navigation.compose.hiltViewModel
 
 @SuppressLint("SetJavaScriptEnabled")
@@ -57,6 +58,7 @@ fun BraveBrowserScreen(
     val state by viewModel.uiState.collectAsState()
     var urlInput by remember(state.currentUrl, initialUrl) { mutableStateOf(initialUrl ?: state.currentUrl) }
     var webViewRef by remember { mutableStateOf<WebView?>(null) }
+    var isAuditSheetExpanded by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
     val currentSecurityScore = initialSecurityScore ?: 98
 
@@ -70,7 +72,7 @@ fun BraveBrowserScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .statusBarsPadding()
-                        .background(Color(0xEE0B0E14))
+                        .background(Color(0xFF070A12))
                         .padding(horizontal = horizontalPadding, vertical = 8.dp)
                 ) {
                     // Title Bar
@@ -84,13 +86,14 @@ fun BraveBrowserScreen(
                                 text = "🦁 Brave DEX",
                                 fontSize = if (isWideScreen) 22.sp else 18.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = DeepEyeTheme.colors.brandOrange
+                                color = BrandOrange
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Surface(
                                 shape = CircleShape,
                                 color = Color(0x3300E676),
-                                contentColor = DeepEyeTheme.colors.statusSuccess
+                                contentColor = StatusSuccess,
+                                modifier = Modifier.clickable { isAuditSheetExpanded = !isAuditSheetExpanded }
                             ) {
                                 Text(
                                     text = "Web3 Shield ($currentSecurityScore)",
@@ -102,13 +105,36 @@ fun BraveBrowserScreen(
                         }
 
                         Row {
+                            IconButton(onClick = { isAuditSheetExpanded = !isAuditSheetExpanded }) {
+                                Icon(
+                                    imageVector = Icons.Default.Shield,
+                                    contentDescription = "Crypto Sentinel Audit",
+                                    tint = if (isAuditSheetExpanded) CyberCyan else ThinkingMutedSlate
+                                )
+                            }
                             IconButton(onClick = { viewModel.toggleDeepResearchOverlay() }) {
                                 Icon(
                                     imageVector = Icons.Default.Psychology,
                                     contentDescription = "Deep Research AI",
-                                    tint = if (state.isDeepResearchActive) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface
+                                    tint = if (state.isDeepResearchActive) CyberCyan else ThinkingMutedSlate
                                 )
                             }
+                        }
+                    }
+
+                    AnimatedVisibility(visible = isAuditSheetExpanded) {
+                        Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                            CryptoSentinelCard(
+                                tokenSymbol = "ETH / DEEP POOL",
+                                contractAddress = "0x89b27f4d...319a",
+                                securityScore = currentSecurityScore,
+                                liquidityLockDays = 365,
+                                buyTax = 0f,
+                                sellTax = 0f,
+                                isHoneypotFree = true,
+                                isOwnershipRenounced = true,
+                                isReentrancyClean = true
+                            )
                         }
                     }
 
@@ -118,10 +144,10 @@ fun BraveBrowserScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         IconButton(onClick = { webViewRef?.goBack() }) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
                         }
                         IconButton(onClick = { webViewRef?.goForward() }) {
-                            Icon(Icons.Default.ArrowForward, contentDescription = "Forward", tint = MaterialTheme.colorScheme.onSurface)
+                            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Forward", tint = MaterialTheme.colorScheme.onSurface)
                         }
                         IconButton(onClick = { webViewRef?.reload() }) {
                             Icon(Icons.Default.Refresh, contentDescription = "Reload", tint = MaterialTheme.colorScheme.onSurface)
@@ -143,7 +169,7 @@ fun BraveBrowserScreen(
                                         viewModel.updateUrl(urlInput)
                                         focusManager.clearFocus()
                                     }) {
-                                        Icon(Icons.Default.ArrowForward, contentDescription = "Go", tint = MaterialTheme.colorScheme.secondary)
+                                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Go", tint = CyberCyan)
                                     }
                                 }
                             },
@@ -204,7 +230,7 @@ fun BraveBrowserScreen(
                             Pair("Raydium", "☀️"),
                             Pair("Jupiter", "🪐")
                         )
-                        items(dexes) { dex ->
+                        items(dexes, key = { it.first }) { dex ->
                             val isActive = (initialDexSource != null && dex.first.equals(initialDexSource, ignoreCase = true)) || state.currentUrl.contains(dex.first.lowercase())
                             Surface(
                                 shape = RoundedCornerShape(20.dp),

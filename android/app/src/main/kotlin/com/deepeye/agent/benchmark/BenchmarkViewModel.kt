@@ -19,12 +19,15 @@ data class BenchmarkUiState(
     val currentPromptName: String = "",
     val progress: Float = 0f,
     val lastResult: AggregateBenchmarkResult? = null,
-    val exportStatus: String? = null
+    val exportStatus: String? = null,
+    val diagnosticSummary: com.deepeye.agent.core.diagnostics.DiagnosticSuiteSummary? = null,
+    val isRunningDiagnostics: Boolean = false
 )
 
 @HiltViewModel
 class BenchmarkViewModel @Inject constructor(
-    private val runner: LLMBenchmarkRunner
+    private val runner: LLMBenchmarkRunner,
+    private val diagnosticsEngine: com.deepeye.agent.core.diagnostics.AdbDiagnosticsEngine
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(BenchmarkUiState())
@@ -36,6 +39,13 @@ class BenchmarkViewModel @Inject constructor(
             _uiState.update { it.copy(currentPromptName = status, progress = progress) }
         }
         _uiState.update { it.copy(isRunning = false, progress = 1f, lastResult = result) }
+    }
+
+    fun runAdbHardwareDiagnostics() = viewModelScope.launch {
+        _uiState.update { it.copy(isRunningDiagnostics = true) }
+        diagnosticsEngine.runFullSelfTest().collect { summary ->
+            _uiState.update { it.copy(isRunningDiagnostics = false, diagnosticSummary = summary) }
+        }
     }
 
     fun exportResultsCsv() = viewModelScope.launch(Dispatchers.IO) {

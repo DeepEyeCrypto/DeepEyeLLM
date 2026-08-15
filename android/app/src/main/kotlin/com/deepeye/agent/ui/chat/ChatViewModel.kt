@@ -29,7 +29,8 @@ data class Message(
     val isUser: Boolean,
     val isStreaming: Boolean = false,
     val isError: Boolean = false,
-    val modelStatus: ModelStatus = ModelStatus.LOCAL_ACTIVE
+    val modelStatus: ModelStatus = ModelStatus.LOCAL_ACTIVE,
+    val dexTradeIntent: com.deepeye.agent.core.dex.DexTradeIntent? = null
 )
 
 @Immutable
@@ -48,7 +49,8 @@ data class ChatUiState(
 @HiltViewModel
 class ChatViewModel @Inject constructor(
     private val engineController: EngineController,
-    private val fileService: FileAnalysisService
+    private val fileService: FileAnalysisService,
+    private val dexTradingEngine: com.deepeye.agent.core.dex.DexTradingEngine
 ) : ViewModel() {
 
     private val _chatState = MutableStateFlow(ChatUiState())
@@ -81,13 +83,11 @@ class ChatViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            _chatState.update { it.copy(isLoading = true) }
-            val (status, msg) = engineController.initialize()
+            val (status, _) = engineController.initialize()
             _chatState.update {
                 it.copy(
                     isLoading = false,
-                    modelStatus = status,
-                    messages = listOf(Message(text = msg, isUser = false, modelStatus = status))
+                    modelStatus = status
                 )
             }
         }
@@ -101,6 +101,44 @@ class ChatViewModel @Inject constructor(
         _chatState.update { it.copy(showModelPicker = show) }
     }
 
+    fun selectAndActivateModel(modelId: String, fileName: String? = null) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val modelsDir = java.io.File(engineController.context.filesDir, "models")
+            var destFile = if (!fileName.isNullOrBlank()) java.io.File(modelsDir, fileName) else null
+
+            if (destFile == null || !destFile.exists()) {
+                val matching = modelsDir.listFiles()?.find {
+                    it.name.equals(modelId, ignoreCase = true) ||
+                    it.nameWithoutExtension.equals(modelId, ignoreCase = true) ||
+                    (!fileName.isNullOrBlank() && it.name.equals(fileName, ignoreCase = true)) ||
+                    (!fileName.isNullOrBlank() && it.nameWithoutExtension.equals(fileName.substringBeforeLast('.'), ignoreCase = true)) ||
+                    (!fileName.isNullOrBlank() && fileName.contains("gemma", ignoreCase = true) && it.name.contains("gemma", ignoreCase = true)) ||
+                    (!fileName.isNullOrBlank() && fileName.contains("hermes", ignoreCase = true) && it.name.contains("hermes", ignoreCase = true))
+                }
+                if (matching != null) destFile = matching
+            }
+
+            if (destFile != null && destFile.exists() && destFile.length() > 1_000_000L) {
+                engineController.reinitializeWithModel(destFile.absolutePath)
+            }
+        }
+    }
+
+    fun executeDexSwap(messageId: String, intent: com.deepeye.agent.core.dex.DexTradeIntent) {
+        val executed = dexTradingEngine.executeSwap(intent)
+        _chatState.update { state ->
+            val updated = state.messages.map { msg ->
+                if (msg.id == messageId) {
+                    msg.copy(
+                        text = msg.text + "\n\n✅ **Transaction Broadcasted**: ${executed.statusMessage}",
+                        dexTradeIntent = executed
+                    )
+                } else msg
+            }
+            state.copy(messages = updated)
+        }
+    }
+
     fun sendStream(promptText: String? = null, onChunk: (String) -> Unit = {}) {
         val inputPrompt = promptText ?: _chatState.value.prompt
         if (inputPrompt.isBlank()) return
@@ -109,6 +147,40 @@ class ChatViewModel @Inject constructor(
 
         val userMessage = Message(text = inputPrompt, isUser = true)
         val assistantPlaceholderId = java.util.UUID.randomUUID().toString()
+
+        // Handle specialized /dex crypto trading command & natural language trade intents
+        val isDexTrade = inputPrompt.startsWith("/dex", ignoreCase = true) ||
+            ((inputPrompt.contains("buy", ignoreCase = true) || inputPrompt.contains("swap", ignoreCase = true) || inputPrompt.contains("sell", ignoreCase = true)) &&
+             (inputPrompt.contains("sol", ignoreCase = true) || inputPrompt.contains("eth", ignoreCase = true) || inputPrompt.contains("btc", ignoreCase = true) || inputPrompt.contains("usdc", ignoreCase = true) || inputPrompt.contains("usdt", ignoreCase = true)))
+
+        if (isDexTrade) {
+            val intent = dexTradingEngine.parseTradingIntent(inputPrompt)
+            val responseText = if (intent.securityAudit.isSafeToTrade) {
+                "🦁 **Nous Hermes 3 DEX Sentinel**: Verified Trade Intent.\n\n" +
+                "• **Action**: ${intent.action} ${intent.amountIn} ${intent.tokenIn} ➔ ~${"%.4f".format(intent.estimatedAmountOut)} ${intent.tokenOut}\n" +
+                "• **DEX Protocol**: ${intent.quote.dexRouter.displayName}\n" +
+                "• **Safety Radar**: ${intent.securityAudit.overallSafetyScore}/100 (Honeypot Clean • LP Locked ${intent.securityAudit.lpLockDurationDays}d)\n" +
+                "• **Slippage**: Max ${intent.maxSlippagePct}%\n\n" +
+                "Interactive non-custodial trade ticket formulated below:"
+            } else {
+                "⚠️ **Trade Blocked by Safety Policy**: ${intent.statusMessage}"
+            }
+
+            _chatState.update {
+                it.copy(
+                    prompt = "",
+                    error = null,
+                    messages = it.messages + userMessage + Message(
+                        id = assistantPlaceholderId,
+                        text = responseText,
+                        isUser = false,
+                        dexTradeIntent = intent
+                    )
+                )
+            }
+            return
+        }
+
         val assistantPlaceholder = Message(
             id = assistantPlaceholderId,
             text = "",
@@ -127,36 +199,46 @@ class ChatViewModel @Inject constructor(
         _activeStreamingMessageId.value = assistantPlaceholderId
 
         activeGenerationJob = viewModelScope.launch(Dispatchers.IO) {
-            try {
-                engineController.executeChatStream(inputPrompt) { chunk ->
-                    onChunk(chunk)
+            val responseBuffer = StringBuilder()
+            var lastFlushTime = 0L
+            val flushIntervalMs = 30L // Decouple token arrival from Compose recomposition loop
+
+            fun flushToUi(force: Boolean = false, isFinished: Boolean = false) {
+                val now = System.currentTimeMillis()
+                if (force || now - lastFlushTime >= flushIntervalMs) {
+                    lastFlushTime = now
+                    val currentText = responseBuffer.toString()
                     _chatState.update { state ->
                         val updatedMessages = state.messages.map { msg ->
                             if (msg.id == assistantPlaceholderId) {
-                                msg.copy(text = msg.text + chunk, isStreaming = true)
+                                msg.copy(text = currentText, isStreaming = !isFinished)
                             } else msg
                         }
                         state.copy(messages = updatedMessages)
                     }
                 }
-                _chatState.update { state ->
-                    val updatedMessages = state.messages.map { msg ->
-                        if (msg.id == assistantPlaceholderId) msg.copy(isStreaming = false) else msg
-                    }
-                    state.copy(messages = updatedMessages)
+            }
+
+            try {
+                engineController.executeChatStream(inputPrompt) { chunk ->
+                    onChunk(chunk)
+                    responseBuffer.append(chunk)
+                    flushToUi(force = false, isFinished = false)
                 }
+                flushToUi(force = true, isFinished = true)
             } catch (e: Throwable) {
+                val errorMsg = e.message ?: "Generation failed"
                 _chatState.update { state ->
                     val updatedMessages = state.messages.map { msg ->
                         if (msg.id == assistantPlaceholderId) {
                             msg.copy(
-                                text = if (msg.text.isBlank()) "Error: ${e.message ?: "Generation failed"}" else msg.text,
+                                text = if (responseBuffer.isBlank()) "Error: $errorMsg" else responseBuffer.toString(),
                                 isStreaming = false,
                                 isError = true
                             )
                         } else msg
                     }
-                    state.copy(messages = updatedMessages, error = e.message)
+                    state.copy(messages = updatedMessages, error = errorMsg)
                 }
             } finally {
                 _isGenerating.value = false

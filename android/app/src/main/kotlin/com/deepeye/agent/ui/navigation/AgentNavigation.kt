@@ -4,12 +4,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CompassCalibration
+import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -61,11 +64,7 @@ sealed class AgentDestinations(
     )
 
     @Serializable
-    data class BraveBrowser(
-        val url: String? = null,
-        val dexSource: String? = null,
-        val securityScore: String? = null
-    ) : AgentDestinations(
+    data object BraveBrowser : AgentDestinations(
         route = "brave_browser",
         label = "DEX",
         icon = Icons.Default.Language,
@@ -73,11 +72,7 @@ sealed class AgentDestinations(
     )
 
     @Serializable
-    data class SkillStore(
-        val category: String? = null,
-        val selectedSkillId: String? = null,
-        val installMode: String? = null
-    ) : AgentDestinations(
+    data object SkillStore : AgentDestinations(
         route = "skill_store",
         label = "Skills",
         icon = Icons.Default.Extension,
@@ -125,6 +120,30 @@ sealed class AgentDestinations(
     )
 
     @Serializable
+    data object PromptLab : AgentDestinations(
+        route = "prompt_lab",
+        label = "Lab",
+        icon = Icons.Default.Science,
+        contentDescription = "Prompt Lab & A/B Studio"
+    )
+
+    @Serializable
+    data object Benchmark : AgentDestinations(
+        route = "benchmark",
+        label = "Bench",
+        icon = Icons.Default.Speed,
+        contentDescription = "Edge Benchmark Suite"
+    )
+
+    @Serializable
+    data object WorkstationHome : AgentDestinations(
+        route = "workstation_home",
+        label = "Home",
+        icon = Icons.Default.Dashboard,
+        contentDescription = "Workstation Command Center"
+    )
+
+    @Serializable
     data object Security : AgentDestinations(
         route = "security_audit",
         label = "Guard",
@@ -133,15 +152,14 @@ sealed class AgentDestinations(
     )
 }
 
-val startDestination: String = AgentDestinations.Chat.route
+val startDestination: String = AgentDestinations.WorkstationHome.route
 
 val agentDestinationsList: List<AgentDestinations> = listOf(
+    AgentDestinations.WorkstationHome,
     AgentDestinations.Chat,
-    AgentDestinations.AgentStudio,
+    AgentDestinations.PromptLab,
+    AgentDestinations.SkillStore,
     AgentDestinations.KnowledgeBase,
-    AgentDestinations.P2PShare,
-    AgentDestinations.Security,
-    AgentDestinations.SkillStore(),
     AgentDestinations.Settings
 )
 
@@ -160,17 +178,17 @@ fun AgentDestinations.BraveBrowser.withArgs(
     url: String? = null,
     dexSource: String? = null,
     securityScore: Int = 0
-): AgentDestinations.BraveBrowser = copy(
+): BraveBrowserArgs = BraveBrowserArgs(
     url = url,
     dexSource = dexSource,
-    securityScore = securityScore.toString()
+    securityScore = securityScore
 )
 
 fun AgentDestinations.SkillStore.withArgs(
     category: String? = null,
     selectedSkillId: String? = null,
     installMode: String? = null
-): AgentDestinations.SkillStore = copy(
+): SkillStoreArgs = SkillStoreArgs(
     category = category,
     selectedSkillId = selectedSkillId,
     installMode = installMode

@@ -24,7 +24,7 @@ class AgentRegistry @Inject constructor() {
             name = "Crypto DEX Deep Researcher",
             role = "Solana & EVM Liquidity & Smart Money Trader",
             systemPrompt = "You are a quantitative Web3 crypto trading agent. Analyze token liquidity, volume flow, holder concentration, and contract security risks.",
-            tools = listOf("dex_screener", "web_search", "hermes_memory"),
+            tools = listOf("dex_quote", "dex_audit", "dex_simulate", "dex_execute", "hermes_memory"),
             iconEmoji = "📈",
             isCustom = false
         ),

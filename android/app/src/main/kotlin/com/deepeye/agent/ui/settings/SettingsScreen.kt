@@ -2,7 +2,6 @@ package com.deepeye.agent.ui.settings
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,19 +22,18 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.RenderEffect
-import androidx.compose.ui.graphics.Shader
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import com.deepeye.agent.ui.theme.DeepEyeTheme
+import com.deepeye.agent.ui.theme.CyberCyan
 import com.deepeye.agent.ui.components.GlassCard
 import androidx.compose.animation.core.*
 import androidx.compose.runtime.remember
@@ -78,21 +76,30 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = androidx.hilt.navigation.compose.hiltViewModel()
 ) {
     Scaffold(
-        containerColor = Color.Transparent,
+        containerColor = Color(0xFF070A12),
         topBar = {
-            TopAppBar(
-                title = {
+            Surface(
+                color = Color(0xF2070A12),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)))
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+            ) {
+                Column {
                     Text(
-                        "Settings",
-                        color = MaterialTheme.colorScheme.onSurface,
-                        style = MaterialTheme.typography.headlineSmall
+                        text = "System & Engine Settings",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                        color = Color.White
                     )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent,
-                    scrolledContainerColor = Color(0x40000000)
-                )
-            )
+                    Text(
+                        text = "Hardware Delegates, Zero-Blur Mode, Policy & Telemetry",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = CyberCyan
+                    )
+                }
+            }
         }
     ) { padding ->
         LazyColumn(
@@ -147,6 +154,15 @@ fun SettingsScreen(
                 FuturisticSettingCard {
                     FuturisticToggleRow(
                         icon = Icons.Default.Speed,
+                        title = "Zero-Blur & Performance Mode",
+                        subtitle = "Bypass GPU shader loops for ultra-low latency",
+                        checked = true,
+                        onCheckedChange = { },
+                        accentColor = com.deepeye.agent.ui.theme.CyberCyan
+                    )
+                    HorizontalDivider(color = DeepEyeTheme.colors.glassBorder)
+                    FuturisticToggleRow(
+                        icon = Icons.Default.Tune,
                         title = "Auto Update Skills",
                         subtitle = "Sync local skill updates",
                         checked = state.autoUpdateSkills,
@@ -195,11 +211,10 @@ fun SettingsScreen(
             // Storage & System Models
             item { FuturisticSectionHeader("Storage & System Models", Icons.Default.Storage) }
             item {
-                FuturisticSettingCard {
+                FuturisticSettingCard(onClick = onManageModels) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onManageModels() }
                             .padding(16.dp)
                     ) {
                         Row(
@@ -347,8 +362,12 @@ private fun FuturisticSectionHeader(title: String, icon: androidx.compose.ui.gra
 }
 
 @Composable
-private fun FuturisticSettingCard(content: @Composable ColumnScope.() -> Unit) {
+private fun FuturisticSettingCard(
+    onClick: (() -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit
+) {
     GlassCard(
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
             .border(
@@ -388,22 +407,12 @@ private fun FuturisticToggleRow(
     accentColor: Color,
     glowEnabled: Boolean = false
 ) {
-    val infiniteTransition = rememberInfiniteTransition()
-    val glowAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.3f,
-        targetValue = 0.7f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2000, easing = EaseInOut),
-            repeatMode = RepeatMode.Reverse
-        )
-    )
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(
                 color = if (checked && glowEnabled) {
-                    accentColor.copy(alpha = glowAlpha * 0.1f)
+                    accentColor.copy(alpha = 0.08f)
                 } else {
                     Color.Transparent
                 }
@@ -455,13 +464,15 @@ private fun FuturisticSliderControl(
     steps: Int,
     accentColor: Color
 ) {
+    var sliderPosition by remember(value) { androidx.compose.runtime.mutableStateOf(value) }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
     ) {
         Text(
-            "$title: ${value.toInt()}",
+            "$title: ${sliderPosition.toInt()}",
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
@@ -473,8 +484,9 @@ private fun FuturisticSliderControl(
         )
         Spacer(Modifier.height(12.dp))
         Slider(
-            value = value,
-            onValueChange = onValueChange,
+            value = sliderPosition,
+            onValueChange = { sliderPosition = it },
+            onValueChangeFinished = { onValueChange(sliderPosition) },
             valueRange = valueRange,
             steps = steps,
             colors = SliderDefaults.colors(

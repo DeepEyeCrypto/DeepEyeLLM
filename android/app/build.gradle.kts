@@ -30,36 +30,10 @@ android {
                     "-DANDROID_ARM_NEON=ON",
                     "-DANDROID_PLATFORM=android-28",
                     "-DCMAKE_BUILD_TYPE=Release",
-                    "-DCMAKE_CXX_FLAGS_RELEASE=-O3 -fno-finite-math-only -march=armv8.2-a+dotprod+fp16"
+                    "-DCMAKE_CXX_FLAGS_RELEASE=-O3 -fno-finite-math-only -march=armv8.2-a+dotprod+fp16",
+                    "-DGGML_VULKAN=ON",
+                    "-DVulkan_GLSLC_EXECUTABLE=/usr/local/bin/glslc"
                 )
-            }
-        }
-    }
-
-    flavorDimensions += "backend"
-    productFlavors {
-        create("vulkan") {
-            dimension = "backend"
-            externalNativeBuild {
-                cmake {
-                    arguments += listOf("-DGGML_VULKAN=ON", "-DVulkan_GLSLC_EXECUTABLE=/usr/local/bin/glslc")
-                }
-            }
-        }
-        create("opencl") {
-            dimension = "backend"
-            externalNativeBuild {
-                cmake {
-                    arguments += listOf("-DGGML_OPENCL=ON")
-                }
-            }
-        }
-        create("qnn") {
-            dimension = "backend"
-            externalNativeBuild {
-                cmake {
-                    arguments += listOf("-DGGML_QNN=ON")
-                }
             }
         }
     }

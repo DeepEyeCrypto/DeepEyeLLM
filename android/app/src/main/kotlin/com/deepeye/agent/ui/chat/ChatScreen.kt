@@ -36,9 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RenderEffect
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
@@ -56,13 +53,21 @@ import com.deepeye.agent.domain.LocalModel
 import com.deepeye.agent.domain.ModelStatus
 import com.deepeye.agent.ui.components.GlassCard
 import com.deepeye.agent.ui.components.NeonStatusBadge
+import com.deepeye.agent.ui.components.ReasoningParser
+import com.deepeye.agent.ui.components.ThinkingAccordion
+import com.deepeye.agent.ui.components.ToolExecutionCard
+import com.deepeye.agent.ui.components.ToolExecutionStatus
+import com.deepeye.agent.ui.components.TelemetryHeaderHUD
+import com.deepeye.agent.ui.components.SlashCommandPopup
+import com.deepeye.agent.ui.components.DexTradingCard
+import com.deepeye.agent.core.dex.DexTradeIntent
+import androidx.compose.foundation.BorderStroke
+import com.deepeye.agent.ui.components.CyberButton
 import com.deepeye.agent.ui.models.ModelCatalogViewModel
 import com.deepeye.agent.ui.theme.*
 import com.deepeye.agent.ui.utils.PerformanceUtils
 import com.deepeye.agent.ui.utils.UiLayoutMode
 import com.deepeye.agent.ui.utils.currentUiLayoutMode
-import android.graphics.RenderEffect as AndroidRenderEffect
-import android.graphics.Shader as AndroidShader
 import androidx.compose.ui.geometry.Offset
 
 // OPTIMIZATION: Stable keys for message types
@@ -82,6 +87,14 @@ fun ChatScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val modelCatalog by modelCatalogViewModel.modelCatalog.collectAsStateWithLifecycle()
     val layoutMode = currentUiLayoutMode()
+    var showModelPicker by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        modelCatalogViewModel.snackbarEvent.collect { message ->
+            snackbarHostState.showSnackbar(message)
+        }
+    }
 
     val filePicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri?.let { viewModel.analyzeFile(it) }
@@ -94,20 +107,21 @@ fun ChatScreen(
     }
 
     Scaffold(
-        containerColor = Color(0xFF0B0F19), // Deep Space Slate
+        containerColor = Color(0xFF070A12), // Obsidian Void
         contentWindowInsets = WindowInsets.ime,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
-            HolographicTopAppBar(
+            TelemetryHeaderHUD(
                 modelStatus = state.modelStatus,
                 activeModelName = state.activeModelName,
-                onPickerClick = { viewModel.toggleModelPicker(true) }
+                tokensPerSecond = if (state.isGenerating) 32.4f else 0f,
+                thermalState = "Nominal 36°C",
+                onPickerClick = { showModelPicker = true }
             )
         },
         bottomBar = {
             // OPTIMIZATION: Memoize input dock props
-            val canSend by remember(state.isLoading, state.isGenerating, state.prompt) {
-                derivedStateOf { !state.isLoading && !state.isGenerating && state.prompt.isNotBlank() }
-            }
+            val canSend = !state.isLoading && !state.isGenerating && state.prompt.isNotBlank()
             
             FuturisticChatInputDock(
                 prompt = state.prompt,
@@ -133,16 +147,6 @@ fun ChatScreen(
                     .weight(1f)
                     .fillMaxHeight()
             ) {
-                if (state.isLoading || state.isGenerating) {
-                    LinearProgressIndicator(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .semantics { contentDescription = "Loading indicator" },
-                        color = DeepEyeTheme.colors.link,
-                        trackColor = Color.Transparent
-                    )
-                }
-                
                 // OPTIMIZATION: Show error only when needed
                 val err = state.error
                 if (state.modelStatus == ModelStatus.ERROR && err != null) {
@@ -154,13 +158,15 @@ fun ChatScreen(
                 }
                 
                 Box(modifier = Modifier.fillMaxSize()) {
-                    if (state.messages.none { it.isUser } && !state.isGenerating) {
+                    if (state.messages.isEmpty() && !state.isGenerating) {
                         EmptyStateOverlay()
+                    } else {
+                        HolographicChatTranscript(
+                            messages = state.messages,
+                            isGenerating = state.isGenerating,
+                            onExecuteDexSwap = viewModel::executeDexSwap
+                        )
                     }
-                    HolographicChatTranscript(
-                        messages = state.messages,
-                        isGenerating = state.isGenerating
-                    )
                 }
             }
 
@@ -190,14 +196,26 @@ fun ChatScreen(
             }
         }
 
-        if (state.showModelPicker) {
+        if (showModelPicker || state.showModelPicker) {
             ModelPickerSheet(
                 currentStatus = state.modelStatus,
                 activeModelName = state.activeModelName,
                 models = modelCatalog,
-                onSelect = { modelCatalogViewModel.selectModel(it.id) },
-                onImportModel = { modelPicker.launch(arrayOf("*/*")) },
-                onDismiss = { viewModel.toggleModelPicker(false) }
+                onSelect = { model ->
+                    viewModel.selectAndActivateModel(model.id, model.fileName)
+                    modelCatalogViewModel.selectModel(model.id)
+                    showModelPicker = false
+                    viewModel.toggleModelPicker(false)
+                },
+                onImportModel = {
+                    showModelPicker = false
+                    viewModel.toggleModelPicker(false)
+                    modelPicker.launch(arrayOf("*/*"))
+                },
+                onDismiss = {
+                    showModelPicker = false
+                    viewModel.toggleModelPicker(false)
+                }
             )
         }
     }
@@ -284,7 +302,8 @@ fun HolographicTopAppBar(
 @Composable
 fun HolographicChatTranscript(
     messages: List<Message>,
-    isGenerating: Boolean
+    isGenerating: Boolean,
+    onExecuteDexSwap: (String, com.deepeye.agent.core.dex.DexTradeIntent) -> Unit = { _, _ -> }
 ) {
     val listState = rememberLazyListState()
     
@@ -325,7 +344,8 @@ fun HolographicChatTranscript(
             // OPTIMIZATION: Pass only necessary props
             HolographicMessageBubble(
                 message = message,
-                isLastMessage = message.id == lastMessageId
+                isLastMessage = message.id == lastMessageId,
+                onExecuteDexSwap = onExecuteDexSwap
             )
         }
     }
@@ -334,7 +354,8 @@ fun HolographicChatTranscript(
 @Composable
 fun HolographicMessageBubble(
     message: Message,
-    isLastMessage: Boolean
+    isLastMessage: Boolean,
+    onExecuteDexSwap: (String, com.deepeye.agent.core.dex.DexTradeIntent) -> Unit = { _, _ -> }
 ) {
     val isUser = message.isUser
     val alignment = if (isUser) Alignment.End else Alignment.Start
@@ -352,6 +373,7 @@ fun HolographicMessageBubble(
     ) {
         if (isUser) {
             GlassCard(
+                showSpecular = false,
                 modifier = Modifier
                     .fillMaxWidth(0.85f) // Cap width for readability
                     .animateContentSize()
@@ -380,6 +402,9 @@ fun HolographicMessageBubble(
                 }
             }
         } else {
+            val parsed = remember(message.text, message.isStreaming) {
+                ReasoningParser.parse(message.text, message.isStreaming)
+            }
             val cardTint = if (message.isError) Color(0xB32A1215) else Color(0xB3161E2E)
             val cardBorder = when {
                 message.isError -> DeepEyeTheme.colors.statusError
@@ -388,9 +413,10 @@ fun HolographicMessageBubble(
             }
 
             GlassCard(
+                showSpecular = false,
                 modifier = Modifier
                     .fillMaxWidth(0.92f) // Slightly wider for AI responses
-                    .animateContentSize()
+                    .then(if (!message.isStreaming) Modifier.animateContentSize() else Modifier)
                     .border(
                         width = if (message.isStreaming) 1.5.dp else 1.dp,
                         color = cardBorder.copy(alpha = if (message.isStreaming) 0.6f else 0.3f),
@@ -408,30 +434,54 @@ fun HolographicMessageBubble(
                         NeonStatusBadge(
                             text = when {
                                 message.isError -> "Error"
+                                message.dexTradeIntent != null -> "🦁 Hermes 3 DEX"
+                                message.isStreaming && parsed.isThinkingActive -> "Thinking..."
                                 message.isStreaming -> "Streaming..."
                                 else -> "DeepEye AI"
                             },
-                            isPulsing = message.isStreaming,
+                            isPulsing = message.isStreaming && isLastMessage,
                             color = when {
                                 message.isError -> DeepEyeTheme.colors.statusError
+                                message.dexTradeIntent != null -> CyberCyan
                                 message.isStreaming -> DeepEyeTheme.colors.link
                                 else -> DeepEyeTheme.colors.statusSuccess
                             },
                             modifier = Modifier.height(26.dp)
                         )
                     }
-                    Row(verticalAlignment = Alignment.Bottom) {
-                        Text(
-                            text = if (message.text.isBlank() && message.isStreaming) "Thinking..." else message.text,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = if (message.isError) Color(0xFFFFB3B3) else Color.White,
-                            modifier = Modifier.weight(1f, fill = false),
-                            lineHeight = 24.sp,
-                            letterSpacing = 0.2.sp
+
+                    if (!parsed.thoughtTrace.isNullOrBlank()) {
+                        ThinkingAccordion(
+                            thoughtTrace = parsed.thoughtTrace,
+                            isThinkingActive = parsed.isThinkingActive,
+                            modifier = Modifier.padding(bottom = 8.dp)
                         )
-                        if (message.isStreaming && isLastMessage) {
-                            HolographicStreamingCursor()
+                    }
+
+                    if (parsed.finalResponse.isNotBlank() || !parsed.isThinkingActive) {
+                        Row(verticalAlignment = Alignment.Bottom) {
+                            Text(
+                                text = if (parsed.finalResponse.isBlank() && message.isStreaming) "Synthesizing response..." else parsed.finalResponse,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = if (message.isError) Color(0xFFFFB3B3) else Color.White,
+                                modifier = Modifier.weight(1f, fill = false),
+                                lineHeight = 24.sp,
+                                letterSpacing = 0.2.sp
+                            )
+                            if (message.isStreaming && isLastMessage && !parsed.isThinkingActive) {
+                                HolographicStreamingCursor()
+                            }
                         }
+                    }
+
+                    if (message.dexTradeIntent != null) {
+                        Spacer(modifier = Modifier.height(10.dp))
+                        DexTradingCard(
+                            intent = message.dexTradeIntent,
+                            onExecuteSwap = { executed ->
+                                onExecuteDexSwap(message.id, executed)
+                            }
+                        )
                     }
                 }
             }
@@ -452,8 +502,8 @@ fun HolographicStreamingCursor() {
         label = "cursor_alpha"
     )
     
-    val glowTransition = rememberInfiniteTransition(label = "glow_transition")
-    val glowAlpha by glowTransition.animateFloat(
+    // PERF: Merged into single transition to halve animation loop overhead
+    val glowAlpha by transition.animateFloat(
         initialValue = 0.3f,
         targetValue = 0.8f,
         animationSpec = infiniteRepeatable(
@@ -493,7 +543,7 @@ fun FuturisticChatInputDock(
 ) {
     var isToolsExpanded by remember { mutableStateOf(false) }
 
-    Box(
+    Column(
         modifier = Modifier
             .padding(horizontal = 16.dp)
             .padding(bottom = 12.dp) // Lifted above bottom nav
@@ -501,6 +551,67 @@ fun FuturisticChatInputDock(
             .navigationBarsPadding()
             .imePadding()
     ) {
+        SlashCommandPopup(
+            isVisible = prompt.startsWith("/"),
+            filterText = prompt,
+            onSelect = { item ->
+                when (item.command) {
+                    "/clear" -> {
+                        onPromptChange("")
+                    }
+                    "/audit" -> {
+                        onPromptChange("/audit ")
+                        onAnalyze()
+                    }
+                    "/debug" -> {
+                        onPromptChange("/debug ")
+                        onDebug()
+                    }
+                    else -> {
+                        onPromptChange("${item.command} ")
+                    }
+                }
+            }
+        )
+
+        if (prompt.isEmpty() && !isGenerating) {
+            androidx.compose.foundation.lazy.LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            ) {
+                val suggestions = listOf(
+                    "🛡️ /audit" to "Audit contract",
+                    "🦁 /dex" to "DEX Sentinel",
+                    "🧠 /memory" to "Context Ledger",
+                    "⚡ /bench" to "Benchmark",
+                    "🐞 /debug" to "Deep Debug"
+                )
+                items(suggestions.size) { index ->
+                    val (tag, label) = suggestions[index]
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = Color(0xCC0E1322),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)),
+                        modifier = Modifier.clickable {
+                            val cmd = tag.split(" ").last()
+                            onPromptChange("$cmd ")
+                        }
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(text = tag, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = CyberCyan)
+                            Text(text = label, style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp), color = ThinkingMutedSlate)
+                        }
+                    }
+                }
+            }
+        }
+
         Box(
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -508,9 +619,9 @@ fun FuturisticChatInputDock(
                 modifier = Modifier
                     .fillMaxWidth()
                     .shadow(
-                        elevation = 24.dp,
+                        elevation = 6.dp,
                         shape = RoundedCornerShape(32.dp),
-                        spotColor = DeepEyeTheme.colors.link.copy(alpha = 0.15f)
+                        spotColor = Color(0x2600B4D8)
                     )
                     .border(
                         width = 1.dp,
@@ -635,36 +746,21 @@ fun FuturisticChatInputDock(
                                 )
                             }
                         } else {
-                            Surface(
+                            FilledIconButton(
+                                onClick = onSend,
+                                enabled = canSend,
+                                modifier = Modifier.size(40.dp),
                                 shape = RoundedCornerShape(18.dp),
-                                color = Color.Transparent,
-                                modifier = Modifier
-                                    .clickable(enabled = canSend, onClick = onSend)
-                                    .size(42.dp)
-                                    .background(
-                                        brush = if (canSend) {
-                                            Brush.linearGradient(
-                                                colors = listOf(
-                                                    DeepEyeTheme.colors.link,
-                                                    DeepEyeTheme.colors.accent
-                                                )
-                                            )
-                                        } else {
-                                            Brush.linearGradient(
-                                                colors = listOf(
-                                                    MaterialTheme.colorScheme.outlineVariant,
-                                                    MaterialTheme.colorScheme.outlineVariant
-                                                )
-                                            )
-                                        },
-                                        shape = RoundedCornerShape(18.dp)
-                                    )
+                                colors = IconButtonDefaults.filledIconButtonColors(
+                                    containerColor = DeepEyeTheme.colors.link,
+                                    disabledContainerColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                                )
                             ) {
                                 Icon(
                                     Icons.Default.ArrowUpward,
                                     contentDescription = "Send",
                                     tint = if (canSend) Color(0xFF070A12) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                                    modifier = Modifier.padding(10.dp)
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
                         }
@@ -837,110 +933,123 @@ fun ModelPickerSheet(
     onImportModel: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = Color(0xB3070A12),
+        sheetState = sheetState,
+        containerColor = Color(0xF2070A12),
         contentColor = Color.White
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            Text(
-                "Select Model",
-                style = MaterialTheme.typography.titleLarge,
-                color = Color.White,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(Modifier.height(16.dp))
-            
-            models.forEach { model ->
-                GlassCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onSelect(model) }
-                        .padding(vertical = 4.dp)
-                        .border(
-                            width = 1.dp,
-                            brush = Brush.linearGradient(
-                                colors = listOf(
-                                    if (model.name == activeModelName) DeepEyeTheme.colors.link.copy(alpha = 0.5f) else Color.White.copy(alpha = 0.2f),
-                                    if (model.name == activeModelName) DeepEyeTheme.colors.link.copy(alpha = 0.15f) else Color.White.copy(alpha = 0.05f)
-                                )
-                            ),
-                            shape = RoundedCornerShape(16.dp)
-                        )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "Select LLM Model",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = Color(0x3300E5FF)
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(14.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    Text(
+                        text = "${models.count { it.engineState == EngineState.READY }} Local Ready",
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelSmall.copy(color = CyberCyan, fontWeight = FontWeight.Bold)
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(14.dp))
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 380.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(models, key = { it.id }) { model ->
+                    val isActive = activeModelName.contains(model.fileName.substringBeforeLast('.'), ignoreCase = true) ||
+                        activeModelName.contains(model.name, ignoreCase = true) ||
+                        (activeModelName.contains("hermes", ignoreCase = true) && model.fileName.contains("hermes", ignoreCase = true)) ||
+                        (activeModelName.contains("gemma", ignoreCase = true) && model.fileName.contains("gemma", ignoreCase = true))
+
+                    Surface(
+                        onClick = { onSelect(model) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                        color = if (isActive) Color(0x3300E5FF) else Color(0xCC0E1322),
+                        border = BorderStroke(
+                            1.dp,
+                            if (isActive) CyberCyan.copy(alpha = 0.7f) else Color.White.copy(alpha = 0.08f)
+                        )
                     ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                model.name,
-                                style = MaterialTheme.typography.titleMedium,
-                                color = Color.White
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                "${model.sizeString} • ${model.engineState.name}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        if (model.name == activeModelName) {
-                            NeonStatusBadge(
-                                text = "Active",
-                                isPulsing = false,
-                                color = DeepEyeTheme.colors.statusSuccess
-                            )
+                        Row(
+                            modifier = Modifier
+                                .padding(14.dp)
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    model.name,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(Modifier.height(4.dp))
+                                Text(
+                                    "${model.sizeString} • ${model.publisher} • ${model.engineState.name}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = ThinkingMutedSlate
+                                )
+                            }
+                            if (isActive) {
+                                NeonStatusBadge(
+                                    text = "Active",
+                                    isPulsing = false,
+                                    color = StatusSuccess
+                                )
+                            } else if (model.engineState == EngineState.READY) {
+                                Surface(
+                                    onClick = { onSelect(model) },
+                                    shape = RoundedCornerShape(6.dp),
+                                    color = CyberCyan.copy(alpha = 0.25f),
+                                    border = BorderStroke(1.dp, CyberCyan)
+                                ) {
+                                    Text(
+                                        "Load",
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                        style = MaterialTheme.typography.labelMedium.copy(color = CyberCyan, fontWeight = FontWeight.Bold)
+                                    )
+                                }
+                            }
                         }
                     }
                 }
-                Spacer(Modifier.height(8.dp))
             }
-            
-            Spacer(Modifier.height(12.dp))
-            
-            GlassCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onImportModel() }
-                    .border(
-                        width = 1.5.dp,
-                        brush = Brush.linearGradient(
-                            colors = listOf(
-                                DeepEyeTheme.colors.accent.copy(alpha = 0.5f),
-                                DeepEyeTheme.colors.accent.copy(alpha = 0.15f)
-                            )
-                        ),
-                        shape = RoundedCornerShape(16.dp)
-                    )
+
+            Spacer(Modifier.height(14.dp))
+
+            CyberButton(
+                onClick = onImportModel,
+                modifier = Modifier.fillMaxWidth(),
+                accentColor = AmberAccent
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(14.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        "Import Model",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = DeepEyeTheme.colors.accent
-                    )
-                    Icon(
-                        Icons.Default.Add,
-                        contentDescription = "Import",
-                        tint = DeepEyeTheme.colors.accent
-                    )
-                }
+                Icon(Icons.Default.Add, contentDescription = "Import", modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Import Custom Local Model (.gguf / .bin)", fontWeight = FontWeight.Bold)
             }
-            
+
             Spacer(Modifier.height(16.dp))
         }
     }

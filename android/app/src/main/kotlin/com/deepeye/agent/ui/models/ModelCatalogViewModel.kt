@@ -154,25 +154,34 @@ class ModelCatalogViewModel @Inject constructor(
         refreshCatalog()
     }
 
-    fun selectModel(modelId: String) = viewModelScope.launch {
-        val model = _modelCatalog.value.find { it.id == modelId } ?: return@launch
+    fun selectModel(modelId: String) = viewModelScope.launch(Dispatchers.IO) {
+        Log.d("DeepEye", "{\"event\":\"select_model_called\", \"id\":\"$modelId\"}")
+        val model = _modelCatalog.value.find { it.id == modelId }
         val modelsDir = File(engineController.context.filesDir, "models")
-        val destFile = File(modelsDir, model.fileName)
+        var destFile = if (model != null) File(modelsDir, model.fileName) else null
 
-        if (!isSupportedFormat(model.fileName)) {
-            val ext = model.fileName.substringAfterLast('.', "unknown").uppercase()
-            _snackbarEvent.tryEmit("$ext format not supported on this engine.")
-            return@launch
+        if (destFile == null || !destFile.exists()) {
+            val matching = modelsDir.listFiles()?.find {
+                it.name.equals(modelId, ignoreCase = true) ||
+                it.nameWithoutExtension.equals(modelId, ignoreCase = true) ||
+                (model != null && it.name.equals(model.fileName, ignoreCase = true)) ||
+                (model != null && it.nameWithoutExtension.equals(model.fileName.substringBeforeLast('.'), ignoreCase = true)) ||
+                (model != null && model.fileName.contains("gemma", ignoreCase = true) && it.name.contains("gemma", ignoreCase = true)) ||
+                (model != null && model.fileName.contains("hermes", ignoreCase = true) && it.name.contains("hermes", ignoreCase = true))
+            }
+            if (matching != null) destFile = matching
         }
 
-        if (destFile.exists() && destFile.length() > 1_000_000L) {
+        if (destFile != null && destFile.exists() && destFile.length() > 1_000_000L) {
+            Log.d("DeepEye", "{\"event\":\"reinitializing_with_model\", \"path\":\"${destFile.absolutePath}\"}")
             val (_, msg) = engineController.reinitializeWithModel(destFile.absolutePath)
             _snackbarEvent.tryEmit(msg)
-        } else if (model.downloadUrl.isNotBlank()) {
+            refreshCatalog()
+        } else if (model != null && model.downloadUrl.isNotBlank()) {
             _snackbarEvent.tryEmit("Starting download for ${model.name}...")
             downloadModel(modelId)
         } else {
-            _snackbarEvent.tryEmit("No local file for ${model.name}. Tap 'Import Custom Local Model' to load a .bin or .gguf binary.")
+            _snackbarEvent.tryEmit("No local file for model. Tap 'Import Model' to load a .bin or .gguf binary.")
         }
     }
 

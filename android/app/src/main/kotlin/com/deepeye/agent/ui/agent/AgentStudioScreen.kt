@@ -28,13 +28,18 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import com.deepeye.agent.core.agent.AgentSpec
 import com.deepeye.agent.core.agent.ExecutionPhase
+import com.deepeye.agent.ui.components.CyberButton
+import com.deepeye.agent.ui.components.CyberCardHeader
+import com.deepeye.agent.ui.components.DagExecutionNode
+import com.deepeye.agent.ui.components.DagNodeStatus
 import com.deepeye.agent.ui.components.GlassCard
 import com.deepeye.agent.ui.components.GlassCardElevated
 import com.deepeye.agent.ui.components.NeonStatusBadge
-import com.deepeye.agent.ui.components.CyberCardHeader
-import com.deepeye.agent.ui.components.CyberButton
+import com.deepeye.agent.ui.components.VisualDagExecutionCard
+import com.deepeye.agent.ui.theme.*
 import com.deepeye.agent.ui.utils.UiLayoutMode
 import com.deepeye.agent.ui.utils.currentUiLayoutMode
 
@@ -112,41 +117,56 @@ fun AgentStudioScreen(
     }
 
     Scaffold(
+        containerColor = Color(0xFF070A12),
         topBar = {
-            TopAppBar(
-                modifier = Modifier.statusBarsPadding(),
-                title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "⚡ AI Agent Studio",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = if (layoutMode != UiLayoutMode.COMPACT) 22.sp else 18.sp,
-                            modifier = Modifier.semantics { heading() }
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Surface(
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.primaryContainer
-                        ) {
+            Surface(
+                color = Color(0xF2070A12),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)))
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = "Deep Research Engine",
-                                fontSize = 10.sp,
+                                text = "Autonomous Agent Studio",
+                                style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                color = Color.White,
+                                modifier = Modifier.semantics { heading() }
                             )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Surface(
+                                shape = RoundedCornerShape(4.dp),
+                                color = CyberCyan.copy(alpha = 0.15f)
+                            ) {
+                                Text(
+                                    text = "DAG ENGINE",
+                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp, fontWeight = FontWeight.Bold),
+                                    color = CyberCyan,
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                                )
+                            }
                         }
+                        Text(
+                            text = "Multi-Step Deterministic Planning & Dynamic Execution",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = ThinkingMutedSlate
+                        )
                     }
-                },
-                actions = {
+
                     IconButton(onClick = { viewModel.toggleCreatorDialog(true) }) {
-                        Icon(Icons.Default.Add, contentDescription = "Create Custom Agent", tint = MaterialTheme.colorScheme.primary)
+                        Icon(Icons.Default.Add, contentDescription = "Create Custom Agent", tint = CyberCyan)
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
-            )
-        },
-        containerColor = Color.Transparent
+                }
+            }
+        }
     ) { padding ->
         if (layoutMode == UiLayoutMode.COMPACT) {
             AgentStudioCompactLayout(
@@ -414,49 +434,46 @@ private fun ResearchQuerySection(
 
 @Composable
 private fun ExecutionTraceSection(state: AgentStudioUiState) {
-    if (state.isExecuting) {
-        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-        Spacer(modifier = Modifier.height(8.dp))
+    val dagNodes = remember(state.executionSteps, state.isExecuting) {
+        if (state.executionSteps.isNotEmpty()) {
+            state.executionSteps.mapIndexed { index, step ->
+                DagExecutionNode(
+                    id = "step_$index",
+                    title = step.title,
+                    subtitle = step.detail,
+                    status = when {
+                        index < state.executionSteps.size - 1 -> DagNodeStatus.COMPLETED
+                        state.isExecuting -> DagNodeStatus.RUNNING
+                        else -> DagNodeStatus.COMPLETED
+                    },
+                    durationMs = (120L * (index + 1)),
+                    tokensUsed = 48 * (index + 1)
+                )
+            }
+        } else {
+            listOf(
+                DagExecutionNode("d1", "Context Ingestion & Intent Analysis", "Deconstruct user directive and select tools", DagNodeStatus.PENDING),
+                DagExecutionNode("d2", "Static Policy & AST Scan", "Enforce zero-trust permission gate", DagNodeStatus.PENDING),
+                DagExecutionNode("d3", "Autonomous Tool Execution", "Invoke local tools & RAG indexes", DagNodeStatus.PENDING),
+                DagExecutionNode("d4", "Verification Gate Checkpoint", "Validate output against acceptance invariants", DagNodeStatus.PENDING),
+                DagExecutionNode("d5", "Synthesis & Episodic Memory Update", "Commit validated result to long-term memory", DagNodeStatus.PENDING)
+            )
+        }
     }
 
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.fillMaxSize()
+    var isPaused by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(vertical = 4.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        itemsIndexed(state.executionSteps, key = { index, _ -> "step_$index" }) { index, step ->
-            GlassCardElevated(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Surface(
-                        shape = CircleShape,
-                        color = Color(0x2200E5FF),
-                        border = BorderStroke(1.dp, Color(0xFF00E5FF)),
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text("${index + 1}", color = Color(0xFF00E5FF), fontWeight = FontWeight.Bold)
-                        }
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            step.title,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 13.sp,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            step.detail,
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    NeonStatusBadge(text = step.phase.name, color = Color(0xFF00E5FF))
-                }
-            }
-        }
+        VisualDagExecutionCard(
+            nodes = dagNodes,
+            planTitle = if (state.isExecuting) "Executing: ${state.selectedAgent?.name ?: "Agent"}" else "Autonomous Workflow Pipeline",
+            onPauseToggle = { isPaused = !isPaused },
+            isPaused = isPaused
+        )
     }
 }

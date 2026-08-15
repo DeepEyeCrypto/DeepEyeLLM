@@ -54,51 +54,17 @@ fun AgentAppShell(
         navigationSuiteItems = {
             agentDestinationsList.forEach { destination ->
                 val isSelected = currentRoute == destination.route
-                val itemTint = if (isSelected) Color(0xFF00E5FF) else unselectedColor
+                val itemTint = if (isSelected) com.deepeye.agent.ui.theme.CyberCyan else unselectedColor
 
                 item(
                     selected = isSelected,
                     onClick = {
-                        when (destination) {
-                            is AgentDestinations.BraveBrowser -> {
-                                navController.navigate(
-                                    AgentDestinations.BraveBrowser().withArgs(
-                                        url = "https://example.com",
-                                        dexSource = "DexScreener",
-                                        securityScore = 98
-                                    )
-                                ) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
+                        navController.navigate(destination.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
                             }
-                            is AgentDestinations.SkillStore -> {
-                                navController.navigate(
-                                    AgentDestinations.SkillStore().withArgs(
-                                        category = "AI Agents",
-                                        selectedSkillId = "skill_123",
-                                        installMode = "INSTALL"
-                                    )
-                                ) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            }
-                            else -> {
-                                navController.navigate(destination.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            }
+                            launchSingleTop = true
+                            restoreState = true
                         }
                     },
                     icon = {

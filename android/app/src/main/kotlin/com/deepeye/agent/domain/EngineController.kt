@@ -53,6 +53,7 @@ class EngineController(
 
     suspend fun reinitializeWithModel(newModelPath: String): Pair<ModelStatus, String> {
         val modelId = java.io.File(newModelPath).nameWithoutExtension
+        _engineStatus.update { EngineStatus(ModelStatus.LOCAL_ACTIVE, "Loading $modelId...", "Initializing model $modelId...") }
         android.util.Log.d("DeepEye", "{\"event\":\"engine_load_started\", \"model_id\":\"$modelId\"}")
         return runCatching<Pair<ModelStatus, String>> {
             val file = java.io.File(newModelPath)
@@ -67,8 +68,8 @@ class EngineController(
             val totalRamGb = memoryInfo.totalMem.toDouble() / (1024 * 1024 * 1024)
             val modelSizeGb = file.length().toDouble() / (1024 * 1024 * 1024)
             
-            // Hard cap for mobile LMK safety: max 2.1GB on <=7GB devices
-            val maxAllowedModelGb = if (totalRamGb <= 7.5) 2.1 else (totalRamGb - 2.5)
+            // GGUF mmap runtime: kernel memory-maps layer weights on demand
+            val maxAllowedModelGb = (totalRamGb - 1.0).coerceAtLeast(3.8)
             
             if (modelSizeGb > maxAllowedModelGb && totalRamGb > 0) {
                 throw Exception("Model size (%.2f GB) exceeds mobile RAM safety limit (%.1f GB)".format(modelSizeGb, maxAllowedModelGb))

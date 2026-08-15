@@ -2,6 +2,7 @@ package com.deepeye.agent.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -32,11 +33,13 @@ import com.deepeye.agent.ui.utils.rememberIsReduceTransparencyEnabled
 @Composable
 fun GlassCard(
     modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
     isActive: Boolean = false,
     tintColor: Color? = null,
     borderColor: Color? = null,
     shape: Shape = RoundedCornerShape(16.dp),
     elevation: Dp = 0.dp,
+    showSpecular: Boolean = true,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val colors = DeepEyeTheme.colors
@@ -52,10 +55,14 @@ fun GlassCard(
     val border = borderColor ?: if (isActive) colors.glassBorderActive else colors.glassBorder
     val borderWidth = if (isActive) 1.5.dp else 1.dp
 
+    val cardModifier = if (onClick != null) {
+        modifier.fillMaxWidth().clickable(onClick = onClick)
+    } else {
+        modifier.fillMaxWidth()
+    }
+
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .accessibleFocusRing(shapeRadius = 16.dp),
+        modifier = cardModifier,
         shape = shape,
         colors = CardDefaults.cardColors(
             containerColor = containerColor
@@ -67,7 +74,7 @@ fun GlassCard(
             modifier = Modifier.drawWithContent {
                 drawContent()
                 // Volumetric specular top-highlight line for glass depth
-                if (!isReduceTransparency) {
+                if (showSpecular && !isReduceTransparency) {
                     drawRect(
                         brush = Brush.verticalGradient(
                             colors = listOf(Color.White.copy(alpha = 0.12f), Color.Transparent),
