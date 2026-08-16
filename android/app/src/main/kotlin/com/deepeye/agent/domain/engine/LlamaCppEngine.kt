@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.withLock
 import java.io.File
 
 /**
@@ -244,13 +245,23 @@ class LlamaCppEngine(
         return nativeGetPerformanceStats(nativeContextHandle)
     }
 
+    private val lifecycleMutex = kotlinx.coroutines.sync.Mutex()
+
     override suspend fun close(): Unit = withContext(Dispatchers.IO) {
-        if (isNativeLibLoaded && nativeContextHandle != 0L) {
-            nativeFreeModel(nativeContextHandle)
-            nativeContextHandle = 0L
+        lifecycleMutex.withLock {
+            val handle = nativeContextHandle
+            if (isNativeLibLoaded && handle != 0L) {
+                nativeContextHandle = 0L
+                try {
+                    nativeAbortGeneration(handle)
+                    nativeFreeModel(handle)
+                } catch (e: Throwable) {
+                    Log.e(TAG, "Error freeing native model: ${e.message}", e)
+                }
+            }
+            isInitialized = false
+            runCatching { Log.d(TAG, "GGUF engine closed.") }
         }
-        isInitialized = false
-        runCatching { Log.d(TAG, "GGUF engine closed.") }
     }
 
     // ─── Native JNI Declarations ────────────────────────────────────────────

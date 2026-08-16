@@ -114,7 +114,7 @@ fun ChatScreen(
             TelemetryHeaderHUD(
                 modelStatus = state.modelStatus,
                 activeModelName = state.activeModelName,
-                tokensPerSecond = if (state.isGenerating) 32.4f else 0f,
+                tokensPerSecond = if (state.isGenerating || state.tokensPerSecond > 0f) state.tokensPerSecond else 0f,
                 thermalState = "Nominal 36°C",
                 onPickerClick = { showModelPicker = true }
             )
@@ -203,7 +203,6 @@ fun ChatScreen(
                 models = modelCatalog,
                 onSelect = { model ->
                     viewModel.selectAndActivateModel(model.id, model.fileName)
-                    modelCatalogViewModel.selectModel(model.id)
                     showModelPicker = false
                     viewModel.toggleModelPicker(false)
                 },
@@ -977,20 +976,23 @@ fun ModelPickerSheet(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(models, key = { it.id }) { model ->
-                    val isActive = activeModelName.contains(model.fileName.substringBeforeLast('.'), ignoreCase = true) ||
-                        activeModelName.contains(model.name, ignoreCase = true) ||
-                        (activeModelName.contains("hermes", ignoreCase = true) && model.fileName.contains("hermes", ignoreCase = true)) ||
-                        (activeModelName.contains("gemma", ignoreCase = true) && model.fileName.contains("gemma", ignoreCase = true))
+                    val cleanActive = activeModelName.removePrefix("GGUF: ").removePrefix("LiteRT: ").trim()
+                    val isActive = cleanActive.equals(model.fileName.substringBeforeLast('.'), ignoreCase = true) ||
+                        cleanActive.equals(model.name, ignoreCase = true) ||
+                        cleanActive.equals(model.id, ignoreCase = true) ||
+                        cleanActive.equals(model.fileName, ignoreCase = true)
 
-                    Surface(
-                        onClick = { onSelect(model) },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp),
-                        color = if (isActive) Color(0x3300E5FF) else Color(0xCC0E1322),
-                        border = BorderStroke(
-                            1.dp,
-                            if (isActive) CyberCyan.copy(alpha = 0.7f) else Color.White.copy(alpha = 0.08f)
-                        )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(if (isActive) Color(0x3300E5FF) else Color(0xCC0E1322))
+                            .border(
+                                1.dp,
+                                if (isActive) CyberCyan.copy(alpha = 0.7f) else Color.White.copy(alpha = 0.08f),
+                                RoundedCornerShape(14.dp)
+                            )
+                            .clickable { onSelect(model) }
                     ) {
                         Row(
                             modifier = Modifier
@@ -1020,15 +1022,15 @@ fun ModelPickerSheet(
                                     color = StatusSuccess
                                 )
                             } else if (model.engineState == EngineState.READY) {
-                                Surface(
-                                    onClick = { onSelect(model) },
-                                    shape = RoundedCornerShape(6.dp),
-                                    color = CyberCyan.copy(alpha = 0.25f),
-                                    border = BorderStroke(1.dp, CyberCyan)
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(CyberCyan.copy(alpha = 0.25f))
+                                        .border(1.dp, CyberCyan, RoundedCornerShape(6.dp))
+                                        .padding(horizontal = 14.dp, vertical = 6.dp)
                                 ) {
                                     Text(
                                         "Load",
-                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                                         style = MaterialTheme.typography.labelMedium.copy(color = CyberCyan, fontWeight = FontWeight.Bold)
                                     )
                                 }

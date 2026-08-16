@@ -48,28 +48,23 @@ class ModelRepository @Inject constructor(
 
     suspend fun fetchModelCatalog(): List<ModelSpec> = withContext(Dispatchers.IO) {
         val totalRamGb = getDeviceTotalRamGb()
-        val maxAllowedRamBytes = ((totalRamGb - 1.5).coerceAtLeast(2.0)) * 1024 * 1024 * 1024L
-        Log.d(TAG, "Device total RAM: ${totalRamGb}GB. Max allowed model RAM: ${maxAllowedRamBytes / (1024*1024*1024)}GB")
+        Log.d(TAG, "Device total RAM: ${totalRamGb}GB. Fetching complete model catalog.")
 
         // 1. Fetch live HuggingFace model search API with exact siblings tree
         val hfModels = runCatching { fetchHuggingFaceCatalog() }.getOrNull()
         if (!hfModels.isNullOrEmpty()) {
-            val filtered = hfModels.filter { it.requiredRamBytes <= maxAllowedRamBytes }
-            if (filtered.isNotEmpty()) {
-                cacheCatalogLocally(filtered)
-                return@withContext filtered
-            }
+            cacheCatalogLocally(hfModels)
+            return@withContext hfModels
         }
 
-        // 2. Fallback to cached catalog filtered for device RAM
+        // 2. Fallback to cached catalog
         val cachedModels = loadCachedCatalog()
-        val filteredCached = cachedModels.filter { it.requiredRamBytes <= maxAllowedRamBytes }
-        if (filteredCached.isNotEmpty()) {
-            return@withContext filteredCached
+        if (cachedModels.isNotEmpty()) {
+            return@withContext cachedModels
         }
 
-        // 3. Fallback to default catalog filtered for device RAM
-        ModelSpec.CATALOG.filter { it.requiredRamBytes <= maxAllowedRamBytes }
+        // 3. Fallback to default catalog
+        ModelSpec.CATALOG
     }
 
     private fun fetchHuggingFaceCatalog(): List<ModelSpec> {

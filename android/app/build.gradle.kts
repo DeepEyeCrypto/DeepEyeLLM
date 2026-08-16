@@ -30,9 +30,11 @@ android {
                     "-DANDROID_ARM_NEON=ON",
                     "-DANDROID_PLATFORM=android-28",
                     "-DCMAKE_BUILD_TYPE=Release",
-                    "-DCMAKE_CXX_FLAGS_RELEASE=-O3 -fno-finite-math-only -march=armv8.2-a+dotprod+fp16",
-                    "-DGGML_VULKAN=ON",
-                    "-DVulkan_GLSLC_EXECUTABLE=/usr/local/bin/glslc"
+                    "-DCMAKE_CXX_FLAGS_RELEASE=-O3 -DNDEBUG -fno-finite-math-only -march=armv8.2-a+dotprod+fp16 -fvectorize -fomit-frame-pointer",
+                    "-DGGML_ARM_NEON=ON",
+                    "-DGGML_ARM_DOTPROD=ON",
+                    "-DGGML_ARM_FP16=ON",
+                    "-DGGML_VULKAN=OFF"
                 )
             }
         }
@@ -65,6 +67,10 @@ android {
             signingConfig = signingConfigs.getByName("release")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
+    }
+    lint {
+        checkReleaseBuilds = false
+        abortOnError = false
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

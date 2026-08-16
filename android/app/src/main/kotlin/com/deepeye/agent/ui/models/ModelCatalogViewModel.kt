@@ -158,18 +158,30 @@ class ModelCatalogViewModel @Inject constructor(
         Log.d("DeepEye", "{\"event\":\"select_model_called\", \"id\":\"$modelId\"}")
         val model = _modelCatalog.value.find { it.id == modelId }
         val modelsDir = File(engineController.context.filesDir, "models")
-        var destFile = if (model != null) File(modelsDir, model.fileName) else null
+        var destFile: File? = null
 
-        if (destFile == null || !destFile.exists()) {
-            val matching = modelsDir.listFiles()?.find {
+        if (model != null) {
+            val direct = File(modelsDir, model.fileName)
+            if (direct.exists() && direct.length() > 1_000_000L) {
+                destFile = direct
+            }
+        }
+
+        if (destFile == null) {
+            val directId = File(modelsDir, modelId)
+            if (directId.exists() && directId.length() > 1_000_000L) {
+                destFile = directId
+            }
+        }
+
+        if (destFile == null) {
+            val filesOnDisk = modelsDir.listFiles() ?: emptyArray()
+            destFile = filesOnDisk.find {
                 it.name.equals(modelId, ignoreCase = true) ||
                 it.nameWithoutExtension.equals(modelId, ignoreCase = true) ||
                 (model != null && it.name.equals(model.fileName, ignoreCase = true)) ||
-                (model != null && it.nameWithoutExtension.equals(model.fileName.substringBeforeLast('.'), ignoreCase = true)) ||
-                (model != null && model.fileName.contains("gemma", ignoreCase = true) && it.name.contains("gemma", ignoreCase = true)) ||
-                (model != null && model.fileName.contains("hermes", ignoreCase = true) && it.name.contains("hermes", ignoreCase = true))
+                (model != null && it.nameWithoutExtension.equals(model.fileName.substringBeforeLast('.'), ignoreCase = true))
             }
-            if (matching != null) destFile = matching
         }
 
         if (destFile != null && destFile.exists() && destFile.length() > 1_000_000L) {
@@ -234,7 +246,11 @@ class ModelCatalogViewModel @Inject constructor(
         val filesOnDisk = modelsDir.listFiles() ?: emptyArray()
 
         val catalogModels = specs.map { spec ->
-            val fileOnDisk = filesOnDisk.find { it.name == spec.fileName }
+            val fileOnDisk = filesOnDisk.find {
+                it.name.equals(spec.fileName, ignoreCase = true) ||
+                it.nameWithoutExtension.equals(spec.fileName.substringBeforeLast('.'), ignoreCase = true) ||
+                it.name.equals(spec.id, ignoreCase = true)
+            }
             val isDownloaded = fileOnDisk != null && fileOnDisk.length() > 1_000_000L
             val isLoadable = isSupportedFormat(spec.fileName)
             val sizeStr = if (isDownloaded) "${fileOnDisk!!.length() / (1024 * 1024)} MB" else spec.parameterCount
@@ -254,15 +270,15 @@ class ModelCatalogViewModel @Inject constructor(
                 requiredRamGb = (spec.requiredRamMb / 1024).toInt(),
                 isChinese = false,
                 downloadUrl = spec.downloadUrl ?: "",
-                fileName = spec.fileName,
+                fileName = fileOnDisk?.name ?: spec.fileName,
                 isSupportedOnDevice = isLoadable,
                 engineState = engineState,
                 downloadProgress = if (isDownloaded) 1f else 0f
             )
         }
 
-        val knownFileNames = catalogModels.map { it.fileName }.toSet()
-        val customModelsOnDisk = filesOnDisk.filter { it.name !in knownFileNames && isSupportedFormat(it.name) }.map { file ->
+        val mappedFileNames = catalogModels.filter { it.engineState == EngineState.READY }.map { it.fileName.lowercase() }.toSet()
+        val customModelsOnDisk = filesOnDisk.filter { it.name.lowercase() !in mappedFileNames && isSupportedFormat(it.name) && it.length() > 1_000_000L }.map { file ->
             LocalModel(
                 id = "custom_${file.name.hashCode()}",
                 name = file.nameWithoutExtension.replace('_', ' ').replace('-', ' '),

@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.withLock
 import com.deepeye.agent.core.datastore.SettingsDataStore
 
 /**
@@ -29,6 +30,7 @@ class EngineController(
     private val settingsDataStore: SettingsDataStore
 ) {
     private var isEngineReady = false
+    private val initMutex = kotlinx.coroutines.sync.Mutex()
 
     private val _engineStatus = MutableStateFlow(EngineStatus())
     val engineStatus: StateFlow<EngineStatus> = _engineStatus.asStateFlow()
@@ -51,78 +53,78 @@ class EngineController(
         return@withContext status to msg
     }
 
-    suspend fun reinitializeWithModel(newModelPath: String): Pair<ModelStatus, String> {
-        val modelId = java.io.File(newModelPath).nameWithoutExtension
-        _engineStatus.update { EngineStatus(ModelStatus.LOCAL_ACTIVE, "Loading $modelId...", "Initializing model $modelId...") }
-        android.util.Log.d("DeepEye", "{\"event\":\"engine_load_started\", \"model_id\":\"$modelId\"}")
-        return runCatching<Pair<ModelStatus, String>> {
-            val file = java.io.File(newModelPath)
-            if (!file.exists()) throw Exception("Model file not found")
-            if (file.name.endsWith(".tmp")) throw Exception("Cannot load incomplete .tmp model download")
+    suspend fun reinitializeWithModel(newModelPath: String): Pair<ModelStatus, String> = withContext(Dispatchers.IO) {
+        initMutex.withLock {
+            val modelId = java.io.File(newModelPath).nameWithoutExtension
+            _engineStatus.update { EngineStatus(ModelStatus.LOCAL_ACTIVE, "Loading $modelId...", "Initializing model $modelId...") }
+            android.util.Log.d("DeepEye", "{\"event\":\"engine_load_started\", \"model_id\":\"$modelId\"}")
+            try {
+                val file = java.io.File(newModelPath)
+                if (!file.exists()) throw Exception("Model file not found")
+                if (file.name.endsWith(".tmp")) throw Exception("Cannot load incomplete .tmp model download")
 
-            val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as? android.app.ActivityManager
-                ?: throw Exception("Cannot query device memory info")
-            val memoryInfo = android.app.ActivityManager.MemoryInfo()
-            activityManager.getMemoryInfo(memoryInfo)
-            
-            val totalRamGb = memoryInfo.totalMem.toDouble() / (1024 * 1024 * 1024)
-            val modelSizeGb = file.length().toDouble() / (1024 * 1024 * 1024)
-            
-            // GGUF mmap runtime: kernel memory-maps layer weights on demand
-            val maxAllowedModelGb = (totalRamGb - 1.0).coerceAtLeast(3.8)
-            
-            if (modelSizeGb > maxAllowedModelGb && totalRamGb > 0) {
-                throw Exception("Model size (%.2f GB) exceeds mobile RAM safety limit (%.1f GB)".format(modelSizeGb, maxAllowedModelGb))
+                val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as? android.app.ActivityManager
+                    ?: throw Exception("Cannot query device memory info")
+                val memoryInfo = android.app.ActivityManager.MemoryInfo()
+                activityManager.getMemoryInfo(memoryInfo)
+                
+                val totalRamGb = memoryInfo.totalMem.toDouble() / (1024 * 1024 * 1024)
+                val modelSizeGb = file.length().toDouble() / (1024 * 1024 * 1024)
+                
+                // GGUF mmap runtime: kernel memory-maps layer weights on demand
+                val maxAllowedModelGb = (totalRamGb - 1.0).coerceAtLeast(3.8)
+                
+                if (modelSizeGb > maxAllowedModelGb && totalRamGb > 0) {
+                    throw Exception("Model size (%.2f GB) exceeds mobile RAM safety limit (%.1f GB)".format(modelSizeGb, maxAllowedModelGb))
+                }
+
+                // Close existing engine and release address space before allocating next model
+                engine.close()
+                System.gc()
+
+                val settings = settingsDataStore.engineSettingsFlow.first()
+
+                // Instantiate appropriate LLMEngine
+                engine = if (file.name.endsWith(".gguf")) {
+                    LlamaCppEngine(
+                        modelPath = newModelPath,
+                        context = context,
+                        useGpu = settings.useGpu,
+                        selectedBackend = settings.selectedBackend,
+                        gpuLayers = settings.gpuLayers,
+                        customThreads = settings.cpuThreads,
+                        customContextSize = settings.contextSize
+                    )
+                } else if (file.name.endsWith(".bin") || file.name.endsWith(".tflite")) {
+                    DeepEyeAgentEngine(newModelPath)
+                } else {
+                    throw Exception("Unsupported model file format: ${file.name}")
+                }
+
+                engine.init().getOrThrow()
+                isEngineReady = true
+
+                val engineType = if (file.name.endsWith(".gguf")) "GGUF" else "LiteRT"
+                android.util.Log.d("DeepEye", "{\"event\":\"engine_load_succeeded\", \"model_id\":\"$modelId\", \"type\":\"$engineType\"}")
+                val status = ModelStatus.LOCAL_ACTIVE
+                val msg = "$engineType Engine active with model $modelId."
+                _engineStatus.update { EngineStatus(status, "$engineType: $modelId", msg) }
+                status to msg
+            } catch (e: Throwable) {
+                isEngineReady = false
+                android.util.Log.e("DeepEye", "{\"event\":\"engine_load_failed\", \"model_id\":\"$modelId\", \"error\":\"${e.message}\"}", e)
+                val status = ModelStatus.LOCAL_ACTIVE
+                val msg = "Model initialization failed: ${e.message}"
+                _engineStatus.update { EngineStatus(status, "Load Failed", msg) }
+                status to msg
             }
-
-            // Close existing engine
-            engine.close()
-
-            val settings = settingsDataStore.engineSettingsFlow.first()
-
-            // NOTE: EngineController acts as an engine factory — it intentionally
-            // creates new LlamaCppEngine/DeepEyeAgentEngine instances at runtime
-            // to swap models. The DI-provided engine is only the initial default.
-            // Instantiate appropriate LLMEngine
-            engine = if (file.name.endsWith(".gguf")) {
-                LlamaCppEngine(
-                    modelPath = newModelPath,
-                    context = context,
-                    useGpu = settings.useGpu,
-                    selectedBackend = settings.selectedBackend,
-                    gpuLayers = settings.gpuLayers,
-                    customThreads = settings.cpuThreads,
-                    customContextSize = settings.contextSize
-                )
-            } else if (file.name.endsWith(".bin") || file.name.endsWith(".tflite")) {
-                DeepEyeAgentEngine(newModelPath)
-            } else {
-                throw Exception("Unsupported model file format: ${file.name}")
-            }
-
-            engine.init().getOrThrow()
-            isEngineReady = true
-
-            val engineType = if (file.name.endsWith(".gguf")) "GGUF" else "LiteRT"
-            android.util.Log.d("DeepEye", "{\"event\":\"engine_load_succeeded\", \"model_id\":\"$modelId\", \"type\":\"$engineType\"}")
-            val status = ModelStatus.LOCAL_ACTIVE
-            val msg = "$engineType Engine active with model $modelId."
-            _engineStatus.update { EngineStatus(status, "$engineType: $modelId", msg) }
-            status to msg
-        }.getOrElse { e ->
-            isEngineReady = false
-            android.util.Log.e("DeepEye", "{\"event\":\"engine_load_failed\", \"model_id\":\"$modelId\", \"error\":\"${e.message}\"}", e)
-            val status = ModelStatus.LOCAL_ACTIVE
-            val msg = "Model initialization failed: ${e.message}"
-            _engineStatus.update { EngineStatus(status, "Load Failed", msg) }
-            status to msg
         }
     }
 
     suspend fun switchToNativeLocalMode() = withContext(Dispatchers.IO) {
         val modelsDir = java.io.File(context.filesDir, "models")
         val availableModels = modelsDir.listFiles { _, name -> (name.endsWith(".bin") || name.endsWith(".gguf")) && !name.endsWith(".tmp") }
-        val activeModel = availableModels?.filter { it.length() in 50_000_000L..2_100_000_000L }?.maxByOrNull { it.length() }
+        val activeModel = availableModels?.filter { it.length() in 50_000_000L..5_000_000_000L }?.maxByOrNull { it.length() }
         
         if (activeModel != null && activeModel.exists()) {
             reinitializeWithModel(activeModel.absolutePath)
@@ -165,4 +167,7 @@ class EngineController(
     fun getActiveEngineName(): String = engine.activeModelPath?.let { java.io.File(it).nameWithoutExtension } ?: "No Model Loaded"
 
     fun getEngineStatusMessage(): String = _engineStatus.value.statusMessage
+
+    fun getPerformanceStats(): com.deepeye.agent.domain.engine.PerformanceStats? =
+        (engine as? LlamaCppEngine)?.getPerformanceStats()
 }

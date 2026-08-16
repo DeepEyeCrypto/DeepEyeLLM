@@ -63,6 +63,34 @@ data class ModelSpec(
          * Pre-defined catalog of known models.
          */
         val CATALOG = listOf(
+            // --- Ultra-Fast 100+ Tokens/Sec Models ---
+            ModelSpec(
+                id = "qwen2.5-0.5b-instruct-q4km",
+                name = "Qwen 2.5 0.5B Turbo",
+                family = "Qwen",
+                parameterCount = "0.5B",
+                backend = ModelBackend.GGUF_LLAMA_CPP,
+                quantization = Quantization.Q4_K_M,
+                sizeBytes = 398_000_000L,
+                requiredRamBytes = 600_000_000L,
+                capabilities = setOf(ModelCapability.CHAT, ModelCapability.CODE, ModelCapability.FUNCTION_CALLING),
+                fileName = "qwen2.5-0.5b-instruct-q4_k_m.gguf",
+                downloadUrl = "https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+            ),
+            ModelSpec(
+                id = "smollm2-135m-q4km",
+                name = "SmolLM2 135M Instant",
+                family = "SmolLM",
+                parameterCount = "135M",
+                backend = ModelBackend.GGUF_LLAMA_CPP,
+                quantization = Quantization.Q4_K_M,
+                sizeBytes = 95_000_000L,
+                requiredRamBytes = 200_000_000L,
+                capabilities = setOf(ModelCapability.CHAT, ModelCapability.CODE),
+                fileName = "smollm2-135m-instruct-q4_k_m.gguf",
+                downloadUrl = "https://huggingface.co/HuggingFaceTB/SmolLM2-135M-Instruct-GGUF/resolve/main/smollm2-135m-instruct-q4_k_m.gguf",
+            ),
+
             // --- Gemma 4 ---
             ModelSpec(
                 id = "gemma-4-2b-q4km",

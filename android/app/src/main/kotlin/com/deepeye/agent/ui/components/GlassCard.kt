@@ -55,37 +55,36 @@ fun GlassCard(
     val border = borderColor ?: if (isActive) colors.glassBorderActive else colors.glassBorder
     val borderWidth = if (isActive) 1.5.dp else 1.dp
 
-    val cardModifier = if (onClick != null) {
-        modifier.fillMaxWidth().clickable(onClick = onClick)
-    } else {
-        modifier.fillMaxWidth()
-    }
-
-    Card(
-        modifier = cardModifier,
-        shape = shape,
-        colors = CardDefaults.cardColors(
-            containerColor = containerColor
-        ),
-        border = BorderStroke(borderWidth, border),
-        elevation = CardDefaults.cardElevation(defaultElevation = elevation)
-    ) {
-        Box(
-            modifier = Modifier.drawWithContent {
-                drawContent()
-                // Volumetric specular top-highlight line for glass depth
-                if (showSpecular && !isReduceTransparency) {
-                    drawRect(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(Color.White.copy(alpha = 0.12f), Color.Transparent),
-                            startY = 0f,
-                            endY = 30f
-                        )
-                    )
-                }
-            }
+    if (onClick != null) {
+        Card(
+            onClick = onClick,
+            modifier = modifier.fillMaxWidth(),
+            shape = shape,
+            colors = CardDefaults.cardColors(
+                containerColor = containerColor
+            ),
+            border = BorderStroke(borderWidth, border),
+            elevation = CardDefaults.cardElevation(defaultElevation = elevation)
         ) {
-            Column(content = content)
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                content = content
+            )
+        }
+    } else {
+        Card(
+            modifier = modifier.fillMaxWidth(),
+            shape = shape,
+            colors = CardDefaults.cardColors(
+                containerColor = containerColor
+            ),
+            border = BorderStroke(borderWidth, border),
+            elevation = CardDefaults.cardElevation(defaultElevation = elevation)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                content = content
+            )
         }
     }
 }

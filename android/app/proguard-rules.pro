@@ -25,8 +25,12 @@
 }
 
 # --- JNA (UniFFI Bindings) ---
+-dontwarn java.awt.**
+-dontwarn com.sun.jna.**
 -keep class com.sun.jna.** { *; }
 -keep class * implements com.sun.jna.Library { *; }
+-keepclassmembers class * extends com.sun.jna.** { *; }
+-keep class com.deepeye.agent.domain.engine.PerformanceStats { *; }
 
 # --- Retrofit / OkHttp ---
 -dontwarn okhttp3.**

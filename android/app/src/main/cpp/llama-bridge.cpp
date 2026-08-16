@@ -19,6 +19,7 @@
 #include <vector>
 #include <atomic>
 #include <chrono>
+#include <sys/resource.h>
 #include <android/log.h>
 
 // llama.cpp core API
@@ -417,6 +418,9 @@ Java_com_deepeye_agent_domain_engine_LlamaCppEngine_nativeInitModel(
     LOGI("  Requested GPU layers: %d (global: %d)", n_gpu_layers, g_n_gpu_layers);
     LOGI("═══════════════════════════════════════════════════════");
 
+    // Boost process priority for unthrottled maximum CPU frequency
+    setpriority(PRIO_PROCESS, 0, -20);
+
     auto t_start = std::chrono::high_resolution_clock::now();
     int effective_gpu_layers = (g_n_gpu_layers > 0) ? g_n_gpu_layers : n_gpu_layers;
 
@@ -424,7 +428,7 @@ Java_com_deepeye_agent_domain_engine_LlamaCppEngine_nativeInitModel(
     model_params.n_gpu_layers = effective_gpu_layers;
     model_params.main_gpu     = 0;
     model_params.split_mode   = static_cast<enum llama_split_mode>(0);
-    model_params.load_mode    = (effective_gpu_layers > 0) ? LLAMA_LOAD_MODE_NONE : LLAMA_LOAD_MODE_MMAP;
+    model_params.load_mode    = LLAMA_LOAD_MODE_MMAP;
 
     llama_model* model = llama_model_load_from_file(path, model_params);
     if (!model) {
@@ -435,10 +439,13 @@ Java_com_deepeye_agent_domain_engine_LlamaCppEngine_nativeInitModel(
 
     auto ctx_params = llama_context_default_params();
     ctx_params.n_ctx            = n_ctx;
-    ctx_params.n_threads        = n_threads;
-    ctx_params.n_threads_batch  = n_threads;
+    ctx_params.n_threads        = (n_threads >= 6) ? 4 : std::max(1, n_threads);
+    ctx_params.n_threads_batch  = std::max(n_threads, 6);
     ctx_params.n_batch          = 512;
     ctx_params.n_ubatch         = 512;
+    ctx_params.flash_attn_type  = LLAMA_FLASH_ATTN_TYPE_ENABLED;
+    ctx_params.type_k           = GGML_TYPE_F16;
+    ctx_params.type_v           = GGML_TYPE_F16;
 
     llama_context* ctx = llama_init_from_model(model, ctx_params);
     if (!ctx) {
@@ -449,10 +456,9 @@ Java_com_deepeye_agent_domain_engine_LlamaCppEngine_nativeInitModel(
     }
 
     auto sparams = llama_sampler_chain_default_params();
+    sparams.no_perf = true;
     llama_sampler* sampler = llama_sampler_chain_init(sparams);
     llama_sampler_chain_add(sampler, llama_sampler_init_top_k(40));
-    llama_sampler_chain_add(sampler, llama_sampler_init_top_p(0.9f, 1));
-    llama_sampler_chain_add(sampler, llama_sampler_init_min_p(0.1f, 1));
     llama_sampler_chain_add(sampler, llama_sampler_init_temp(0.7f));
     llama_sampler_chain_add(sampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));
 
@@ -612,9 +618,12 @@ Java_com_deepeye_agent_domain_engine_LlamaCppEngine_nativeFreeModel(
     if (handle == 0) return;
 
     auto* state = reinterpret_cast<LlamaState*>(handle);
+    if (!state) return;
+
     LOGI("Freeing native resources for model: %s", state->model_path.c_str());
 
-    // Free in reverse order of creation
+    state->abort_flag.store(true);
+
     if (state->sampler) {
         llama_sampler_free(state->sampler);
         state->sampler = nullptr;
@@ -641,8 +650,6 @@ Java_com_deepeye_agent_domain_engine_LlamaCppEngine_nativeSetBackendConfig(
 
     g_backend_type = backend_type;
     g_n_gpu_layers = n_gpu_layers;
-
-    llama_backend_init();
 
     LOGI("Native backend config updated: type=%d, layers=%d", g_backend_type, g_n_gpu_layers);
 }

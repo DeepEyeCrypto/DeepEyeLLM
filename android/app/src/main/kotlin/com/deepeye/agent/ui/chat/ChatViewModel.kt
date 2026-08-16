@@ -43,7 +43,8 @@ data class ChatUiState(
     val modelStatus: ModelStatus = ModelStatus.LOCAL_ACTIVE,
     val error: String? = null,
     val showModelPicker: Boolean = false,
-    val activeModelName: String = "No Model Loaded"
+    val activeModelName: String = "No Model Loaded",
+    val tokensPerSecond: Float = 0f
 )
 
 @HiltViewModel
@@ -104,21 +105,34 @@ class ChatViewModel @Inject constructor(
     fun selectAndActivateModel(modelId: String, fileName: String? = null) {
         viewModelScope.launch(Dispatchers.IO) {
             val modelsDir = java.io.File(engineController.context.filesDir, "models")
-            var destFile = if (!fileName.isNullOrBlank()) java.io.File(modelsDir, fileName) else null
+            var destFile: java.io.File? = null
 
-            if (destFile == null || !destFile.exists()) {
-                val matching = modelsDir.listFiles()?.find {
+            if (!fileName.isNullOrBlank()) {
+                val direct = java.io.File(modelsDir, fileName)
+                if (direct.exists() && direct.length() > 1_000_000L) {
+                    destFile = direct
+                }
+            }
+
+            if (destFile == null) {
+                val directId = java.io.File(modelsDir, modelId)
+                if (directId.exists() && directId.length() > 1_000_000L) {
+                    destFile = directId
+                }
+            }
+
+            if (destFile == null) {
+                val filesOnDisk = modelsDir.listFiles() ?: emptyArray()
+                destFile = filesOnDisk.find {
                     it.name.equals(modelId, ignoreCase = true) ||
                     it.nameWithoutExtension.equals(modelId, ignoreCase = true) ||
                     (!fileName.isNullOrBlank() && it.name.equals(fileName, ignoreCase = true)) ||
-                    (!fileName.isNullOrBlank() && it.nameWithoutExtension.equals(fileName.substringBeforeLast('.'), ignoreCase = true)) ||
-                    (!fileName.isNullOrBlank() && fileName.contains("gemma", ignoreCase = true) && it.name.contains("gemma", ignoreCase = true)) ||
-                    (!fileName.isNullOrBlank() && fileName.contains("hermes", ignoreCase = true) && it.name.contains("hermes", ignoreCase = true))
+                    (!fileName.isNullOrBlank() && it.nameWithoutExtension.equals(fileName.substringBeforeLast('.'), ignoreCase = true))
                 }
-                if (matching != null) destFile = matching
             }
 
             if (destFile != null && destFile.exists() && destFile.length() > 1_000_000L) {
+                android.util.Log.d("DeepEye", "{\"event\":\"activating_model\", \"path\":\"${destFile.absolutePath}\"}")
                 engineController.reinitializeWithModel(destFile.absolutePath)
             }
         }
@@ -201,12 +215,21 @@ class ChatViewModel @Inject constructor(
         activeGenerationJob = viewModelScope.launch(Dispatchers.IO) {
             val responseBuffer = StringBuilder()
             var lastFlushTime = 0L
-            val flushIntervalMs = 30L // Decouple token arrival from Compose recomposition loop
+            val flushIntervalMs = 25L // Decouple token arrival from Compose recomposition loop
+            var tokenCount = 0
+            var firstTokenTime = 0L
+            var liveTps = 0f
 
             fun flushToUi(force: Boolean = false, isFinished: Boolean = false) {
                 val now = System.currentTimeMillis()
                 if (force || now - lastFlushTime >= flushIntervalMs) {
                     lastFlushTime = now
+                    if (firstTokenTime > 0L && tokenCount > 1) {
+                        val elapsedDecodeSec = (now - firstTokenTime) / 1000.0f
+                        if (elapsedDecodeSec > 0.02f) {
+                            liveTps = ((tokenCount - 1) / elapsedDecodeSec).coerceAtLeast(1f)
+                        }
+                    }
                     val currentText = responseBuffer.toString()
                     _chatState.update { state ->
                         val updatedMessages = state.messages.map { msg ->
@@ -214,17 +237,24 @@ class ChatViewModel @Inject constructor(
                                 msg.copy(text = currentText, isStreaming = !isFinished)
                             } else msg
                         }
-                        state.copy(messages = updatedMessages)
+                        state.copy(messages = updatedMessages, tokensPerSecond = if (liveTps > 0f) liveTps else state.tokensPerSecond)
                     }
                 }
             }
 
             try {
                 engineController.executeChatStream(inputPrompt) { chunk ->
+                    if (firstTokenTime == 0L) {
+                        firstTokenTime = System.currentTimeMillis()
+                    }
+                    tokenCount++
                     onChunk(chunk)
                     responseBuffer.append(chunk)
                     flushToUi(force = false, isFinished = false)
                 }
+                val nativeStats = engineController.getPerformanceStats()
+                val finalTps = nativeStats?.tokensPerSec?.toFloat()?.takeIf { it > 0f } ?: liveTps
+                _chatState.update { it.copy(tokensPerSecond = finalTps) }
                 flushToUi(force = true, isFinished = true)
             } catch (e: Throwable) {
                 val errorMsg = e.message ?: "Generation failed"
