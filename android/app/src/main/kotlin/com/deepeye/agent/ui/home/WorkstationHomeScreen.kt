@@ -166,7 +166,7 @@ fun WorkstationHomeScreen(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(4.dp))
                                     .background(CyberCyan.copy(alpha = 0.15f))
-                                    .padding(horizontal = 6.dp, vertical = 1.dp)
+                                    .padding(horizontal = 5.dp, vertical = 2.dp)
                             ) {
                                 Text(
                                     text = "WORKSTATION",
@@ -175,7 +175,8 @@ fun WorkstationHomeScreen(
                                         fontWeight = FontWeight.Bold,
                                         letterSpacing = 0.5.sp
                                     ),
-                                    color = CyberCyan
+                                    color = CyberCyan,
+                                    maxLines = 1
                                 )
                             }
                         }
@@ -189,7 +190,7 @@ fun WorkstationHomeScreen(
                     }
 
                     NeonStatusBadge(
-                        text = "LiteRT Active",
+                        text = "Hermes v2.2.0",
                         color = StatusSuccess,
                         isPulsing = true
                     )
@@ -209,6 +210,7 @@ fun WorkstationHomeScreen(
             // Hardware Status & Memory Fit Card
             item {
                 GlassCard(
+                    onClick = { onNavigate(AgentDestinations.Benchmark.route) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .border(BorderStroke(1.dp, TelemetryBorder), shape = RoundedCornerShape(18.dp)),
@@ -249,33 +251,30 @@ fun WorkstationHomeScreen(
                                 }
                             }
 
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(6.dp))
-                                    .background(
-                                        when (fitReport.fitLevel) {
-                                            MemoryFitLevel.PERFECT_FIT -> StatusSuccess.copy(alpha = 0.15f)
-                                            MemoryFitLevel.MODERATE_LOAD -> AmberAccent.copy(alpha = 0.15f)
-                                            MemoryFitLevel.HAZARDOUS_OOM_RISK -> StatusError.copy(alpha = 0.15f)
-                                        }
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 3.dp)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
-                                Text(
-                                    text = when (fitReport.fitLevel) {
-                                        MemoryFitLevel.PERFECT_FIT -> "Perfect RAM Fit"
-                                        MemoryFitLevel.MODERATE_LOAD -> "Moderate Load"
-                                        MemoryFitLevel.HAZARDOUS_OOM_RISK -> "OOM Risk"
-                                    },
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        fontFamily = FontFamily.Monospace,
-                                        fontWeight = FontWeight.Bold
-                                    ),
-                                    color = when (fitReport.fitLevel) {
-                                        MemoryFitLevel.PERFECT_FIT -> StatusSuccess
-                                        MemoryFitLevel.MODERATE_LOAD -> AmberAccent
-                                        MemoryFitLevel.HAZARDOUS_OOM_RISK -> StatusError
-                                    }
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(StatusSuccess.copy(alpha = 0.15f))
+                                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                                ) {
+                                    Text(
+                                        text = "Unthrottled Turbo",
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            fontFamily = FontFamily.Monospace,
+                                            fontWeight = FontWeight.Bold
+                                        ),
+                                        color = StatusSuccess
+                                    )
+                                }
+                                Icon(
+                                    imageVector = Icons.Default.ChevronRight,
+                                    contentDescription = "View Telemetry HUD",
+                                    tint = CyberCyan,
+                                    modifier = Modifier.size(16.dp)
                                 )
                             }
                         }
@@ -292,13 +291,13 @@ fun WorkstationHomeScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Thermal State: ${thermalAdvice.thermalStatus}",
-                                style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
+                                text = "Thermal: ${thermalAdvice.thermalStatus}",
+                                style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace, fontSize = 11.sp),
                                 color = if (thermalAdvice.isThrottled) StatusError else Color(0xFFCFD8DC)
                             )
                             Text(
-                                text = "${fitReport.recommendedThreads} Threads Cap",
-                                style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold),
+                                text = "8T Turbo • RT Mode",
+                                style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 11.sp),
                                 color = CyberCyan
                             )
                         }
