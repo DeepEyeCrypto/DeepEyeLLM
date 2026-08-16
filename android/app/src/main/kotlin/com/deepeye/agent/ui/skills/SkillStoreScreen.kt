@@ -137,6 +137,7 @@ fun SkillStoreContent(
                     Spacer(modifier = Modifier.height(10.dp))
 
                     // Search Bar
+                    // Search Bar
                     OutlinedTextField(
                         value = searchQuery,
                         onValueChange = { searchQuery = it },
@@ -150,7 +151,8 @@ fun SkillStoreContent(
                         leadingIcon = {
                             Icon(Icons.Default.Search, contentDescription = null, tint = CyberCyan, modifier = Modifier.size(18.dp))
                         },
-                        modifier = Modifier.fillMaxWidth().height(48.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = CyberCyan,
@@ -215,9 +217,8 @@ fun SkillStoreContent(
                     }
 
                     LazyVerticalGrid(
-                        columns = GridCells.Adaptive(minSize = 170.dp),
-                        contentPadding = PaddingValues(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        columns = GridCells.Fixed(1),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
@@ -272,31 +273,46 @@ fun TacticalSkillCard(
                         modifier = Modifier
                             .clip(RoundedCornerShape(6.dp))
                             .background(CyberCyan.copy(alpha = 0.15f))
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                            .padding(horizontal = 8.dp, vertical = 3.dp)
                     ) {
                         Text(
                             text = skill.category,
                             style = MaterialTheme.typography.labelSmall.copy(
-                                fontSize = 9.sp,
+                                fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold
                             ),
                             color = CyberCyan
                         )
                     }
 
-                    NeonStatusBadge(
-                        text = if (skill.isInstalled) "Active" else "v${skill.version}",
-                        color = if (skill.isInstalled) StatusSuccess else ThinkingMutedSlate,
-                        isPulsing = skill.isInstalled,
-                        modifier = Modifier.height(20.dp)
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        NeonStatusBadge(
+                            text = if (skill.isInstalled) "Active" else "v${skill.version}",
+                            color = if (skill.isInstalled) StatusSuccess else ThinkingMutedSlate,
+                            isPulsing = skill.isInstalled,
+                            modifier = Modifier.height(20.dp)
+                        )
+                        Switch(
+                            checked = skill.isInstalled,
+                            onCheckedChange = { onInstallToggle() },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = Color.Black,
+                                checkedTrackColor = CyberCyan,
+                                uncheckedThumbColor = ThinkingMutedSlate,
+                                uncheckedTrackColor = Color(0x33FFFFFF)
+                            )
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
                     text = skill.name,
-                    style = MaterialTheme.typography.labelLarge,
+                    style = MaterialTheme.typography.titleMedium,
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     maxLines = 2
@@ -306,13 +322,13 @@ fun TacticalSkillCard(
 
                 Text(
                     text = skill.description,
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp, lineHeight = 15.sp),
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 16.sp),
                     color = ThinkingMutedSlate,
                     maxLines = 3
                 )
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             // Footer with Tools & Gates Counter
             Row(
@@ -325,18 +341,28 @@ fun TacticalSkillCard(
                         text = "${skill.toolsProvided.size} tools • ${skill.verificationGates.size} gates",
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontFamily = FontFamily.Monospace,
-                            fontSize = 9.sp
+                            fontSize = 10.sp
                         ),
                         color = Color(0xFFB0BEC5)
                     )
                 }
 
-                Icon(
-                    imageVector = Icons.Default.ChevronRight,
-                    contentDescription = "Inspect Manifest",
-                    tint = CyberCyan,
-                    modifier = Modifier.size(16.dp)
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = "Inspect",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = CyberCyan
+                    )
+                    Icon(
+                        imageVector = Icons.Default.ChevronRight,
+                        contentDescription = "Inspect Manifest",
+                        tint = CyberCyan,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
             }
         }
     }

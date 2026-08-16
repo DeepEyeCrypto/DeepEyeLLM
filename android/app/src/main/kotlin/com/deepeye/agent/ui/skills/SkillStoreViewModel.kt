@@ -67,15 +67,18 @@ class SkillStoreViewModel @Inject constructor(
 
     fun installSkill(skill: Skill) {
         viewModelScope.launch {
-            skillRegistry.markInstalled(skill.id)
+            skillRegistry.toggleInstalled(skill.id)
+            val isNowInstalled = skill.id in skillRegistry.communitySkills.value.filter { it.isInstalled }.map { it.id }
             _uiState.update {
                 it.copy(
                     skills = skillRegistry.communitySkills.value,
-                    toastMessage = "Installed & Activated: ${skill.name}"
+                    toastMessage = if (isNowInstalled) "Activated: ${skill.name}" else "Deactivated: ${skill.name}"
                 )
             }
         }
     }
+
+    fun toggleSkill(skill: Skill) = installSkill(skill)
 
     fun clearToast() {
         _uiState.update { it.copy(toastMessage = null) }

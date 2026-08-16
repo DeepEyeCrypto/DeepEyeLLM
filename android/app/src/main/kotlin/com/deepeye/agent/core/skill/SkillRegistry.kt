@@ -16,7 +16,7 @@ class SkillRegistry @Inject constructor() {
                 name = "Crypto Sentinel & Smart Contract Auditor",
                 description = "Real-time on-chain analysis, DEX pool liquidity audit, honeypot detection, and AST reentrancy scan.",
                 author = "DeepEye Crypto",
-                version = "2027.3",
+                version = "2.2.0",
                 category = "Crypto & DeFi",
                 toolsProvided = listOf("dex_screener", "contract_decompiler", "liquidity_verifier", "honeypot_tester"),
                 verificationGates = listOf("Liquidity Lock >= 90 days", "Honeypot Tax < 5%", "Reentrancy AST Clean"),
@@ -47,7 +47,7 @@ class SkillRegistry @Inject constructor() {
                 name = "Hermes Autonomous Loop",
                 description = "Nous Research self-improving memory, autonomous skill creation, and dialectic user modeling.",
                 author = "Nous Research",
-                version = "2027.2",
+                version = "2.1.0",
                 category = "AI Agents",
                 toolsProvided = listOf("memory_weaver", "skill_compiler", "feedback_evaluator"),
                 verificationGates = listOf("Constitutional Policy Pass", "DAG Convergence Check"),
@@ -129,14 +129,27 @@ class SkillRegistry @Inject constructor() {
         )
     }
     
-    private val installedSkillIds = mutableSetOf<String>()
+    private val installedSkillIds = mutableSetOf("crypto-sentinel", "code-auditor", "hermes-agent-loop")
 
-    private val _communitySkills = MutableStateFlow<List<Skill>>(BUILTIN_SKILLS)
+    private val _communitySkills = MutableStateFlow<List<Skill>>(
+        BUILTIN_SKILLS.map { it.copy(isInstalled = it.id in installedSkillIds) }
+    )
     val communitySkills: StateFlow<List<Skill>> = _communitySkills.asStateFlow()
     
     fun updateSkills(skills: List<Skill>) {
         val baseList = if (skills.isNotEmpty()) skills else BUILTIN_SKILLS
         _communitySkills.value = baseList.map { skill ->
+            skill.copy(isInstalled = skill.id in installedSkillIds)
+        }
+    }
+
+    fun toggleInstalled(skillId: String) {
+        if (skillId in installedSkillIds) {
+            installedSkillIds.remove(skillId)
+        } else {
+            installedSkillIds.add(skillId)
+        }
+        _communitySkills.value = _communitySkills.value.map { skill ->
             skill.copy(isInstalled = skill.id in installedSkillIds)
         }
     }
