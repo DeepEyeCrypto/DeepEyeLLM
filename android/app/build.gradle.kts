@@ -15,8 +15,8 @@ android {
         applicationId = "com.deepeye.agent"
         minSdk = 28
         targetSdk = 35
-        versionCode = 1
-        versionName = "2027.2.0"
+        versionCode = 2
+        versionName = "2.2.0"
         testInstrumentationRunner = "com.deepeye.agent.CustomTestRunner"
         
         // Only build for arm64 — llama.cpp is too heavy for x86 emulators

@@ -14,6 +14,7 @@ import java.io.File
 sealed class UpdateState {
     object Idle : UpdateState()
     object Checking : UpdateState()
+    data class UpToDate(val version: String) : UpdateState()
     data class Available(val info: UpdateInfo) : UpdateState()
     data class Downloading(val progress: Int) : UpdateState()
     data class ReadyToInstall(val apkFile: File) : UpdateState()
@@ -58,7 +59,11 @@ class UpdateManager @Inject constructor(
                         _updateState.value = UpdateState.Idle
                     }
                 } else {
-                    _updateState.value = UpdateState.Idle
+                    if (force) {
+                        _updateState.value = UpdateState.UpToDate(info.latestVersion)
+                    } else {
+                        _updateState.value = UpdateState.Idle
+                    }
                 }
             }.onFailure { e ->
                 if (force) {

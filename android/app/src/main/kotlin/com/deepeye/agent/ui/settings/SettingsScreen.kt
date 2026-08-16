@@ -289,7 +289,7 @@ fun SettingsScreen(
                                 )
                                 Spacer(Modifier.height(2.dp))
                                 Text(
-                                    "Latest: v1.2.4",
+                                    "Current: v${com.deepeye.agent.BuildConfig.VERSION_NAME}",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )

@@ -28,19 +28,19 @@ fun UpdateDialog(
 ) {
     val state by updateManager.updateState.collectAsState()
 
-    if (state is UpdateState.Idle || state is UpdateState.Checking) {
+    if (state is UpdateState.Idle) {
         return
     }
 
     Dialog(
         onDismissRequest = {
-            if (state is UpdateState.Available || state is UpdateState.Error) {
+            if (state !is UpdateState.Downloading && state !is UpdateState.Checking) {
                 updateManager.resetState()
             }
         },
         properties = DialogProperties(
-            dismissOnBackPress = state !is UpdateState.Downloading,
-            dismissOnClickOutside = state !is UpdateState.Downloading
+            dismissOnBackPress = state !is UpdateState.Downloading && state !is UpdateState.Checking,
+            dismissOnClickOutside = state !is UpdateState.Downloading && state !is UpdateState.Checking
         )
     ) {
         GlassCard(
@@ -70,6 +70,15 @@ fun UpdateDialog(
                     label = "UpdateStateContent"
                 ) { targetState ->
                     when (targetState) {
+                        is UpdateState.Checking -> {
+                            CheckingContent()
+                        }
+                        is UpdateState.UpToDate -> {
+                            UpToDateContent(
+                                version = targetState.version,
+                                onDismiss = { updateManager.resetState() }
+                            )
+                        }
                         is UpdateState.Available -> {
                             AvailableUpdateContent(
                                 info = targetState.info,
@@ -97,6 +106,65 @@ fun UpdateDialog(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun CheckingContent() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        CircularProgressIndicator(
+            color = CyberCyan,
+            modifier = Modifier.size(44.dp)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Checking for updates...",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = "Querying GitHub release repository",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun UpToDateContent(
+    version: String,
+    onDismiss: () -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "You're on the Latest Version!",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = CyberCyan
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "DeepEyeLLM $version is currently installed and fully up to date with the latest engine optimizations.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        Button(
+            onClick = onDismiss,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = CyberCyan, contentColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Text("Done", fontWeight = FontWeight.Bold)
         }
     }
 }

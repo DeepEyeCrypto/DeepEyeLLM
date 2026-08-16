@@ -31,18 +31,21 @@ class UpdateChecker @Inject constructor(
             val request = Request.Builder()
                 .url(RELEASES_API_URL)
                 .header("Accept", "application/vnd.github.v3+json")
+                .header("User-Agent", "DeepEyeLLM-Android/${BuildConfig.VERSION_NAME}")
                 .build()
 
+            android.util.Log.d("DeepEyeUpdate", "Checking GitHub releases: $RELEASES_API_URL")
             val response = okHttpClient.newCall(request).execute()
             if (!response.isSuccessful) {
-                return@withContext Result.failure(Exception("HTTP Error: ${response.code}"))
+                android.util.Log.e("DeepEyeUpdate", "GitHub API error: ${response.code}")
+                return@withContext Result.failure(Exception("GitHub API error (${response.code})"))
             }
 
-            val bodyString = response.body?.string() ?: throw Exception("Empty response body")
+            val bodyString = response.body?.string() ?: throw Exception("Empty response body from GitHub API")
             val json = JSONObject(bodyString)
 
-            val tagName = json.getString("tag_name") // e.g. "v2.0.0" or "2027.2.0"
-            val body = json.optString("body", "No changelog provided.")
+            val tagName = json.getString("tag_name") // e.g. "v2.2.0"
+            val body = json.optString("body", "DeepEyeLLM latest release.")
             
             val assets = json.optJSONArray("assets")
             var downloadUrl = ""
@@ -50,7 +53,7 @@ class UpdateChecker @Inject constructor(
                 for (i in 0 until assets.length()) {
                     val asset = assets.getJSONObject(i)
                     val name = asset.getString("name")
-                    if (name.endsWith(".apk")) {
+                    if (name.endsWith(".apk", ignoreCase = true)) {
                         downloadUrl = asset.getString("browser_download_url")
                         break
                     }
@@ -58,11 +61,13 @@ class UpdateChecker @Inject constructor(
             }
 
             if (downloadUrl.isEmpty()) {
-                return@withContext Result.failure(Exception("No APK found in release assets"))
+                // Fallback to HTML release URL if direct APK asset is not yet attached
+                downloadUrl = json.optString("html_url", "https://github.com/$GITHUB_OWNER/$GITHUB_REPO/releases")
             }
 
             val currentVersion = BuildConfig.VERSION_NAME
             val isNewer = isVersionNewer(currentVersion, tagName)
+            android.util.Log.d("DeepEyeUpdate", "Update check result: current=$currentVersion, latest=$tagName, isNewer=$isNewer, url=$downloadUrl")
 
             Result.success(UpdateInfo(isNewer, tagName, downloadUrl, body))
         } catch (e: Exception) {
@@ -71,14 +76,18 @@ class UpdateChecker @Inject constructor(
     }
 
     private fun isVersionNewer(current: String, latest: String): Boolean {
-        // Strip 'v' prefix if present
-        val currStr = current.removePrefix("v").trim()
-        val latestStr = latest.removePrefix("v").trim()
+        val currClean = current.removePrefix("v").removePrefix("V").trim()
+        val latestClean = latest.removePrefix("v").removePrefix("V").trim()
 
-        if (currStr == latestStr) return false
+        if (currClean.equals(latestClean, ignoreCase = true)) return false
 
-        val currParts = currStr.split(".").map { it.toIntOrNull() ?: 0 }
-        val latestParts = latestStr.split(".").map { it.toIntOrNull() ?: 0 }
+        // Extract semantic integer parts (ignoring build numbers if any)
+        val currParts = currClean.split(".").map { part ->
+            part.takeWhile { it.isDigit() }.toIntOrNull() ?: 0
+        }
+        val latestParts = latestClean.split(".").map { part ->
+            part.takeWhile { it.isDigit() }.toIntOrNull() ?: 0
+        }
 
         val length = maxOf(currParts.size, latestParts.size)
         for (i in 0 until length) {
