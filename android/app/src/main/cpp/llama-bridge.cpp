@@ -542,13 +542,15 @@ Java_com_deepeye_agent_domain_engine_LlamaCppEngine_nativeInitModel(
     ctx_params.n_batch          = 1024;
     ctx_params.n_ubatch         = 512;
     ctx_params.flash_attn_type  = LLAMA_FLASH_ATTN_TYPE_AUTO;
-    ctx_params.type_k           = GGML_TYPE_F16;
-    ctx_params.type_v           = GGML_TYPE_F16;
+    ctx_params.type_k           = GGML_TYPE_Q8_0;
+    ctx_params.type_v           = GGML_TYPE_Q8_0;
 
     llama_context* ctx = llama_init_from_model(model, ctx_params);
     if (!ctx) {
-        LOGW("Failed to create llama context with default params; retrying with safe fallback...");
-        ctx_params.flash_attn_type = LLAMA_FLASH_ATTN_TYPE_DISABLED;
+        LOGW("Failed to create llama context with Q8_0 KV cache; retrying with safe F16 fallback...");
+        ctx_params.type_k           = GGML_TYPE_F16;
+        ctx_params.type_v           = GGML_TYPE_F16;
+        ctx_params.flash_attn_type  = LLAMA_FLASH_ATTN_TYPE_DISABLED;
         ctx = llama_init_from_model(model, ctx_params);
     }
 

@@ -30,11 +30,12 @@ android {
                     "-DANDROID_ARM_NEON=ON",
                     "-DANDROID_PLATFORM=android-28",
                     "-DCMAKE_BUILD_TYPE=Release",
-                    "-DCMAKE_CXX_FLAGS_RELEASE=-O3 -DNDEBUG -fno-finite-math-only -march=armv8.2-a+dotprod+fp16 -fvectorize -fomit-frame-pointer",
+                    "-DCMAKE_CXX_FLAGS_RELEASE=-O3 -DNDEBUG -fno-finite-math-only -march=armv8.2-a+dotprod+fp16 -fvectorize -funroll-loops -finline-functions -fomit-frame-pointer",
                     "-DGGML_ARM_NEON=ON",
                     "-DGGML_ARM_DOTPROD=ON",
                     "-DGGML_ARM_FP16=ON",
-                    "-DGGML_VULKAN=OFF"
+                    "-DGGML_VULKAN=ON",
+                    "-DVulkan_GLSLC_EXECUTABLE=/usr/local/bin/glslc"
                 )
             }
         }
