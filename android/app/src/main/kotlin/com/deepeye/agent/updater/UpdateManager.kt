@@ -23,7 +23,7 @@ sealed class UpdateState {
 
 @Singleton
 class UpdateManager @Inject constructor(
-    private val checker: UpdateChecker,
+    private val checker: GitHubUpdateChecker,
     private val downloader: UpdateDownloader,
     private val installer: UpdateInstaller,
     private val prefs: UpdatePreferences
@@ -84,13 +84,13 @@ class UpdateManager @Inject constructor(
         scope.launch {
             downloader.downloadUpdate(url).collect { state ->
                 when (state) {
-                    is DownloadState.Progress -> {
+                    is UpdateDownloadState.Progress -> {
                         _updateState.value = UpdateState.Downloading(state.percent)
                     }
-                    is DownloadState.Success -> {
+                    is UpdateDownloadState.Success -> {
                         _updateState.value = UpdateState.ReadyToInstall(state.file)
                     }
-                    is DownloadState.Error -> {
+                    is UpdateDownloadState.Error -> {
                         _updateState.value = UpdateState.Error(state.message)
                     }
                 }

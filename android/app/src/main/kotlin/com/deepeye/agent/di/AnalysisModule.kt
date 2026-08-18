@@ -2,7 +2,7 @@ package com.deepeye.agent.di
 
 import android.content.Context
 import com.deepeye.agent.DeepEyeAgentEngine
-import com.deepeye.agent.analysis.FileAnalysisService
+import com.deepeye.agent.analysis.LocalFileAnalysisService
 import com.deepeye.agent.analysis.ToolRegistry
 import com.deepeye.agent.ui.history.HistoryLocalStore
 import com.deepeye.agent.ui.history.HistoryItemUi
@@ -28,8 +28,8 @@ object AnalysisModule {
         @ApplicationContext context: Context,
         engine: DeepEyeAgentEngine,
         toolRegistry: ToolRegistry
-    ): FileAnalysisService {
-        return FileAnalysisService(context, engine, toolRegistry)
+    ): LocalFileAnalysisService {
+        return LocalFileAnalysisService(context, engine, toolRegistry)
     }
 
     @Provides

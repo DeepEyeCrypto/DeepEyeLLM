@@ -17,7 +17,7 @@ data class UpdateInfo(
 )
 
 @Singleton
-class UpdateChecker @Inject constructor(
+class GitHubUpdateChecker @Inject constructor(
     private val okHttpClient: OkHttpClient
 ) {
     companion object {

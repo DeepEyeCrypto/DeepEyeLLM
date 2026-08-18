@@ -18,21 +18,21 @@ class UpdateDownloader @Inject constructor(
     @ApplicationContext private val context: Context,
     private val okHttpClient: OkHttpClient
 ) {
-    fun downloadUpdate(url: String): Flow<DownloadState> = flow {
-        emit(DownloadState.Progress(0))
+    fun downloadUpdate(url: String): Flow<UpdateDownloadState> = flow {
+        emit(UpdateDownloadState.Progress(0))
 
         try {
             val request = Request.Builder().url(url).build()
             val response = okHttpClient.newCall(request).execute()
 
             if (!response.isSuccessful) {
-                emit(DownloadState.Error("HTTP Error: ${response.code}"))
+                emit(UpdateDownloadState.Error("HTTP Error: ${response.code}"))
                 return@flow
             }
 
             val body = response.body
             if (body == null) {
-                emit(DownloadState.Error("Empty response body"))
+                emit(UpdateDownloadState.Error("Empty response body"))
                 return@flow
             }
 
@@ -66,22 +66,22 @@ class UpdateDownloader @Inject constructor(
                             val progress = ((bytesCopied * 100) / contentLength).toInt()
                             if (progress > lastProgress) {
                                 lastProgress = progress
-                                emit(DownloadState.Progress(progress))
+                                emit(UpdateDownloadState.Progress(progress))
                             }
                         }
                     }
                 }
             }
 
-            emit(DownloadState.Success(outputFile))
+            emit(UpdateDownloadState.Success(outputFile))
         } catch (e: Exception) {
-            emit(DownloadState.Error(e.message ?: "Unknown download error"))
+            emit(UpdateDownloadState.Error(e.message ?: "Unknown download error"))
         }
     }.flowOn(Dispatchers.IO)
 }
 
-sealed class DownloadState {
-    data class Progress(val percent: Int) : DownloadState()
-    data class Success(val file: File) : DownloadState()
-    data class Error(val message: String) : DownloadState()
+sealed class UpdateDownloadState {
+    data class Progress(val percent: Int) : UpdateDownloadState()
+    data class Success(val file: File) : UpdateDownloadState()
+    data class Error(val message: String) : UpdateDownloadState()
 }

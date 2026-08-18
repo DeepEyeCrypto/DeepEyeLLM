@@ -18,7 +18,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class FileAnalysisService @Inject constructor(
+class CloudFileAnalysisService @Inject constructor(
     private val policyCheckLayer: PolicyCheckLayer,
     private val deepDebugApi: DeepDebugApi,
     private val accessControl: AccessControlLayer

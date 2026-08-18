@@ -19,5 +19,7 @@ data class LocalModel(
     val isSupportedOnDevice: Boolean = true,
     val engineState: EngineState = EngineState.NOT_DOWNLOADED,
     val lastError: DownloadError = DownloadError.NONE,
-    val downloadProgress: Float = 0f
+    val downloadProgress: Float = 0f,
+    val downloadSpeedKbps: Int = 0,
+    val estimatedEtaSeconds: Int = 0
 )

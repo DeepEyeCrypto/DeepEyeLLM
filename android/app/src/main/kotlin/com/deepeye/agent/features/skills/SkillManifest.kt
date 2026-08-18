@@ -23,7 +23,7 @@ data class SkillEntry(
  * Registry of all available skills — both built-in and community-contributed.
  * In production, the community catalog would be fetched from the Cloud Gateway.
  */
-class SkillRegistry {
+class BuiltInSkillCatalog {
 
     private val skills = mutableListOf<SkillEntry>()
 

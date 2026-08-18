@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -41,6 +42,7 @@ import com.deepeye.agent.ui.utils.currentUiLayoutMode
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BenchmarkScreen(
+    onBack: (() -> Unit)? = null,
     viewModel: BenchmarkViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -63,19 +65,37 @@ fun BenchmarkScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
-                        Text(
-                            "Edge LLM Benchmark Suite",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.semantics { heading() }
-                        )
-                        Text(
-                            "Hardware Latency, Decode Throughput & Memory Peak",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = CyberCyan
-                        )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.weight(1f, fill = false)
+                    ) {
+                        if (onBack != null) {
+                            IconButton(
+                                onClick = onBack,
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ArrowBack,
+                                    contentDescription = "Back",
+                                    tint = CyberCyan
+                                )
+                            }
+                        }
+                        Column {
+                            Text(
+                                "Edge LLM Benchmark Suite",
+                                style = MaterialTheme.typography.titleLarge,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.semantics { heading() }
+                            )
+                            Text(
+                                "Hardware Latency, Decode Throughput & Memory Peak",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = CyberCyan
+                            )
+                        }
                     }
                     NeonStatusBadge(
                         text = if (uiState.isRunning) "Benchmarking" else "Engine Ready",

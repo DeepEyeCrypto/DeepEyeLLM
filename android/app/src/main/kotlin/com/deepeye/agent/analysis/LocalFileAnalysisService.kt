@@ -6,7 +6,7 @@ import com.deepeye.agent.DeepEyeAgentEngine
 import java.io.File
 import java.io.FileOutputStream
 
-class FileAnalysisService(
+class LocalFileAnalysisService(
     private val context: Context,
     private val engine: DeepEyeAgentEngine,
     private val toolRegistry: ToolRegistry

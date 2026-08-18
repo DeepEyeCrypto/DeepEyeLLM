@@ -5,7 +5,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.qualifiers.ApplicationContext
-import com.deepeye.agent.analysis.FileAnalysisService
+import com.deepeye.agent.analysis.LocalFileAnalysisService
 import com.deepeye.agent.policy.LocalSafetyContext
 import com.deepeye.agent.policy.PolicyCheckLayer
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -45,7 +45,7 @@ data class FindingUi(
 @HiltViewModel
 class FileAnalysisViewModel @Inject constructor(
     @ApplicationContext private val appContext: Context,
-    private val fileService: FileAnalysisService,
+    private val fileService: LocalFileAnalysisService,
     private val policyCheckLayer: PolicyCheckLayer
 ) : ViewModel() {
 
