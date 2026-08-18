@@ -53,14 +53,15 @@ class EngineController(
         // Uncapped: utilize full 6GB RAM capacity for high-parameter models & mmap paging
         val safeMaxBytes = if (memoryInfo.totalMem > 0) (memoryInfo.totalMem * 0.95).toLong() else 6_000_000_000L
 
-        // Prioritize highest quality model on disk that fits within device capacity
+        // Prioritize high-speed mobile models (<= 2.2 GB) to achieve maximum tokens/sec throughput
         val activeModel = availableModels?.filter { 
             it.length() in 50_000_000L..safeMaxBytes &&
             !it.name.contains("dspark", ignoreCase = true) &&
-            !it.name.contains("adapter", ignoreCase = true)
+            !it.name.contains("adapter", ignoreCase = true) &&
+            it.length() <= 2_200_000_000L
         }?.maxByOrNull { it.length() }
             ?: availableModels?.filter { 
-                it.length() >= 50_000_000L &&
+                it.length() in 50_000_000L..safeMaxBytes &&
                 !it.name.contains("dspark", ignoreCase = true) &&
                 !it.name.contains("adapter", ignoreCase = true)
             }?.minByOrNull { it.length() }
