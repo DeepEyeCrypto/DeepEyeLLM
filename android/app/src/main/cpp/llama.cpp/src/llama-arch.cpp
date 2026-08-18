@@ -927,6 +927,12 @@ const char * llm_arch_name(llm_arch arch) {
 }
 
 llm_arch llm_arch_from_string(const std::string & name) {
+    if (name == "deepseek4-dspark" || name == "deepseek4_dspark" || 
+        name == "deepseek-v4-flash" || name == "deepseek4-flash" ||
+        name == "deepseek-v4" || name == "deepseek4_flash") {
+        return LLM_ARCH_DEEPSEEK4;
+    }
+
     for (const auto & kv : LLM_ARCH_NAMES) { // NOLINT
         if (kv.second == name) {
             return kv.first;

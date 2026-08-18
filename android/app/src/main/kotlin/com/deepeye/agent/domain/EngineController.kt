@@ -86,6 +86,9 @@ class EngineController(
                 val file = java.io.File(newModelPath)
                 if (!file.exists()) throw Exception("Model file not found")
                 if (file.name.endsWith(".tmp")) throw Exception("Cannot load incomplete .tmp model download")
+                if (file.name.contains("dspark", ignoreCase = true) || file.name.contains("adapter", ignoreCase = true)) {
+                    throw Exception("'$modelId' is a DSpark speculative draft adapter (not a standalone base model). Please load a full base model (Hermes 3, Gemma 4, etc.).")
+                }
 
                 val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as? android.app.ActivityManager
                 val memoryInfo = android.app.ActivityManager.MemoryInfo()

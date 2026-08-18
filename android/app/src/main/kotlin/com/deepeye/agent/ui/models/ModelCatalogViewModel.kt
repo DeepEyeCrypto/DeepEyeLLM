@@ -288,10 +288,11 @@ class ModelCatalogViewModel @Inject constructor(
 
         val mappedFileNames = catalogModels.filter { it.engineState == EngineState.READY }.map { it.fileName.lowercase() }.toSet()
         val customModelsOnDisk = filesOnDisk.filter { it.name.lowercase() !in mappedFileNames && isSupportedFormat(it.name) && it.length() > 1_000_000L }.map { file ->
+            val isDraftAdapter = file.name.contains("dspark", ignoreCase = true) || file.name.contains("adapter", ignoreCase = true) || file.name.contains("lora", ignoreCase = true)
             LocalModel(
                 id = "custom_${file.name.hashCode()}",
                 name = file.nameWithoutExtension.replace('_', ' ').replace('-', ' '),
-                publisher = if (file.name.endsWith(".gguf")) "GGUF Local" else "LiteRT Local",
+                publisher = if (isDraftAdapter) "Speculative Draft Adapter" else if (file.name.endsWith(".gguf")) "GGUF Local" else "LiteRT Local",
                 sizeString = "${file.length() / (1024 * 1024)} MB",
                 category = ModelCategory.BALANCED,
                 requiredRamGb = 2,
@@ -299,6 +300,7 @@ class ModelCatalogViewModel @Inject constructor(
                 downloadUrl = "",
                 fileName = file.name,
                 expectedChecksum = "",
+                isSupportedOnDevice = !isDraftAdapter,
                 engineState = EngineState.READY,
                 downloadProgress = 1f
             )
