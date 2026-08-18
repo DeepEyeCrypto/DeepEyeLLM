@@ -354,18 +354,20 @@ static int run_inference(
     const std::function<bool(const std::string& piece)>& token_callback,
     std::string& error_out
 ) {
-    // ── Step 1: Apply chat template ─────────────────────────────────────────
-    std::string formatted = apply_chat_template(state->model, prompt);
+    // ── Step 1: Detect if prompt is already formatted by ChatFormatter ─────
+    bool is_already_formatted = (prompt.find("<|im_start|>") != std::string::npos ||
+                                 prompt.find("<start_of_turn>") != std::string::npos ||
+                                 prompt.find("<|user|>") != std::string::npos ||
+                                 prompt.find("<|system|>") != std::string::npos);
+
+    std::string formatted = is_already_formatted ? prompt : apply_chat_template(state->model, prompt);
 
     // ── Step 2: Tokenize ────────────────────────────────────────────────────
-    // add_special = false when template is applied (template handles BOS/markers)
-    // parse_special = true to recognize <|im_start|> etc. in the formatted text
-    bool has_template = (formatted != prompt);
     auto prompt_tokens = tokenize_prompt(
         state->model,
         formatted,
-        !has_template,   // add_special only if NO template was applied
-        true             // always parse_special
+        !is_already_formatted,
+        true
     );
 
     int n_prompt = (int)prompt_tokens.size();
