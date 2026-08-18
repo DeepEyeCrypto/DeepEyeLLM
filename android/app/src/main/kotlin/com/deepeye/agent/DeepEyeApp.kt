@@ -25,6 +25,9 @@ class DeepEyeApp : Application(), Configuration.Provider {
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
 
+    @Inject
+    lateinit var engineController: com.deepeye.agent.domain.EngineController
+
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)
@@ -53,8 +56,10 @@ class DeepEyeApp : Application(), Configuration.Provider {
             )
         }
 
-        // Offload WorkManager initialization to IO thread to prevent main-thread startup frame drops
+        // Initialize inference engine & sync workers on IO thread on startup
         kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+            runCatching { engineController.initialize() }
+
             val syncConstraints = Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build()

@@ -196,16 +196,92 @@ static std::vector<llama_token> tokenize_prompt(
 static std::string token_to_piece(const llama_model* model, llama_token token) {
     const struct llama_vocab* vocab = llama_model_get_vocab(model);
     char buf[256];
-    int n = llama_token_to_piece(vocab, token, buf, sizeof(buf), 0, true);
+    int n = llama_token_to_piece(vocab, token, buf, sizeof(buf), 0, false);
 
     if (n < 0) {
         // Token text is longer than 256 bytes (rare, but possible for merged tokens)
         std::vector<char> large_buf(-n);
-        n = llama_token_to_piece(vocab, token, large_buf.data(), (int32_t)large_buf.size(), 0, true);
+        n = llama_token_to_piece(vocab, token, large_buf.data(), (int32_t)large_buf.size(), 0, false);
         return std::string(large_buf.data(), n);
     }
 
     return std::string(buf, n);
+}
+
+// Reassemble complete UTF-8 characters from a token-by-token byte stream.
+//
+// llama.cpp may split a single multi-byte UTF-8 character (e.g. an emoji whose
+// leading bytes are F0 9F 98 80) across two adjacent *token pieces*. JNI's
+// NewStringUTF rejects truncated multi-byte sequences and aborts the process,
+// so we must only forward *complete, valid* characters to Kotlin.
+//
+// `carry` accumulates incoming bytes between calls; `complete` receives only
+// valid UTF-8 output. Any incomplete trailing multi-byte sequence is retained
+// in `carry` until the next piece supplies the continuation bytes. Invalid or
+// interrupted sequences are replaced with U+FFFD so the stream never forwards
+// malformed bytes to JNI and never stalls on corrupt input.
+static void drainCompleteUtf8(std::string& carry, const std::string& piece, std::string& complete) {
+    if (!piece.empty()) {
+        carry += piece;
+    }
+    if (carry.empty()) return;
+
+    static const std::string kReplacement = "\xEF\xBF\xBD";  // U+FFFD
+
+    size_t i = 0;
+    const size_t n = carry.size();
+    while (i < n) {
+        const unsigned char c = static_cast<unsigned char>(carry[i]);
+
+        size_t len;
+        if (c < 0x80) {
+            len = 1;                                    // ASCII
+        } else if ((c & 0xE0) == 0xC0) {
+            len = 2;                                    // 2-byte sequence
+        } else if ((c & 0xF0) == 0xE0) {
+            len = 3;                                    // 3-byte sequence
+        } else if ((c & 0xF8) == 0xF0) {
+            len = 4;                                    // 4-byte sequence
+        } else {
+            // Invalid lead byte (stray continuation 0x80..0xBF, 0xF5..0xFF).
+            complete += kReplacement;
+            i += 1;
+            continue;
+        }
+
+        if (len == 1) {
+            complete.push_back(static_cast<char>(c));
+            i += 1;
+            continue;
+        }
+
+        // Count how many valid continuation bytes are present after the lead.
+        const size_t avail = n - i - 1;
+        size_t have = 0;
+        while (have < avail && have < len - 1) {
+            if ((static_cast<unsigned char>(carry[i + 1 + have]) & 0xC0) != 0x80) break;
+            have++;
+        }
+
+        if (have < len - 1) {
+            if (have >= avail) {
+                // Not enough bytes yet — this may be completed by a later piece.
+                break;   // retain the rest of `carry`
+            }
+            // Enough bytes exist but one is not a continuation byte.
+            // Substitute the malformed lead and re-evaluate from the next byte.
+            complete += kReplacement;
+            i += 1;
+            continue;
+        }
+
+        complete.append(carry, i, len);   // forward the whole valid character
+        i += len;
+    }
+
+    if (i > 0) {
+        carry.erase(0, i);   // remove the bytes we have consumed or replaced
+    }
 }
 
 // Apply the model's built-in chat template (e.g., ChatML for Qwen3).
@@ -431,6 +507,12 @@ Java_com_deepeye_agent_domain_engine_LlamaCppEngine_nativeInitModel(
     model_params.load_mode    = LLAMA_LOAD_MODE_MMAP;
 
     llama_model* model = llama_model_load_from_file(path, model_params);
+    if (!model && effective_gpu_layers > 0) {
+        LOGW("GPU layer allocation failed for %s. Retrying with CPU mode (0 GPU layers)...", path);
+        model_params.n_gpu_layers = 0;
+        model = llama_model_load_from_file(path, model_params);
+    }
+
     if (!model) {
         LOGE("FATAL: Failed to load model from: %s", path);
         env->ReleaseStringUTFChars(jmodel_path, path);
@@ -443,11 +525,17 @@ Java_com_deepeye_agent_domain_engine_LlamaCppEngine_nativeInitModel(
     ctx_params.n_threads_batch  = std::max(n_threads, 6);
     ctx_params.n_batch          = 512;
     ctx_params.n_ubatch         = 512;
-    ctx_params.flash_attn_type  = LLAMA_FLASH_ATTN_TYPE_ENABLED;
+    ctx_params.flash_attn_type  = LLAMA_FLASH_ATTN_TYPE_AUTO;
     ctx_params.type_k           = GGML_TYPE_F16;
     ctx_params.type_v           = GGML_TYPE_F16;
 
     llama_context* ctx = llama_init_from_model(model, ctx_params);
+    if (!ctx) {
+        LOGW("Failed to create llama context with default params; retrying with safe fallback...");
+        ctx_params.flash_attn_type = LLAMA_FLASH_ATTN_TYPE_DISABLED;
+        ctx = llama_init_from_model(model, ctx_params);
+    }
+
     if (!ctx) {
         LOGE("FATAL: Failed to create llama context");
         llama_model_free(model);
@@ -563,10 +651,22 @@ Java_com_deepeye_agent_domain_engine_LlamaCppEngine_nativeGenerateResponseStream
 
     // ── Run inference with streaming callback ───────────────────────────────
     std::string error_msg;
+    // Holds an incomplete trailing multi-byte UTF-8 sequence (e.g. the leading
+    // bytes of an emoji) until the continuation bytes arrive in a later piece.
+    std::string utf8_carry;
+
     int result = run_inference(state, prompt, max_tokens,
         [&](const std::string& piece) -> bool {
-            // Stream token to Kotlin
-            safeCallToken(env, callback, onTokenMethod, piece);
+            // Reassemble UTF-8 across token boundaries. llama.cpp may split a
+            // single multi-byte character (e.g. an emoji) across two pieces,
+            // and JNI's NewStringUTF aborts on truncated sequences, so only
+            // forward complete characters to Kotlin.
+            std::string complete;
+            drainCompleteUtf8(utf8_carry, piece, complete);
+
+            if (!complete.empty()) {
+                safeCallToken(env, callback, onTokenMethod, complete);
+            }
 
             // Check if Kotlin-side threw an exception (e.g., consumer cancelled)
             if (env->ExceptionCheck()) {
@@ -580,6 +680,13 @@ Java_com_deepeye_agent_domain_engine_LlamaCppEngine_nativeGenerateResponseStream
         },
         error_msg
     );
+
+    // Drop any incomplete trailing bytes left at end of generation. They are
+    // not valid UTF-8 on their own, so passing them to NewStringUTF would crash.
+    if (!utf8_carry.empty()) {
+        LOGW("Discarding %zu trailing bytes of an incomplete UTF-8 character", utf8_carry.size());
+        utf8_carry.clear();
+    }
 
     // ── Deliver final status to Kotlin ──────────────────────────────────────
     if (result < 0) {

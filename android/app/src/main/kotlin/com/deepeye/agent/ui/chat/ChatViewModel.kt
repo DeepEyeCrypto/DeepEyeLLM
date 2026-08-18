@@ -3,7 +3,7 @@ package com.deepeye.agent.ui.chat
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.deepeye.agent.analysis.FileAnalysisService
+import com.deepeye.agent.analysis.LocalFileAnalysisService
 import com.deepeye.agent.core.model.ChatMessage
 import com.deepeye.agent.domain.EngineController
 import com.deepeye.agent.domain.EngineStatus
@@ -50,7 +50,7 @@ data class ChatUiState(
 @HiltViewModel
 class ChatViewModel @Inject constructor(
     private val engineController: EngineController,
-    private val fileService: FileAnalysisService,
+    private val fileService: LocalFileAnalysisService,
     private val dexTradingEngine: com.deepeye.agent.core.dex.DexTradingEngine
 ) : ViewModel() {
 
@@ -74,7 +74,7 @@ class ChatViewModel @Inject constructor(
             activeStreamingMessageId = streamingId,
             modelStatus = engine.modelStatus,
             activeModelName = engine.activeModelName,
-            error = if (engine.statusMessage.isNotBlank()) engine.statusMessage else chat.error
+            error = if (engine.modelStatus == ModelStatus.ERROR && engine.statusMessage.isNotBlank()) engine.statusMessage else null
         )
     }.stateIn(
         viewModelScope,
