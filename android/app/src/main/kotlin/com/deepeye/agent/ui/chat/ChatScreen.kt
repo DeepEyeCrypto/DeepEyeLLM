@@ -166,11 +166,24 @@ fun ChatScreen(
                         Spacer(Modifier.height(10.dp))
                         Box(modifier = Modifier.padding(bottom = 14.dp, start = 14.dp, end = 14.dp)) {
                             CyberButton(
-                                onClick = { showModelPicker = true },
+                                onClick = {
+                                    val workingModel = modelCatalog.firstOrNull { 
+                                        it.engineState == EngineState.READY && 
+                                        it.isSupportedOnDevice &&
+                                        !it.fileName.contains("dspark", ignoreCase = true) && 
+                                        !it.fileName.contains("adapter", ignoreCase = true)
+                                    } ?: modelCatalog.firstOrNull { it.engineState == EngineState.READY }
+                                    
+                                    if (workingModel != null) {
+                                        viewModel.selectAndActivateModel(workingModel.id, workingModel.fileName)
+                                    } else {
+                                        showModelPicker = true
+                                    }
+                                },
                                 modifier = Modifier.fillMaxWidth(),
                                 accentColor = CyberCyan
                             ) {
-                                Text("Switch to Supported Model", fontWeight = FontWeight.Bold)
+                                Text("Switch to Working Model (Hermes 3 / Gemma 4)", fontWeight = FontWeight.Bold)
                             }
                         }
                     }
