@@ -292,7 +292,11 @@ fun KnowledgeBaseScreen() {
                             verticalArrangement = Arrangement.spacedBy(10.dp),
                             modifier = Modifier.fillMaxSize()
                         ) {
-                            items(filteredDocs, key = { it.id }) { doc ->
+                            items(
+                                items = filteredDocs,
+                                key = { it.id },
+                                contentType = { "rag_doc_card" }
+                            ) { doc ->
                                 GlassCard(
                                     modifier = Modifier
                                         .fillMaxWidth()

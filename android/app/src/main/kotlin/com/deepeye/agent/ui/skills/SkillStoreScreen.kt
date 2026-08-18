@@ -205,15 +205,16 @@ fun SkillStoreContent(
                         color = StatusError,
                         modifier = Modifier.align(Alignment.Center)
                     )
-                } else {
-                    val filteredSkills = state.skills.filter { skill ->
-                        val matchesCategory = selectedCategory == "All" || skill.category.equals(selectedCategory, ignoreCase = true)
-                        val matchesSearch = searchQuery.isBlank() ||
-                            skill.name.contains(searchQuery, ignoreCase = true) ||
-                            skill.description.contains(searchQuery, ignoreCase = true) ||
-                            skill.toolsProvided.any { it.contains(searchQuery, ignoreCase = true) } ||
-                            skill.author.contains(searchQuery, ignoreCase = true)
-                        matchesCategory && matchesSearch
+                    val filteredSkills = remember(state.skills, selectedCategory, searchQuery) {
+                        state.skills.filter { skill ->
+                            val matchesCategory = selectedCategory == "All" || skill.category.equals(selectedCategory, ignoreCase = true)
+                            val matchesSearch = searchQuery.isBlank() ||
+                                skill.name.contains(searchQuery, ignoreCase = true) ||
+                                skill.description.contains(searchQuery, ignoreCase = true) ||
+                                skill.toolsProvided.any { it.contains(searchQuery, ignoreCase = true) } ||
+                                skill.author.contains(searchQuery, ignoreCase = true)
+                            matchesCategory && matchesSearch
+                        }
                     }
 
                     LazyVerticalGrid(
@@ -222,7 +223,11 @@ fun SkillStoreContent(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        items(filteredSkills, key = { it.id }) { skill ->
+                        items(
+                            items = filteredSkills,
+                            key = { it.id },
+                            contentType = { "tactical_skill_card" }
+                        ) { skill ->
                             TacticalSkillCard(
                                 skill = skill,
                                 onInspect = { inspectingSkill = skill },

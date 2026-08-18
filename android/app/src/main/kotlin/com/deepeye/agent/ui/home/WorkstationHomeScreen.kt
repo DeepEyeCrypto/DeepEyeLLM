@@ -325,7 +325,11 @@ fun WorkstationHomeScreen(
                 UiLayoutMode.EXPANDED -> 3
             }
 
-            items(WORKSTATION_TILES.chunked(gridColumns)) { rowTiles ->
+            items(
+                items = WORKSTATION_TILES.chunked(gridColumns),
+                key = { rowTiles -> rowTiles.joinToString("-") { it.route } },
+                contentType = { "bento_tile_row" }
+            ) { rowTiles ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
