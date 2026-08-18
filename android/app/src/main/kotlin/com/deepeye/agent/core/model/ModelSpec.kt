@@ -54,6 +54,7 @@ data class ModelSpec(
     val fileName: String,                // e.g., "gemma-4-2b-q4_k_m.bin"
     val isDownloaded: Boolean = false,
     val downloadUrl: String? = null,
+    val sha256Hash: String? = null,
 ) {
     val sizeMb: Long get() = sizeBytes / (1024 * 1024)
     val requiredRamMb: Long get() = requiredRamBytes / (1024 * 1024)
@@ -233,6 +234,27 @@ data class ModelSpec(
                 capabilities = setOf(ModelCapability.CHAT, ModelCapability.CODE, ModelCapability.FUNCTION_CALLING),
                 fileName = "hermes-3-8b-q4_k_m.gguf",
                 downloadUrl = "https://huggingface.co/NousResearch/Hermes-3-Llama-3.1-8B-GGUF/resolve/main/Hermes-3-Llama-3.1-8B.Q4_K_M.gguf",
+            ),
+
+            // --- DeepSeek V4 Flash (MoE, ~290B total params) ---
+            // DeepSeek-V4-Flash is a large MoE (num_experts_per_tok: 6, DeepseekV4 arch).
+            // This is the smallest standalone single-file GGUF available (~6 GB, an antirez
+            // mixed/REAP "DSpark-support" build). It needs ≥ ~11 GB free RAM to load, so the app's
+            // RAM filter keeps it out of the picker on phones (~8 GB) and only surfaces it on
+            // desktop/large-RAM devices. NOTE: quantization is a mixed precision build, not a
+            // clean Q4_K_M — Q4_K_M is the nearest available enum label.
+            ModelSpec(
+                id = "deepseek-v4-flash-dspark-support",
+                name = "DeepSeek V4 Flash",
+                family = "DeepSeek",
+                parameterCount = "290B",
+                backend = ModelBackend.GGUF_LLAMA_CPP,
+                quantization = Quantization.Q4_K_M,
+                sizeBytes = 5_989_114_272L,
+                requiredRamBytes = 12_000_000_000L,
+                capabilities = setOf(ModelCapability.CHAT, ModelCapability.CODE, ModelCapability.FUNCTION_CALLING),
+                fileName = "DeepSeek-V4-Flash-DSpark-support.gguf",
+                downloadUrl = "https://huggingface.co/antirez/deepseek-v4-gguf/resolve/main/DeepSeek-V4-Flash-DSpark-support.gguf",
             ),
         )
     }

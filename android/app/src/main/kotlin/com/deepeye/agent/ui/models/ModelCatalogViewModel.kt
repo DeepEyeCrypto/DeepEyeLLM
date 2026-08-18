@@ -64,7 +64,7 @@ class ModelCatalogViewModel @Inject constructor(
             com.deepeye.agent.services.ModelDownloadWorker.KEY_MODEL_ID to modelId,
             com.deepeye.agent.services.ModelDownloadWorker.KEY_DOWNLOAD_URL to url,
             com.deepeye.agent.services.ModelDownloadWorker.KEY_DEST_PATH to destFile.absolutePath,
-            com.deepeye.agent.services.ModelDownloadWorker.KEY_EXPECTED_CHECKSUM to ""
+            com.deepeye.agent.services.ModelDownloadWorker.KEY_EXPECTED_CHECKSUM to (model.expectedChecksum)
         )
 
         val constraints = androidx.work.Constraints.Builder()
@@ -279,6 +279,7 @@ class ModelCatalogViewModel @Inject constructor(
                 isChinese = false,
                 downloadUrl = spec.downloadUrl ?: "",
                 fileName = fileOnDisk?.name ?: spec.fileName,
+                expectedChecksum = spec.sha256Hash ?: "",
                 isSupportedOnDevice = isLoadable,
                 engineState = engineState,
                 downloadProgress = if (isDownloaded) 1f else 0f
@@ -297,6 +298,7 @@ class ModelCatalogViewModel @Inject constructor(
                 isChinese = false,
                 downloadUrl = "",
                 fileName = file.name,
+                expectedChecksum = "",
                 engineState = EngineState.READY,
                 downloadProgress = 1f
             )
@@ -305,15 +307,15 @@ class ModelCatalogViewModel @Inject constructor(
         return customModelsOnDisk + catalogModels
     }
 
-    fun refreshCatalog() = viewModelScope.launch(Dispatchers.IO) {
-        Log.d("DeepEye", "{\"event\":\"catalog_refresh_started\"}")
+    fun refreshCatalog(forceRefresh: Boolean = false) = viewModelScope.launch(Dispatchers.IO) {
+        Log.d("DeepEye", "{\"event\":\"catalog_refresh_started\", \"forceRefresh\":$forceRefresh}")
         modelRegistry.rescan()
-        val specs = modelRepository.fetchModelCatalog()
+        val specs = modelRepository.fetchModelCatalog(forceRefresh = forceRefresh)
         _modelCatalog.value = mapSpecsToLocalModels(specs)
         Log.d("DeepEye", "{\"event\":\"catalog_refresh_completed\", \"count\":${_modelCatalog.value.size}}")
     }
 
     fun rescanLocalModels() = viewModelScope.launch(Dispatchers.IO) {
-        refreshCatalog()
+        refreshCatalog(forceRefresh = true)
     }
 }
