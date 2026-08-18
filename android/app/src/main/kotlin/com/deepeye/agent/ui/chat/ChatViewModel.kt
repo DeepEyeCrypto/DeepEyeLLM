@@ -231,10 +231,16 @@ class ChatViewModel @Inject constructor(
                         }
                     }
                     val currentText = responseBuffer.toString()
+                        .replace("<|im_end|>", "")
+                        .replace("<end_of_turn>", "")
+                        .replace("<|eot_id|>", "")
+                        .replace("</s>", "")
+                        .replace("<|end|>", "")
+                    val displayText = if (isFinished) currentText.trimEnd() else currentText
                     _chatState.update { state ->
                         val updatedMessages = state.messages.map { msg ->
                             if (msg.id == assistantPlaceholderId) {
-                                msg.copy(text = currentText, isStreaming = !isFinished)
+                                msg.copy(text = displayText, isStreaming = !isFinished)
                             } else msg
                         }
                         state.copy(messages = updatedMessages, tokensPerSecond = if (liveTps > 0f) liveTps else state.tokensPerSecond)

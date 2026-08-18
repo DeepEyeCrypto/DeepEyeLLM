@@ -450,6 +450,14 @@ static int run_inference(
         // ── Convert token to text piece ─────────────────────────────────────
         std::string piece = token_to_piece(state->model, new_token);
 
+        // Stop generation immediately on standard chat stop markers
+        if (piece == "<|im_end|>" || piece == "<end_of_turn>" || 
+            piece == "<|eot_id|>" || piece == "</s>" || 
+            piece == "<|end|>" || piece == "<|im_start|>") {
+            LOGI("Stop sequence '%s' reached after %d tokens", piece.c_str(), n_generated);
+            break;
+        }
+
         // ── Deliver token to caller ─────────────────────────────────────────
         if (!token_callback(piece)) {
             LOGI("Token callback requested stop after %d tokens", n_generated);
