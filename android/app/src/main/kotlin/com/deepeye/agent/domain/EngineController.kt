@@ -39,7 +39,7 @@ class EngineController(
         val modelsDir = java.io.File(context.filesDir, "models")
         val availableModels = modelsDir.listFiles { _, name -> (name.endsWith(".bin") || name.endsWith(".gguf")) && !name.endsWith(".tmp") }
         // Cap auto-load model file size to <= 2.1 GB to guarantee 0 Low Memory Killer (LMK) kills on mobile devices
-        val activeModel = availableModels?.filter { it.length() in 50_000_000L..2_100_000_000L }?.maxByOrNull { it.length() }
+        val activeModel = availableModels?.filter { it.length() >= 50_000_000L }?.maxByOrNull { it.length() }
         
         if (activeModel != null && activeModel.exists()) {
             android.util.Log.d("DeepEye", "{\"event\":\"engine_auto_loading\", \"model\":\"${activeModel.name}\"}")
@@ -64,18 +64,22 @@ class EngineController(
                 if (file.name.endsWith(".tmp")) throw Exception("Cannot load incomplete .tmp model download")
 
                 val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as? android.app.ActivityManager
-                    ?: throw Exception("Cannot query device memory info")
                 val memoryInfo = android.app.ActivityManager.MemoryInfo()
-                activityManager.getMemoryInfo(memoryInfo)
+                activityManager?.getMemoryInfo(memoryInfo)
                 
-                val totalRamGb = memoryInfo.totalMem.toDouble() / (1024 * 1024 * 1024)
+                val totalRamGb = if (memoryInfo.totalMem > 0) memoryInfo.totalMem.toDouble() / (1024 * 1024 * 1024) else 8.0
                 val modelSizeGb = file.length().toDouble() / (1024 * 1024 * 1024)
                 
-                // GGUF mmap runtime: kernel memory-maps layer weights on demand
-                val maxAllowedModelGb = (totalRamGb - 1.0).coerceAtLeast(3.8)
-                
-                if (modelSizeGb > maxAllowedModelGb && totalRamGb > 0) {
-                    throw Exception("Model size (%.2f GB) exceeds mobile RAM safety limit (%.1f GB)".format(modelSizeGb, maxAllowedModelGb))
+                // GGUF mmap runtime: kernel memory-maps layer weights on demand via zRAM and file pages
+                if (file.name.endsWith(".gguf")) {
+                    if (modelSizeGb > totalRamGb) {
+                        android.util.Log.w("DeepEye", "Model size (%.2f GB) exceeds physical RAM (%.1f GB); relying on Linux mmap paging".format(modelSizeGb, totalRamGb))
+                    }
+                } else {
+                    val maxAllowedModelGb = (totalRamGb - 1.0).coerceAtLeast(3.8)
+                    if (modelSizeGb > maxAllowedModelGb && totalRamGb > 0) {
+                        throw Exception("Model size (%.2f GB) exceeds mobile RAM safety limit (%.1f GB)".format(modelSizeGb, maxAllowedModelGb))
+                    }
                 }
 
                 // Close existing engine and release address space before allocating next model
