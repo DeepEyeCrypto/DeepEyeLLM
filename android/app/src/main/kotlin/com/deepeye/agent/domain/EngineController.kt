@@ -36,10 +36,25 @@ class EngineController(
     val engineStatus: StateFlow<EngineStatus> = _engineStatus.asStateFlow()
 
     suspend fun initialize(): Pair<ModelStatus, String> = withContext(Dispatchers.IO) {
+        if (isEngineReady && engine.isInitialized) {
+            val modelName = engine.activeModelPath?.let { java.io.File(it).nameWithoutExtension } ?: "Active Model"
+            val status = ModelStatus.LOCAL_ACTIVE
+            val msg = "Engine active with $modelName."
+            _engineStatus.update { EngineStatus(status, "GGUF: $modelName", msg) }
+            return@withContext status to msg
+        }
+
         val modelsDir = java.io.File(context.filesDir, "models")
         val availableModels = modelsDir.listFiles { _, name -> (name.endsWith(".bin") || name.endsWith(".gguf")) && !name.endsWith(".tmp") }
-        // Cap auto-load model file size to <= 2.1 GB to guarantee 0 Low Memory Killer (LMK) kills on mobile devices
-        val activeModel = availableModels?.filter { it.length() >= 50_000_000L }?.maxByOrNull { it.length() }
+        
+        val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as? android.app.ActivityManager
+        val memoryInfo = android.app.ActivityManager.MemoryInfo()
+        activityManager?.getMemoryInfo(memoryInfo)
+        val safeMaxBytes = if (memoryInfo.totalMem > 0) (memoryInfo.totalMem * 0.65).toLong() else 3_500_000_000L
+
+        // Prioritize models that safely fit into device RAM (<= 65% total RAM), picking highest quality within budget
+        val activeModel = availableModels?.filter { it.length() in 50_000_000L..safeMaxBytes }?.maxByOrNull { it.length() }
+            ?: availableModels?.filter { it.length() >= 50_000_000L }?.minByOrNull { it.length() }
         
         if (activeModel != null && activeModel.exists()) {
             android.util.Log.d("DeepEye", "{\"event\":\"engine_auto_loading\", \"model\":\"${activeModel.name}\"}")
@@ -55,7 +70,16 @@ class EngineController(
 
     suspend fun reinitializeWithModel(newModelPath: String): Pair<ModelStatus, String> = withContext(Dispatchers.IO) {
         initMutex.withLock {
-            val modelId = java.io.File(newModelPath).nameWithoutExtension
+            val file = java.io.File(newModelPath)
+            val modelId = file.nameWithoutExtension
+
+            if (isEngineReady && engine.isInitialized && engine.activeModelPath == file.absolutePath) {
+                val status = ModelStatus.LOCAL_ACTIVE
+                val msg = "Model $modelId is already active."
+                _engineStatus.update { EngineStatus(status, "GGUF: $modelId", msg) }
+                return@withContext status to msg
+            }
+
             _engineStatus.update { EngineStatus(ModelStatus.LOCAL_ACTIVE, "Loading $modelId...", "Initializing model $modelId...") }
             android.util.Log.d("DeepEye", "{\"event\":\"engine_load_started\", \"model_id\":\"$modelId\"}")
             try {
@@ -70,9 +94,11 @@ class EngineController(
                 val totalRamGb = if (memoryInfo.totalMem > 0) memoryInfo.totalMem.toDouble() / (1024 * 1024 * 1024) else 8.0
                 val modelSizeGb = file.length().toDouble() / (1024 * 1024 * 1024)
                 
-                // GGUF mmap runtime: kernel memory-maps layer weights on demand via zRAM and file pages
+                // GGUF mmap runtime: check for excessive model sizes on mobile
                 if (file.name.endsWith(".gguf")) {
-                    if (modelSizeGb > totalRamGb) {
+                    if (modelSizeGb > 12.0 && totalRamGb < 8.0) {
+                        throw Exception("Model size (%.1f GB) exceeds mobile device memory capacity. Please select a model <= 4 GB.".format(modelSizeGb))
+                    } else if (modelSizeGb > totalRamGb) {
                         android.util.Log.w("DeepEye", "Model size (%.2f GB) exceeds physical RAM (%.1f GB); relying on Linux mmap paging".format(modelSizeGb, totalRamGb))
                     }
                 } else {
@@ -117,7 +143,7 @@ class EngineController(
             } catch (e: Throwable) {
                 isEngineReady = false
                 android.util.Log.e("DeepEye", "{\"event\":\"engine_load_failed\", \"model_id\":\"$modelId\", \"error\":\"${e.message}\"}", e)
-                val status = ModelStatus.LOCAL_ACTIVE
+                val status = ModelStatus.ERROR
                 val msg = "Model initialization failed: ${e.message}"
                 _engineStatus.update { EngineStatus(status, "Load Failed", msg) }
                 status to msg
