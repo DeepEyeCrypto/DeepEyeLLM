@@ -147,14 +147,33 @@ fun ChatScreen(
                     .weight(1f)
                     .fillMaxHeight()
             ) {
-                // OPTIMIZATION: Show error only when needed
+                // Actionable error recovery card
                 val err = state.error
                 if (state.modelStatus == ModelStatus.ERROR && err != null) {
-                    Text(
-                        text = err,
-                        color = DeepEyeTheme.colors.statusError,
-                        modifier = Modifier.padding(16.dp)
-                    )
+                    GlassCard(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        tintColor = DeepEyeTheme.colors.statusError.copy(alpha = 0.12f),
+                        borderColor = DeepEyeTheme.colors.statusError.copy(alpha = 0.4f)
+                    ) {
+                        Text(
+                            text = err,
+                            color = DeepEyeTheme.colors.statusError,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(top = 14.dp, start = 14.dp, end = 14.dp)
+                        )
+                        Spacer(Modifier.height(10.dp))
+                        Box(modifier = Modifier.padding(bottom = 14.dp, start = 14.dp, end = 14.dp)) {
+                            CyberButton(
+                                onClick = { showModelPicker = true },
+                                modifier = Modifier.fillMaxWidth(),
+                                accentColor = CyberCyan
+                            ) {
+                                Text("Switch to Supported Model", fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
                 }
                 
                 Box(modifier = Modifier.fillMaxSize()) {

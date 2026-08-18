@@ -75,6 +75,15 @@ static double g_last_tps = 0.0;
 // Global JavaVM pointer — cached in JNI_OnLoad for thread-attach operations.
 static JavaVM* g_vm = nullptr;
 
+static void deepEyeLlamaLogCallback(enum ggml_log_level level, const char* text, void* /*user_data*/) {
+    if (!text) return;
+    int android_level = ANDROID_LOG_DEBUG;
+    if (level == GGML_LOG_LEVEL_WARN) android_level = ANDROID_LOG_WARN;
+    else if (level == GGML_LOG_LEVEL_ERROR) android_level = ANDROID_LOG_ERROR;
+    else if (level == GGML_LOG_LEVEL_INFO) android_level = ANDROID_LOG_INFO;
+    __android_log_print(android_level, LOG_TAG, "%s", text);
+}
+
 // =============================================================================
 // SECTION 2: JNI Lifecycle
 // =============================================================================
@@ -82,10 +91,9 @@ static JavaVM* g_vm = nullptr;
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
     g_vm = vm;
 
-    // Initialize llama.cpp backend (GGML compute backends, etc.)
-    // Must be called once before any model operations.
+    llama_log_set(deepEyeLlamaLogCallback, nullptr);
     llama_backend_init();
-    LOGI("JNI_OnLoad: JavaVM cached, llama backend initialized.");
+    LOGI("JNI_OnLoad: JavaVM cached, llama backend and logger initialized.");
 
     return JNI_VERSION_1_6;
 }

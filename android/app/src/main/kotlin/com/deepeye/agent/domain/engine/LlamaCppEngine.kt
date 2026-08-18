@@ -146,7 +146,8 @@ class LlamaCppEngine(
                 val threads = customThreads.coerceIn(1, Runtime.getRuntime().availableProcessors())
                 nativeContextHandle = nativeInitModel(modelPath, nCtx = maxContextTokens, nThreads = threads, nGpuLayers = config.nGpuLayers)
                 if (nativeContextHandle == 0L) {
-                    throw IllegalStateException("Native llama_model_load_from_file returned null — check logcat for details")
+                    val baseName = file.nameWithoutExtension
+                    throw IllegalStateException("Model '$baseName' failed to load (incompatible GGUF architecture or quantization). Please select a supported model (e.g. Hermes 3 / Gemma 4).")
                 }
             }
 
