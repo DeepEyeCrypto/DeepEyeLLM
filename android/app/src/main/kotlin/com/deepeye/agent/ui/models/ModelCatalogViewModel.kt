@@ -47,7 +47,7 @@ class ModelCatalogViewModel @Inject constructor(
         val model = _modelCatalog.value.find { it.id == modelId } ?: return@launch
 
         _modelCatalog.update { list ->
-            list.map { if (it.id == modelId) it.copy(engineState = EngineState.DOWNLOADING, downloadProgress = 0f) else it }
+            list.map { if (it.id == modelId) it.copy(engineState = EngineState.DOWNLOADING, downloadProgress = 0f, downloadSpeedKbps = 0, estimatedEtaSeconds = 0) else it }
         }
 
         val destFile = File(engineController.context.filesDir, "models/${model.fileName}")
@@ -80,34 +80,42 @@ class ModelCatalogViewModel @Inject constructor(
 
         workManager.enqueueUniqueWork("download_$modelId", androidx.work.ExistingWorkPolicy.REPLACE, request)
 
-        workManager.getWorkInfoByIdFlow(request.id).collect { workInfo ->
-            if (workInfo != null) {
-                when (workInfo.state) {
-                    androidx.work.WorkInfo.State.RUNNING -> {
-                        val progress = workInfo.progress.getFloat(com.deepeye.agent.services.ModelDownloadWorker.PROGRESS_FLOAT, 0f)
-                        _modelCatalog.update { list ->
-                            list.map { if (it.id == modelId) it.copy(engineState = EngineState.DOWNLOADING, downloadProgress = progress) else it }
+        downloadJobs[modelId]?.cancel()
+        downloadJobs[modelId] = viewModelScope.launch {
+            workManager.getWorkInfoByIdFlow(request.id).collect { workInfo ->
+                if (workInfo != null) {
+                    when (workInfo.state) {
+                        androidx.work.WorkInfo.State.RUNNING -> {
+                            val progress = workInfo.progress.getFloat(com.deepeye.agent.services.ModelDownloadWorker.PROGRESS_FLOAT, 0f)
+                            val speed = workInfo.progress.getInt(com.deepeye.agent.services.ModelDownloadWorker.BYTES_PER_SEC, 0)
+                            val eta = workInfo.progress.getInt(com.deepeye.agent.services.ModelDownloadWorker.ESTIMATED_ETA_SECONDS, -1)
+                            _modelCatalog.update { list ->
+                                list.map { if (it.id == modelId) it.copy(engineState = EngineState.DOWNLOADING, downloadProgress = progress, downloadSpeedKbps = speed, estimatedEtaSeconds = if (eta >= 0) eta else 0) else it }
+                            }
                         }
-                    }
-                    androidx.work.WorkInfo.State.SUCCEEDED -> {
-                        Log.d("DeepEye", "{\"event\":\"download_verified\", \"model_id\":\"$modelId\"}")
-                        modelRegistry.rescan()
-                        refreshCatalog()
-                    }
-                    androidx.work.WorkInfo.State.FAILED -> {
-                        val err = workInfo.outputData.getString(com.deepeye.agent.services.ModelDownloadWorker.ERROR_MSG) ?: "Download failed"
-                        Log.d("DeepEye", "{\"event\":\"download_failed\", \"model_id\":\"$modelId\", \"error\":\"$err\"}")
-                        _modelCatalog.update { list ->
-                            list.map { if (it.id == modelId) it.copy(engineState = EngineState.FAILED, downloadProgress = 0f) else it }
+                        androidx.work.WorkInfo.State.SUCCEEDED -> {
+                            Log.d("DeepEye", "{\"event\":\"download_verified\", \"model_id\":\"$modelId\"}")
+                            downloadJobs.remove(modelId)
+                            modelRegistry.rescan()
+                            refreshCatalog()
                         }
-                    }
-                    androidx.work.WorkInfo.State.CANCELLED -> {
-                        Log.d("DeepEye", "{\"event\":\"download_cancelled\", \"model_id\":\"$modelId\"}")
-                        _modelCatalog.update { list ->
-                            list.map { if (it.id == modelId) it.copy(engineState = EngineState.NOT_DOWNLOADED, downloadProgress = 0f) else it }
+                        androidx.work.WorkInfo.State.FAILED -> {
+                            val err = workInfo.outputData.getString(com.deepeye.agent.services.ModelDownloadWorker.ERROR_MSG) ?: "Download failed"
+                            Log.d("DeepEye", "{\"event\":\"download_failed\", \"model_id\":\"$modelId\", \"error\":\"$err\"}")
+                            downloadJobs.remove(modelId)
+                            _modelCatalog.update { list ->
+                                list.map { if (it.id == modelId) it.copy(engineState = EngineState.FAILED, downloadProgress = 0f) else it }
+                            }
                         }
+                        androidx.work.WorkInfo.State.CANCELLED -> {
+                            Log.d("DeepEye", "{\"event\":\"download_cancelled\", \"model_id\":\"$modelId\"}")
+                            downloadJobs.remove(modelId)
+                            _modelCatalog.update { list ->
+                                list.map { if (it.id == modelId) it.copy(engineState = EngineState.NOT_DOWNLOADED, downloadProgress = 0f) else it }
+                            }
+                        }
+                        else -> {}
                     }
-                    else -> {}
                 }
             }
         }

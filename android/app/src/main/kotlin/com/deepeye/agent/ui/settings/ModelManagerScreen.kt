@@ -65,7 +65,11 @@ fun ModelManagerScreen(
         onDeleteModel = viewModel::deleteModel,
         onSelectModel = viewModel::selectModel,
         onImportModel = { modelPicker.launch(arrayOf("*/*")) },
-        onRescanModels = viewModel::rescanLocalModels
+        onRescanModels = viewModel::rescanLocalModels,
+        onCancelDownload = viewModel::cancelDownload,
+        onPauseDownload = viewModel::pauseDownload,
+        onResumeDownload = viewModel::resumeDownload,
+        onRefreshCatalog = viewModel::refreshCatalog
     )
 }
 
@@ -424,19 +428,53 @@ fun ModelItemCard(
                             }
                         }
                         EngineState.DOWNLOADING, EngineState.VERIFYING -> {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                CircularProgressIndicator(
-                                    progress = { model.downloadProgress },
-                                    modifier = Modifier.size(24.dp),
-                                    strokeWidth = 2.dp,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                IconButton(onClick = onPause) {
-                                    Icon(Icons.Default.Pause, contentDescription = "Pause", tint = DeepEyeTheme.colors.warningAlt)
-                                }
-                                IconButton(onClick = onCancel) {
-                                    Icon(Icons.Default.Close, contentDescription = "Cancel", tint = DeepEyeTheme.colors.dangerAlt)
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    if (model.engineState == EngineState.VERIFYING) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(20.dp),
+                                            strokeWidth = 2.dp,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = "Verifying...",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    } else {
+                                        LinearProgressIndicator(
+                                            progress = { model.downloadProgress },
+                                            modifier = Modifier.weight(1f).height(6.dp).clip(RoundedCornerShape(3.dp)),
+                                            color = MaterialTheme.colorScheme.primary,
+                                            trackColor = MaterialTheme.colorScheme.surfaceVariant
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = "${(model.downloadProgress * 100).toInt()}%",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = formatDownloadSpeed(model.downloadSpeedKbps) + " • " + formatEta(model.estimatedEtaSeconds),
+                                            style = MaterialTheme.typography.bodySmall.copy(fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace, fontSize = 11.sp),
+                                            color = DeepEyeTheme.colors.statusSuccess,
+                                            maxLines = 1
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.weight(1f))
+                                    if (model.engineState == EngineState.DOWNLOADING) {
+                                        IconButton(onClick = onPause) {
+                                            Icon(Icons.Default.Pause, contentDescription = "Pause", tint = DeepEyeTheme.colors.warningAlt)
+                                        }
+                                    }
+                                    IconButton(onClick = onCancel) {
+                                        Icon(Icons.Default.Close, contentDescription = "Cancel", tint = DeepEyeTheme.colors.dangerAlt)
+                                    }
                                 }
                             }
                         }
@@ -512,3 +550,27 @@ fun ImportCustomModelCard(onClick: () -> Unit) {
         }
     }
 }
+
+/** Formats KiB/s into a human-readable string like "1.4 MiB/s" or "512 KiB/s". */
+private fun formatDownloadSpeed(kibPerSec: Int): String = when {
+    kibPerSec >= 1024 -> "%.1f MiB/s".format(kibPerSec / 1024.0)
+    kibPerSec >= 1 -> "${kibPerSec} KiB/s"
+    else -> "— KiB/s"
+}
+
+/** Formats an ETA in seconds into a compact human-readable string like "1m 30s" or "2h 15m". */
+private fun formatEta(etaSeconds: Int): String = when {
+    etaSeconds <= 0 -> "—"
+    etaSeconds < 60 -> "${etaSeconds}s"
+    etaSeconds < 3600 -> {
+        val m = etaSeconds / 60
+        val s = etaSeconds % 60
+        "${m}m ${s}s"
+    }
+    else -> {
+        val h = etaSeconds / 3600
+        val m = (etaSeconds % 3600) / 60
+        "${h}h ${m}m"
+    }
+}
+
