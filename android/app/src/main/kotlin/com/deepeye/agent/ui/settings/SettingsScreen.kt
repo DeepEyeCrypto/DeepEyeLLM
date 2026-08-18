@@ -192,10 +192,18 @@ fun SettingsScreen(
                     HorizontalDivider(color = DeepEyeTheme.colors.glassBorder)
                     FuturisticChipSelector(
                         title = "Context Window Size",
-                        options = listOf(512, 1024, 2048, 4096),
+                        options = listOf(512, 1024, 2048, 4096, 8192),
                         selectedValue = state.engineSettings.contextSize,
                         onOptionSelected = { viewModel.updateContextSize(it) },
                         accentColor = DeepEyeTheme.colors.accent
+                    )
+                    HorizontalDivider(color = DeepEyeTheme.colors.glassBorder)
+                    FuturisticStringChipSelector(
+                        title = "KV-Cache Quantization",
+                        options = listOf("FP16", "Q8_0", "Q4_0"),
+                        selectedValue = state.engineSettings.kvCacheQuant,
+                        onOptionSelected = { viewModel.updateKvCacheQuant(it) },
+                        accentColor = DeepEyeTheme.colors.link
                     )
                     HorizontalDivider(color = DeepEyeTheme.colors.glassBorder)
                     FuturisticActionRow(
@@ -529,6 +537,46 @@ private fun FuturisticChipSelector(
                     selected = selectedValue == size,
                     onClick = { onOptionSelected(size) },
                     label = { Text("$size") },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = accentColor,
+                        selectedLabelColor = MaterialTheme.colorScheme.scrim,
+                        containerColor = MaterialTheme.colorScheme.outlineVariant,
+                        labelColor = MaterialTheme.colorScheme.onSurface
+                    )
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun FuturisticStringChipSelector(
+    title: String,
+    options: List<String>,
+    selectedValue: String,
+    onOptionSelected: (String) -> Unit,
+    accentColor: Color
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Text(
+            "$title: $selectedValue",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(Modifier.height(12.dp))
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            options.forEach { opt ->
+                FilterChip(
+                    selected = selectedValue == opt,
+                    onClick = { onOptionSelected(opt) },
+                    label = { Text(opt) },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = accentColor,
                         selectedLabelColor = MaterialTheme.colorScheme.scrim,

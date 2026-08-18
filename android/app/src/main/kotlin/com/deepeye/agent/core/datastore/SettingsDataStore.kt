@@ -32,6 +32,7 @@ class SettingsDataStore @Inject constructor(
         val KEY_CONTEXT_SIZE = intPreferencesKey("context_size")
         val KEY_TEMPERATURE = floatPreferencesKey("temperature")
         val KEY_TOP_P = floatPreferencesKey("top_p")
+        val KEY_KV_CACHE_QUANT = androidx.datastore.preferences.core.stringPreferencesKey("kv_cache_quant")
     }
 
     val engineSettingsFlow: Flow<EngineSettings> = context.dataStore.data.map { prefs ->
@@ -42,6 +43,7 @@ class SettingsDataStore @Inject constructor(
             gpuLayers = prefs[KEY_GPU_LAYERS] ?: 99,
             cpuThreads = prefs[KEY_CPU_THREADS] ?: defaultThreads,
             contextSize = prefs[KEY_CONTEXT_SIZE] ?: 1024,
+            kvCacheQuant = prefs[KEY_KV_CACHE_QUANT] ?: "FP16",
             temperature = prefs[KEY_TEMPERATURE] ?: 0.7f,
             topP = prefs[KEY_TOP_P] ?: 0.9f
         )
@@ -67,6 +69,10 @@ class SettingsDataStore @Inject constructor(
         context.dataStore.edit { prefs -> prefs[KEY_CONTEXT_SIZE] = contextSize }
     }
 
+    suspend fun updateKvCacheQuant(kvCacheQuant: String) {
+        context.dataStore.edit { prefs -> prefs[KEY_KV_CACHE_QUANT] = kvCacheQuant }
+    }
+
     suspend fun updateTemperature(temperature: Float) {
         context.dataStore.edit { prefs -> prefs[KEY_TEMPERATURE] = temperature }
     }
@@ -82,6 +88,7 @@ data class EngineSettings(
     val gpuLayers: Int = 99,
     val cpuThreads: Int = 4,
     val contextSize: Int = 1024,
+    val kvCacheQuant: String = "FP16", // "FP16", "Q8_0", "Q4_0"
     val temperature: Float = 0.7f,
     val topP: Float = 0.9f
 )

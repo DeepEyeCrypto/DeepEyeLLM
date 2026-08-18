@@ -114,6 +114,10 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { settingsDataStore.updateContextSize(contextSize) }
     }
 
+    fun updateKvCacheQuant(kvCacheQuant: String) {
+        viewModelScope.launch { settingsDataStore.updateKvCacheQuant(kvCacheQuant) }
+    }
+
     fun updateTemperature(temp: Float) {
         viewModelScope.launch { settingsDataStore.updateTemperature(temp) }
     }
