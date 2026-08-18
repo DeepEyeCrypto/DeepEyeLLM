@@ -40,8 +40,12 @@ object HardwareBackendSelector {
             )
         }
 
+        val isMaliOrMediaTek = isMediaTekPlatform() || isMaliPlatform()
+
         return when {
             isHexagonNpuAvailable() -> BackendConfig(backendType = BACKEND_HEXAGON_QNN, nGpuLayers = userGpuLayers, name = "Snapdragon Hexagon NPU")
+            isAdrenoGpu() && isVulkanAvailable(context) -> BackendConfig(backendType = BACKEND_VULKAN, nGpuLayers = userGpuLayers, name = "Adreno Vulkan GPU")
+            isMaliOrMediaTek -> BackendConfig(backendType = BACKEND_CPU, nGpuLayers = 0, name = "ARM NEON Turbo CPU")
             isVulkanAvailable(context) -> BackendConfig(backendType = BACKEND_VULKAN, nGpuLayers = userGpuLayers, name = "Vulkan GPU Acceleration")
             isOpenCLAvailable() -> BackendConfig(backendType = BACKEND_OPENCL, nGpuLayers = userGpuLayers, name = "OpenCL GPU")
             else -> BackendConfig(backendType = BACKEND_CPU, nGpuLayers = 0, name = "CPU Only (ARM NEON)")
@@ -106,6 +110,25 @@ object HardwareBackendSelector {
                 isAvailable = true
             )
         )
+    }
+
+    fun isMediaTekPlatform(): Boolean {
+        val platform = getSystemProperty("ro.board.platform").lowercase()
+        val hardware = Build.HARDWARE.lowercase()
+        val soc = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) Build.SOC_MODEL.lowercase() else ""
+        return platform.startsWith("mt") || hardware.contains("mt") || hardware.contains("dimensity") || soc.contains("dimensity") || soc.contains("mt")
+    }
+
+    fun isMaliPlatform(): Boolean {
+        val hardware = Build.HARDWARE.lowercase()
+        val platform = getSystemProperty("ro.board.platform").lowercase()
+        return hardware.contains("mali") || platform.contains("mali") || hardware.contains("exynos") || hardware.contains("tensor")
+    }
+
+    fun isAdrenoGpu(): Boolean {
+        val hardware = Build.HARDWARE.lowercase()
+        val platform = getSystemProperty("ro.board.platform").lowercase()
+        return platform.startsWith("msm") || platform.startsWith("sdm") || platform.startsWith("sm") || hardware.contains("qcom") || hardware.contains("adreno")
     }
 
     fun isHexagonNpuAvailable(): Boolean {
