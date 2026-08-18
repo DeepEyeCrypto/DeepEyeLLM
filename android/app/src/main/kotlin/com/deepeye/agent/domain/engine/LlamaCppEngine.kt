@@ -33,8 +33,8 @@ class LlamaCppEngine(
     val useGpu: Boolean = true,
     val selectedBackend: Int = -1,
     val gpuLayers: Int = 99,
-    val customThreads: Int = 4,
-    val customContextSize: Int = 1024,
+    val customThreads: Int = 8,
+    val customContextSize: Int = 4096,
     /** Public key bytes (X.509 DER) used to verify the model's Ed25519 signature.
      *  When null, signature verification is skipped (e.g. during local development
      *  before a signing pipeline is wired up). */

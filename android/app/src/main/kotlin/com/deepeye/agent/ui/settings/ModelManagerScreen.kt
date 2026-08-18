@@ -97,8 +97,8 @@ fun ModelManagerScreen(
         val am = context.getSystemService(android.content.Context.ACTIVITY_SERVICE) as? android.app.ActivityManager
         val mi = android.app.ActivityManager.MemoryInfo()
         am?.getMemoryInfo(mi)
-        val ramGb = (mi.totalMem / (1024 * 1024 * 1024)).toInt()
-        if (ramGb > 0) ramGb else 8
+        val ramGb = if (mi.totalMem > 0) kotlin.math.round(mi.totalMem.toDouble() / (1024.0 * 1024.0 * 1024.0)).toInt() else 6
+        if (ramGb > 0) ramGb else 6
     }
 
     val installed = remember(availableModels, deviceRamGb) { availableModels.filter { (it.engineState == EngineState.READY || it.engineState == EngineState.LOADED) && it.requiredRamGb <= deviceRamGb } }

@@ -36,13 +36,13 @@ class SettingsDataStore @Inject constructor(
     }
 
     val engineSettingsFlow: Flow<EngineSettings> = context.dataStore.data.map { prefs ->
-        val defaultThreads = Runtime.getRuntime().availableProcessors().let { if (it >= 8) 6 else (it - 1).coerceAtLeast(2) }
+        val defaultThreads = Runtime.getRuntime().availableProcessors().coerceIn(4, 8)
         EngineSettings(
             useGpu = prefs[KEY_USE_GPU] ?: true,
             selectedBackend = prefs[KEY_SELECTED_BACKEND] ?: -1,
             gpuLayers = prefs[KEY_GPU_LAYERS] ?: 99,
             cpuThreads = prefs[KEY_CPU_THREADS] ?: defaultThreads,
-            contextSize = prefs[KEY_CONTEXT_SIZE] ?: 1024,
+            contextSize = prefs[KEY_CONTEXT_SIZE] ?: 4096,
             kvCacheQuant = prefs[KEY_KV_CACHE_QUANT] ?: "FP16",
             temperature = prefs[KEY_TEMPERATURE] ?: 0.7f,
             topP = prefs[KEY_TOP_P] ?: 0.9f
@@ -86,8 +86,8 @@ data class EngineSettings(
     val useGpu: Boolean = true,
     val selectedBackend: Int = -1, // -1 = Auto, 0 = CPU, 1 = Vulkan, 2 = OpenCL, 3 = Hexagon QNN, 4 = KleidiAI
     val gpuLayers: Int = 99,
-    val cpuThreads: Int = 4,
-    val contextSize: Int = 1024,
+    val cpuThreads: Int = 8,
+    val contextSize: Int = 4096,
     val kvCacheQuant: String = "FP16", // "FP16", "Q8_0", "Q4_0"
     val temperature: Float = 0.7f,
     val topP: Float = 0.9f

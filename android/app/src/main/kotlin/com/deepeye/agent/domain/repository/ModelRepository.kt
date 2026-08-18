@@ -61,8 +61,8 @@ class ModelRepository @Inject constructor(
         val am = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
         val mi = ActivityManager.MemoryInfo()
         am?.getMemoryInfo(mi)
-        val ramGb = (mi.totalMem / (1024 * 1024 * 1024)).toInt()
-        return if (ramGb > 0) ramGb else 8
+        val ramGb = kotlin.math.round(mi.totalMem.toDouble() / (1024.0 * 1024.0 * 1024.0)).toInt().coerceAtLeast(1)
+        return if (ramGb > 0) ramGb else 6
     }
 
     /**

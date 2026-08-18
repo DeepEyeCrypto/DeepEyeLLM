@@ -50,11 +50,20 @@ class EngineController(
         val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as? android.app.ActivityManager
         val memoryInfo = android.app.ActivityManager.MemoryInfo()
         activityManager?.getMemoryInfo(memoryInfo)
-        val safeMaxBytes = if (memoryInfo.totalMem > 0) (memoryInfo.totalMem * 0.65).toLong() else 3_500_000_000L
+        // Uncapped: utilize full 6GB RAM capacity for high-parameter models & mmap paging
+        val safeMaxBytes = if (memoryInfo.totalMem > 0) (memoryInfo.totalMem * 0.95).toLong() else 6_000_000_000L
 
-        // Prioritize models that safely fit into device RAM (<= 65% total RAM), picking highest quality within budget
-        val activeModel = availableModels?.filter { it.length() in 50_000_000L..safeMaxBytes }?.maxByOrNull { it.length() }
-            ?: availableModels?.filter { it.length() >= 50_000_000L }?.minByOrNull { it.length() }
+        // Prioritize highest quality model on disk that fits within device capacity
+        val activeModel = availableModels?.filter { 
+            it.length() in 50_000_000L..safeMaxBytes &&
+            !it.name.contains("dspark", ignoreCase = true) &&
+            !it.name.contains("adapter", ignoreCase = true)
+        }?.maxByOrNull { it.length() }
+            ?: availableModels?.filter { 
+                it.length() >= 50_000_000L &&
+                !it.name.contains("dspark", ignoreCase = true) &&
+                !it.name.contains("adapter", ignoreCase = true)
+            }?.minByOrNull { it.length() }
         
         if (activeModel != null && activeModel.exists()) {
             android.util.Log.d("DeepEye", "{\"event\":\"engine_auto_loading\", \"model\":\"${activeModel.name}\"}")

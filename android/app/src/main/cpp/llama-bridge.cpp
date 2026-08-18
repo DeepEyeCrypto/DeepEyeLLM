@@ -529,9 +529,9 @@ Java_com_deepeye_agent_domain_engine_LlamaCppEngine_nativeInitModel(
 
     auto ctx_params = llama_context_default_params();
     ctx_params.n_ctx            = n_ctx;
-    ctx_params.n_threads        = (n_threads >= 6) ? 4 : std::max(1, n_threads);
-    ctx_params.n_threads_batch  = std::max(n_threads, 6);
-    ctx_params.n_batch          = 512;
+    ctx_params.n_threads        = std::max(1, n_threads);
+    ctx_params.n_threads_batch  = std::max(1, n_threads);
+    ctx_params.n_batch          = 1024;
     ctx_params.n_ubatch         = 512;
     ctx_params.flash_attn_type  = LLAMA_FLASH_ATTN_TYPE_AUTO;
     ctx_params.type_k           = GGML_TYPE_F16;
