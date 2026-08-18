@@ -167,14 +167,18 @@ class LlamaCppEngine(
     suspend fun chatWithHistory(history: List<ChatMessage>): String = withContext(Dispatchers.IO) {
         check(isInitialized) { "LlamaCppEngine is not initialized." }
 
-        val formattedPrompt = com.deepeye.agent.core.model.ChatFormatter.formatPrompt(
-            history = history,
-            maxContextTokens = maxContextTokens,
-            maxGenerationTokens = MAX_GENERATION_TOKENS
-        )
+        val promptToSend = if (history.size == 1 && history[0].role == ChatMessage.ROLE_USER) {
+            history[0].content
+        } else {
+            com.deepeye.agent.core.model.ChatFormatter.formatPrompt(
+                history = history,
+                maxContextTokens = maxContextTokens,
+                maxGenerationTokens = MAX_GENERATION_TOKENS
+            )
+        }
 
         if (isNativeLibLoaded && nativeContextHandle != 0L) {
-            return@withContext nativeGenerateResponse(nativeContextHandle, formattedPrompt)
+            return@withContext nativeGenerateResponse(nativeContextHandle, promptToSend)
         }
 
         "[LlamaCppEngine] Native library not loaded. Cannot run inference."
@@ -191,11 +195,15 @@ class LlamaCppEngine(
     suspend fun chatStreamWithHistory(history: List<ChatMessage>, onChunk: (String) -> Unit): Unit = withContext(Dispatchers.IO) {
         check(isInitialized) { "LlamaCppEngine is not initialized." }
 
-        val formattedPrompt = com.deepeye.agent.core.model.ChatFormatter.formatPrompt(
-            history = history,
-            maxContextTokens = maxContextTokens,
-            maxGenerationTokens = MAX_GENERATION_TOKENS
-        )
+        val promptToSend = if (history.size == 1 && history[0].role == ChatMessage.ROLE_USER) {
+            history[0].content
+        } else {
+            com.deepeye.agent.core.model.ChatFormatter.formatPrompt(
+                history = history,
+                maxContextTokens = maxContextTokens,
+                maxGenerationTokens = MAX_GENERATION_TOKENS
+            )
+        }
 
         if (isNativeLibLoaded && nativeContextHandle != 0L) {
             val handle = nativeContextHandle
@@ -209,7 +217,7 @@ class LlamaCppEngine(
             }
 
             try {
-                nativeGenerateResponseStream(handle, formattedPrompt, MAX_GENERATION_TOKENS,
+                nativeGenerateResponseStream(handle, promptToSend, MAX_GENERATION_TOKENS,
                     object : NativeTokenCallback {
                         override fun onTokenGenerated(token: String) {
                             onChunk(token)
