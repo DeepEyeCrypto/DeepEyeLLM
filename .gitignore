@@ -10,17 +10,32 @@ build/
 local.properties
 
 # Logs & App Data
-logs
+logs/
 *.log
 .kiro/
 *.bin
 *.gguf
 *.tmp
 
+# Screenshots & Inspection Dumps (NEVER commit to git)
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.dump
+*.xml.dump
+*dump.xml
+/screenshot*
+**/screen*
+**/screen*.png
+**/screen*.jpg
+**/window_dump*.xml
+**/sheet_dump*.xml
+**/send_dump*.xml
+
 # System & IDE
 .DS_Store
 .idea/
 *.iml
 .vscode/
-*.png
 
