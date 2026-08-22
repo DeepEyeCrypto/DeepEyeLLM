@@ -38,6 +38,8 @@ import com.deepeye.agent.ui.components.NeonStatusBadge
 import com.deepeye.agent.ui.theme.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 enum class StructuredSchemaPreset(val title: String, val schemaDescription: String) {
     FREEFORM("Freeform", "Standard markdown & natural language generation"),
@@ -46,17 +48,6 @@ enum class StructuredSchemaPreset(val title: String, val schemaDescription: Stri
     TOOL_INTENT("Tool Call Intent", "Forces { \"tool\": string, \"args\": object, \"reason\": string }")
 }
 
-data class PromptLabVariant(
-    val name: String,
-    val systemPrompt: String,
-    val temperature: Float,
-    val topP: Float,
-    val outputText: String = "",
-    val isStreaming: Boolean = false,
-    val ttftMs: Long = 0,
-    val tokensPerSec: Float = 0f
-)
-
 /**
  * Prompt Lab & A/B Experimentation Studio.
  * Allows power users to evaluate model hyperparameters, system prompts, and GBNF grammars side-by-side.
@@ -64,93 +55,20 @@ data class PromptLabVariant(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PromptLabScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: PromptLabViewModel = hiltViewModel()
 ) {
-    val coroutineScope = rememberCoroutineScope()
-
-    var sharedPrompt by remember {
-        mutableStateOf("Analyze the reentrancy attack surface on standard ERC-20 transferFrom implementations.")
-    }
-    var selectedSchema by remember { mutableStateOf(StructuredSchemaPreset.FREEFORM) }
-    var activeTab by remember { mutableIntStateOf(0) }
-
-    var variantA by remember {
-        mutableStateOf(
-            PromptLabVariant(
-                name = "Variant A (Deterministic)",
-                systemPrompt = "You are a senior security researcher. Output strictly verified technical invariants.",
-                temperature = 0.2f,
-                topP = 0.85f,
-                outputText = "Decompiling contract bytecode...\nInvariant 1: State mutation occurs after external balance checks.\nInvariant 2: Reentrancy protection modifier enforced on withdrawal pathways.",
-                ttftMs = 120,
-                tokensPerSec = 34.5f
-            )
-        )
-    }
-
-    var variantB by remember {
-        mutableStateOf(
-            PromptLabVariant(
-                name = "Variant B (Creative / Broad)",
-                systemPrompt = "You are an exploratory AI assistant. Provide comprehensive exploit scenarios and edge-case theories.",
-                temperature = 0.8f,
-                topP = 0.95f,
-                outputText = "Exploring potential attack vectors:\n1. Cross-function reentrancy via fallback hooks.\n2. Read-only reentrancy impacting downstream price oracles in AMM pool pairs.",
-                ttftMs = 140,
-                tokensPerSec = 32.1f
-            )
-        )
-    }
-
-    var isRunningDual by remember { mutableStateOf(false) }
-
-    val presetPrompts = listOf(
-        "ERC-20 Audit" to "Analyze the reentrancy attack surface on standard ERC-20 transferFrom implementations.",
-        "Zero-Day Scan" to "Scan memory allocation patterns in C++ pointer dereferencing for buffer overflows.",
-        "JSON Extractor" to "Extract DEX pool liquidity reserves, token decimals, and slippage tolerance from swap logs.",
-        "Agent Plan" to "Synthesize multi-step autonomous execution plan for smart contract fuzz testing."
-    )
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    
+    val sharedPrompt = uiState.sharedPrompt
+    val selectedSchema = uiState.selectedSchema
+    val activeTab = uiState.activeTab
+    val variantA = uiState.variantA
+    val variantB = uiState.variantB
+    val isRunningDual = uiState.isRunningDual
 
     fun runBenchmark() {
-        if (isRunningDual) {
-            isRunningDual = false
-            return
-        }
-        isRunningDual = true
-        coroutineScope.launch {
-            variantA = variantA.copy(outputText = "", isStreaming = true, ttftMs = 95, tokensPerSec = 36.2f)
-            variantB = variantB.copy(outputText = "", isStreaming = true, ttftMs = 110, tokensPerSec = 33.8f)
-
-            val streamChunksA = listOf(
-                "Initializing deterministic engine (temp=0.2)...\n",
-                "[Pass 1] AST validation verified clean control flow.\n",
-                "Invariant Check: transferFrom state transitions execute atomically.\n",
-                "Formal Verification: Solved Z3 invariant with 0 SAT counter-examples.\n",
-                "Audit Conclusion: No reentrancy vulnerability detected on standard transfer pathway."
-            )
-
-            val streamChunksB = listOf(
-                "Initializing exploratory synthesis (temp=0.8)...\n",
-                "Hypothesis: Analyzing potential flash loan reentrancy vectors...\n",
-                "Scenario A: Callback reentrancy if ERC-777 tokensReceived hook is invoked.\n",
-                "Scenario B: Cross-contract read reentrancy during UniswapV2 price calculation.\n",
-                "Recommendation: Implement Checks-Effects-Interactions and ReentrancyGuard modifier."
-            )
-
-            for (i in 0 until maxOf(streamChunksA.size, streamChunksB.size)) {
-                if (!isRunningDual) break
-                delay(300)
-                if (i < streamChunksA.size) {
-                    variantA = variantA.copy(outputText = variantA.outputText + streamChunksA[i])
-                }
-                if (i < streamChunksB.size) {
-                    variantB = variantB.copy(outputText = variantB.outputText + streamChunksB[i])
-                }
-            }
-            variantA = variantA.copy(isStreaming = false)
-            variantB = variantB.copy(isStreaming = false)
-            isRunningDual = false
-        }
+        viewModel.runBenchmark()
     }
 
     Scaffold(
@@ -237,18 +155,31 @@ fun PromptLabScreen(
                             color = CyberCyan
                         )
 
-                        Text(
-                            text = "${sharedPrompt.length} chars",
-                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                            color = ThinkingMutedSlate
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            IconButton(
+                                onClick = { viewModel.saveCurrentPromptAsPreset() },
+                                modifier = Modifier.size(24.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Save,
+                                    contentDescription = "Save Preset",
+                                    tint = CyberCyan,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                            Text(
+                                text = "${sharedPrompt.length} chars",
+                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                                color = ThinkingMutedSlate
+                            )
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(6.dp))
 
                     OutlinedTextField(
                         value = sharedPrompt,
-                        onValueChange = { sharedPrompt = it },
+                        onValueChange = { viewModel.onSharedPromptChange(it) },
                         modifier = Modifier.fillMaxWidth(),
                         maxLines = 3,
                         shape = RoundedCornerShape(10.dp),
@@ -266,12 +197,12 @@ fun PromptLabScreen(
 
                     // Preset Prompts Chips
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        items(presetPrompts) { (label, text) ->
+                        items(uiState.presetPrompts) { (label, text) ->
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(6.dp))
                                     .background(Color(0x2200E5FF))
-                                    .clickable { sharedPrompt = text }
+                                    .clickable { viewModel.onSharedPromptChange(text) }
                                     .padding(horizontal = 8.dp, vertical = 4.dp)
                             ) {
                                 Text(
@@ -297,11 +228,11 @@ fun PromptLabScreen(
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        items(StructuredSchemaPreset.values()) { preset ->
+                        items(StructuredSchemaPreset.entries) { preset ->
                             CyberChip(
                                 label = preset.title,
                                 selected = selectedSchema == preset,
-                                onClick = { selectedSchema = preset }
+                                onClick = { viewModel.onSchemaChange(preset) }
                             )
                         }
                     }
@@ -316,13 +247,13 @@ fun PromptLabScreen(
                 CyberChip(
                     label = variantA.name,
                     selected = activeTab == 0,
-                    onClick = { activeTab = 0 },
+                    onClick = { viewModel.onTabChange(0) },
                     modifier = Modifier.weight(1f)
                 )
                 CyberChip(
                     label = variantB.name,
                     selected = activeTab == 1,
-                    onClick = { activeTab = 1 },
+                    onClick = { viewModel.onTabChange(1) },
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -331,13 +262,27 @@ fun PromptLabScreen(
             if (activeTab == 0) {
                 VariantEvaluationCard(
                     variant = variantA,
-                    onUpdate = { variantA = it },
+                    onUpdate = { 
+                        viewModel.updateVariantA(
+                            systemPrompt = it.systemPrompt,
+                            temperature = it.temperature,
+                            topK = it.topK,
+                            maxTokens = it.maxTokens
+                        )
+                    },
                     modifier = Modifier.fillMaxWidth()
                 )
             } else {
                 VariantEvaluationCard(
                     variant = variantB,
-                    onUpdate = { variantB = it },
+                    onUpdate = { 
+                        viewModel.updateVariantB(
+                            systemPrompt = it.systemPrompt,
+                            temperature = it.temperature,
+                            topK = it.topK,
+                            maxTokens = it.maxTokens
+                        )
+                    },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -428,8 +373,8 @@ fun CyberSlider(
 
 @Composable
 fun VariantEvaluationCard(
-    variant: PromptLabVariant,
-    onUpdate: (PromptLabVariant) -> Unit,
+    variant: PromptLabVariantState,
+    onUpdate: (PromptLabVariantState) -> Unit,
     modifier: Modifier = Modifier
 ) {
     GlassCard(
@@ -464,7 +409,7 @@ fun VariantEvaluationCard(
                             .padding(horizontal = 8.dp, vertical = 3.dp)
                     ) {
                         Text(
-                            text = "${variant.tokensPerSec} t/s",
+                            text = "${"%.1f".format(variant.tokensPerSec)} t/s",
                             style = MaterialTheme.typography.labelSmall.copy(
                                 fontFamily = FontFamily.Monospace,
                                 fontWeight = FontWeight.Bold
@@ -530,20 +475,20 @@ fun VariantEvaluationCard(
 
                 Spacer(modifier = Modifier.height(2.dp))
 
-                // Top-P Row
+                // Top-K Row
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Top-P Sampling",
+                        text = "Top-K",
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.White,
                         fontWeight = FontWeight.Medium
                     )
                     Text(
-                        text = "%.2f".format(variant.topP),
+                        text = "${variant.topK}",
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontFamily = FontFamily.Monospace,
                             fontWeight = FontWeight.Bold
@@ -552,10 +497,40 @@ fun VariantEvaluationCard(
                     )
                 }
                 CyberSlider(
-                    value = variant.topP,
-                    onValueChange = { onUpdate(variant.copy(topP = it)) },
-                    valueRange = 0.1f..1.0f,
+                    value = variant.topK.toFloat(),
+                    onValueChange = { onUpdate(variant.copy(topK = it.toInt())) },
+                    valueRange = 1f..100f,
                     accentColor = AmberAccent
+                )
+                
+                Spacer(modifier = Modifier.height(2.dp))
+
+                // Max Tokens Row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Max Tokens",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.White,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text = "${variant.maxTokens}",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = StatusWarning
+                    )
+                }
+                CyberSlider(
+                    value = variant.maxTokens.toFloat(),
+                    onValueChange = { onUpdate(variant.copy(maxTokens = it.toInt())) },
+                    valueRange = 64f..4096f,
+                    accentColor = StatusWarning
                 )
             }
 

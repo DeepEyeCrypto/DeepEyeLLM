@@ -19,6 +19,8 @@ data class BenchmarkUiState(
     val currentPromptName: String = "",
     val progress: Float = 0f,
     val lastResult: AggregateBenchmarkResult? = null,
+    val comparisonResults: List<AggregateBenchmarkResult> = emptyList(),
+    val isComparisonMode: Boolean = false,
     val exportStatus: String? = null,
     val diagnosticSummary: com.deepeye.agent.core.diagnostics.DiagnosticSuiteSummary? = null,
     val isRunningDiagnostics: Boolean = false
@@ -33,12 +35,28 @@ class BenchmarkViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(BenchmarkUiState())
     val uiState: StateFlow<BenchmarkUiState> = _uiState.asStateFlow()
 
+    fun toggleComparisonMode() {
+        _uiState.update { it.copy(isComparisonMode = !it.isComparisonMode, comparisonResults = if (!it.isComparisonMode) listOfNotNull(it.lastResult) else emptyList()) }
+    }
+
     fun runBenchmark() = viewModelScope.launch {
         _uiState.update { it.copy(isRunning = true, progress = 0f, exportStatus = null) }
         val result = runner.runSuite { status, progress ->
             _uiState.update { it.copy(currentPromptName = status, progress = progress) }
         }
-        _uiState.update { it.copy(isRunning = false, progress = 1f, lastResult = result) }
+        _uiState.update { state -> 
+            val newComparisonResults = if (state.isComparisonMode) {
+                state.comparisonResults + result
+            } else {
+                state.comparisonResults
+            }
+            state.copy(
+                isRunning = false, 
+                progress = 1f, 
+                lastResult = result,
+                comparisonResults = newComparisonResults
+            )
+        }
     }
 
     fun runAdbHardwareDiagnostics() = viewModelScope.launch {

@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -86,7 +87,8 @@ fun ModelManagerScreen(
     onCancelDownload: (String) -> Unit = {},
     onPauseDownload: (String) -> Unit = {},
     onResumeDownload: (String) -> Unit = {},
-    onRefreshCatalog: () -> Unit = {}
+    onRefreshCatalog: () -> Unit = {},
+    onBenchmarkModel: (String) -> Unit = {}
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val tabs = listOf("Installed", "Available", "Unsupported", "Failed")
@@ -180,15 +182,16 @@ fun ModelManagerScreen(
 
             // Storage Footprint Meter
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                val totalUsed = 11.8f
-                val totalMax = 128f
+                val stat = remember { android.os.StatFs(android.os.Environment.getDataDirectory().path) }
+                val totalMax = stat.totalBytes.toFloat() / (1024f * 1024f * 1024f)
+                val totalUsed = (stat.totalBytes - stat.availableBytes).toFloat() / (1024f * 1024f * 1024f)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Storage Footprint", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text("$totalUsed GB / $totalMax GB Used", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface)
+                    Text("Device Storage", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("%.1f GB / %.1f GB Used".format(totalUsed, totalMax), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface)
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 LinearProgressIndicator(
@@ -239,6 +242,7 @@ fun ModelManagerScreen(
                             onCancel = { onCancelDownload(model.id) },
                             onPause = { onPauseDownload(model.id) },
                             onResume = { onResumeDownload(model.id) },
+                            onBenchmark = { onBenchmarkModel(model.id) },
                             isUnsupported = selectedTabIndex == 2
                         )
                         Spacer(modifier = Modifier.height(8.dp))
@@ -250,15 +254,15 @@ fun ModelManagerScreen(
                     columns = GridCells.Fixed(gridColumns),
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     if (selectedTabIndex == 0) {
-                        item { ImportCustomModelCard(onClick = onImportModel) }
+                        item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) { ImportCustomModelCard(onClick = onImportModel) }
                     }
 
                     if (currentList.isEmpty() && selectedTabIndex != 0) {
-                        item { EmptyStateContent(selectedTabIndex, onRefreshCatalog) }
+                        item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) { EmptyStateContent(selectedTabIndex, onRefreshCatalog) }
                     }
 
                     items(
@@ -274,6 +278,7 @@ fun ModelManagerScreen(
                             onCancel = { onCancelDownload(model.id) },
                             onPause = { onPauseDownload(model.id) },
                             onResume = { onResumeDownload(model.id) },
+                            onBenchmark = { onBenchmarkModel(model.id) },
                             isUnsupported = selectedTabIndex == 2
                         )
                     }
@@ -318,6 +323,7 @@ fun ModelItemCard(
     onCancel: () -> Unit,
     onPause: () -> Unit = {},
     onResume: () -> Unit = {},
+    onBenchmark: () -> Unit = {},
     isUnsupported: Boolean
 ) {
     val canSelect = (model.engineState == EngineState.READY || model.engineState == EngineState.LOADED) && !isUnsupported
@@ -393,6 +399,29 @@ fun ModelItemCard(
                     }
 
                     Spacer(modifier = Modifier.height(4.dp))
+
+                    if (model.capabilities.isNotEmpty()) {
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(bottom = 4.dp)) {
+                            items(model.capabilities) { cap ->
+                                Box(
+                                    modifier = Modifier
+                                        .border(BorderStroke(1.dp, CyberCyan.copy(alpha = 0.3f)), RoundedCornerShape(4.dp))
+                                        .padding(horizontal = 4.dp, vertical = 2.dp)
+                                ) {
+                                    Text(cap, style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp), color = CyberCyan)
+                                }
+                            }
+                        }
+                    }
+
+                    if (model.lastBenchmarkTps != null) {
+                        Text(
+                            text = "Last Benchmark: ${"%.1f".format(model.lastBenchmarkTps)} t/s", 
+                            style = MaterialTheme.typography.bodySmall, 
+                            color = StatusSuccess, 
+                            modifier = Modifier.padding(bottom = 4.dp)
+                        )
+                    }
 
                     if (isUnsupported) {
                         Text(
@@ -496,11 +525,19 @@ fun ModelItemCard(
                         }
                         EngineState.READY, EngineState.LOADED, EngineState.LOADING, EngineState.DOWNLOADED -> {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                OutlinedButton(
+                                    onClick = onBenchmark,
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = CyberCyan),
+                                    contentPadding = PaddingValues(horizontal = 8.dp)
+                                ) {
+                                    Text("Benchmark", style = MaterialTheme.typography.labelSmall)
+                                }
                                 Button(
                                     onClick = onSelect,
-                                    colors = ButtonDefaults.buttonColors(containerColor = DeepEyeTheme.colors.statusSuccess)
+                                    colors = ButtonDefaults.buttonColors(containerColor = DeepEyeTheme.colors.statusSuccess),
+                                    contentPadding = PaddingValues(horizontal = 8.dp)
                                 ) {
-                                    Text("Activate", color = MaterialTheme.colorScheme.scrim)
+                                    Text("Activate", color = MaterialTheme.colorScheme.scrim, style = MaterialTheme.typography.labelSmall)
                                 }
                                 IconButton(onClick = onDelete) {
                                     Icon(Icons.Default.Delete, contentDescription = "Delete", tint = DeepEyeTheme.colors.dangerAlt)

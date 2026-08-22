@@ -3,11 +3,13 @@ package com.deepeye.agent.ui.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CompassCalibration
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Settings
@@ -149,6 +151,22 @@ sealed class AgentDestinations(
         label = "Guard",
         icon = Icons.Default.Security,
         contentDescription = "Zero-Trust Security Audit"
+    )
+
+    @Serializable
+    data object AskImage : AgentDestinations(
+        route = "ask_image",
+        label = "Vision",
+        icon = Icons.Default.CameraAlt,
+        contentDescription = "Ask Image — Multimodal Vision"
+    )
+
+    @Serializable
+    data object AudioScribe : AgentDestinations(
+        route = "audio_scribe",
+        label = "Audio",
+        icon = Icons.Default.Mic,
+        contentDescription = "Audio Scribe — Transcription & Translation"
     )
 }
 

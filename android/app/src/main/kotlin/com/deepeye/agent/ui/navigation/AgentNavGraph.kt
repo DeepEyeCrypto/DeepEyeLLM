@@ -10,6 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import kotlin.reflect.typeOf
 import com.deepeye.agent.ui.agent.AgentStudioScreen
+import com.deepeye.agent.ui.audio.AudioScribeScreen
 import com.deepeye.agent.ui.benchmark.BenchmarkScreen
 import com.deepeye.agent.ui.browser.BraveBrowserScreen
 import com.deepeye.agent.ui.chat.ChatScreen
@@ -22,6 +23,7 @@ import com.deepeye.agent.ui.settings.DiagnosticsScreen
 import com.deepeye.agent.ui.settings.ModelManagerScreen
 import com.deepeye.agent.ui.settings.SettingsScreen
 import com.deepeye.agent.ui.skills.SkillStoreScreen
+import com.deepeye.agent.ui.vision.AskImageScreen
 
 @Composable
 fun DeepEyeNavGraph(
@@ -87,6 +89,12 @@ fun DeepEyeNavGraph(
         }
         composable(route = AgentDestinations.Security.route) {
             SecurityDashboardScreen()
+        }
+        composable(route = AgentDestinations.AskImage.route) {
+            AskImageScreen()
+        }
+        composable(route = AgentDestinations.AudioScribe.route) {
+            AudioScribeScreen()
         }
     }
 }

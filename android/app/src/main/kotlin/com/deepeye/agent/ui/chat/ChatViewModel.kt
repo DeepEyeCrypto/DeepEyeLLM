@@ -44,7 +44,8 @@ data class ChatUiState(
     val error: String? = null,
     val showModelPicker: Boolean = false,
     val activeModelName: String = "No Model Loaded",
-    val tokensPerSecond: Float = 0f
+    val tokensPerSecond: Float = 0f,
+    val isThinkingModeEnabled: Boolean = false
 )
 
 @HiltViewModel
@@ -100,6 +101,10 @@ class ChatViewModel @Inject constructor(
 
     fun toggleModelPicker(show: Boolean) {
         _chatState.update { it.copy(showModelPicker = show) }
+    }
+
+    fun toggleThinkingMode() {
+        _chatState.update { it.copy(isThinkingModeEnabled = !it.isThinkingModeEnabled) }
     }
 
     fun selectAndActivateModel(modelId: String, fileName: String? = null) {
@@ -249,7 +254,13 @@ class ChatViewModel @Inject constructor(
             }
 
             try {
-                engineController.executeChatStream(inputPrompt) { chunk ->
+                val enginePrompt = if (_chatState.value.isThinkingModeEnabled) {
+                    "<system>\nYou are a reasoning model. You must use <think> and </think> tags to show your chain of thought before providing the final answer.\n</system>\n\nUser: $inputPrompt"
+                } else {
+                    inputPrompt
+                }
+                
+                engineController.executeChatStream(enginePrompt) { chunk ->
                     if (firstTokenTime == 0L) {
                         firstTokenTime = System.currentTimeMillis()
                     }

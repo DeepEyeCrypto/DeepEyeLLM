@@ -111,6 +111,7 @@ fun BenchmarkScreen(
             BenchmarkCompactLayout(
                 uiState = uiState,
                 onRunBenchmark = { viewModel.runBenchmark() },
+                onToggleComparisonMode = { viewModel.toggleComparisonMode() },
                 onRunDiagnostics = { viewModel.runAdbHardwareDiagnostics() },
                 onExport = { viewModel.exportResultsCsv() },
                 modifier = Modifier.padding(padding)
@@ -126,6 +127,7 @@ fun BenchmarkScreen(
                 BenchmarkPrimaryPane(
                     uiState = uiState,
                     onRunBenchmark = { viewModel.runBenchmark() },
+                    onToggleComparisonMode = { viewModel.toggleComparisonMode() },
                     onRunDiagnostics = { viewModel.runAdbHardwareDiagnostics() },
                     onExport = { viewModel.exportResultsCsv() },
                     modifier = Modifier
@@ -149,6 +151,7 @@ fun BenchmarkScreen(
 private fun BenchmarkCompactLayout(
     uiState: BenchmarkUiState,
     onRunBenchmark: () -> Unit,
+    onToggleComparisonMode: () -> Unit,
     onRunDiagnostics: () -> Unit,
     onExport: () -> Unit,
     modifier: Modifier = Modifier
@@ -166,7 +169,7 @@ private fun BenchmarkCompactLayout(
             )
         }
 
-        item { BenchmarkControlCard(uiState, onRunBenchmark) }
+        item { BenchmarkControlCard(uiState, onRunBenchmark, onToggleComparisonMode) }
 
         item { AdbHardwareDiagnosticsCard(uiState, onRunDiagnostics) }
 
@@ -178,6 +181,11 @@ private fun BenchmarkCompactLayout(
 
         uiState.lastResult?.let { result ->
             item { ResultsSummaryCard(result, onExport) }
+            
+            if (uiState.isComparisonMode && uiState.comparisonResults.size > 1) {
+                item { ComparisonResultsList(uiState.comparisonResults) }
+            }
+            
             item {
                 Text(
                     "Prompt Metrics Breakdown",
@@ -201,6 +209,7 @@ private fun BenchmarkCompactLayout(
 private fun BenchmarkPrimaryPane(
     uiState: BenchmarkUiState,
     onRunBenchmark: () -> Unit,
+    onToggleComparisonMode: () -> Unit,
     onRunDiagnostics: () -> Unit,
     onExport: () -> Unit,
     modifier: Modifier = Modifier
@@ -214,7 +223,7 @@ private fun BenchmarkPrimaryPane(
             engineName = uiState.lastResult?.backendName ?: "LiteRT NPU"
         )
 
-        BenchmarkControlCard(uiState, onRunBenchmark)
+        BenchmarkControlCard(uiState, onRunBenchmark, onToggleComparisonMode)
 
         AdbHardwareDiagnosticsCard(uiState, onRunDiagnostics)
 
@@ -224,6 +233,10 @@ private fun BenchmarkPrimaryPane(
 
         uiState.lastResult?.let { result ->
             ResultsSummaryCard(result, onExport)
+        }
+        
+        if (uiState.isComparisonMode && uiState.comparisonResults.size > 1) {
+            ComparisonResultsList(uiState.comparisonResults)
         }
     }
 }
@@ -399,7 +412,8 @@ private fun BenchmarkDetailPane(
 @Composable
 private fun BenchmarkControlCard(
     uiState: BenchmarkUiState,
-    onRunBenchmark: () -> Unit
+    onRunBenchmark: () -> Unit,
+    onToggleComparisonMode: () -> Unit
 ) {
     GlassCard(
         modifier = Modifier
@@ -409,7 +423,22 @@ private fun BenchmarkControlCard(
         tintColor = Color(0xCC0E1322)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("Benchmark Suite Control", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Benchmark Suite Control", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Compare", style = MaterialTheme.typography.labelSmall, color = ThinkingMutedSlate)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Switch(
+                        checked = uiState.isComparisonMode,
+                        onCheckedChange = { onToggleComparisonMode() },
+                        colors = SwitchDefaults.colors(checkedThumbColor = CyberCyan, checkedTrackColor = CyberCyan.copy(alpha=0.3f))
+                    )
+                }
+            }
             Spacer(modifier = Modifier.height(8.dp))
             if (uiState.isRunning) {
                 LinearProgressIndicator(
@@ -514,6 +543,42 @@ private fun PromptMetricCard(p: PromptBenchmarkResult) {
             Column(horizontalAlignment = Alignment.End) {
                 Text("%.1f t/s".format(p.tokensPerSec), style = MaterialTheme.typography.labelLarge.copy(fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold), color = StatusSuccess)
                 Text("TTFT: %.0f ms".format(p.ttftMs), style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace), color = CyberCyan)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ComparisonResultsList(results: List<AggregateBenchmarkResult>) {
+    GlassCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(BorderStroke(1.dp, TelemetryBorder), shape = RoundedCornerShape(16.dp)),
+        shape = RoundedCornerShape(16.dp),
+        tintColor = Color(0xCC0E1322)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("Model Comparison", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White)
+            Spacer(modifier = Modifier.height(14.dp))
+            results.forEachIndexed { index, result ->
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(result.modelName, style = MaterialTheme.typography.labelMedium, color = Color.White)
+                        Text(result.backendName, style = MaterialTheme.typography.bodySmall, color = CyberCyan)
+                    }
+                    Text(
+                        text = "%.1f t/s".format(result.avgTokensPerSec),
+                        style = MaterialTheme.typography.labelMedium.copy(fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold),
+                        color = StatusSuccess
+                    )
+                }
+                if (index < results.lastIndex) {
+                    Divider(color = Color.White.copy(alpha = 0.05f))
+                }
             }
         }
     }

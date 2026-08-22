@@ -26,7 +26,9 @@ import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.*
@@ -68,6 +70,7 @@ import com.deepeye.agent.ui.theme.*
 import com.deepeye.agent.ui.utils.PerformanceUtils
 import com.deepeye.agent.ui.utils.UiLayoutMode
 import com.deepeye.agent.ui.utils.currentUiLayoutMode
+import kotlinx.coroutines.launch
 import androidx.compose.ui.geometry.Offset
 
 // OPTIMIZATION: Stable keys for message types
@@ -106,6 +109,61 @@ fun ChatScreen(
         uri?.let { modelCatalogViewModel.importModel(it) }
     }
 
+    // ---- On-device voice → text (SpeechRecognizer) ----
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val scope = rememberCoroutineScope()
+    var isVoiceActive by remember { mutableStateOf(false) }
+    var translateToEnglish by remember { mutableStateOf(false) }
+    val stt = remember { OnDeviceSpeechToText(context.applicationContext) }
+    DisposableEffect(Unit) { onDispose { stt.destroy() } }
+
+    val voiceCallbacks = object : OnDeviceSpeechToText.Callbacks {
+        override fun onPartial(text: String) {
+            viewModel.onPromptChange(if (translateToEnglish) "Translate to English: $text" else text)
+        }
+        override fun onFinal(text: String) {
+            isVoiceActive = false
+            viewModel.onPromptChange(if (translateToEnglish) "Translate to English: $text" else text)
+        }
+        override fun onEndOfSpeech() {
+            isVoiceActive = false
+        }
+        override fun onError(errorCode: Int) {
+            isVoiceActive = false
+            scope.launch { snackbarHostState.showSnackbar("Voice input stopped (${OnDeviceSpeechToText.errorLabel(errorCode)})") }
+        }
+    }
+
+    fun startVoiceInput() {
+        if (!stt.isAvailable) {
+            scope.launch { snackbarHostState.showSnackbar("On-device speech recognition unavailable") }
+            return
+        }
+        isVoiceActive = true
+        stt.startListening(voiceCallbacks)
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) startVoiceInput()
+    }
+
+    fun onVoicePressed() {
+        if (isVoiceActive) {
+            stt.stopListening()
+            isVoiceActive = false
+            return
+        }
+        val granted = context.checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) ==
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+        if (granted) {
+            startVoiceInput()
+        } else {
+            permissionLauncher.launch(android.Manifest.permission.RECORD_AUDIO)
+        }
+    }
+
     Scaffold(
         containerColor = Color(0xFF070A12), // Obsidian Void
         contentWindowInsets = WindowInsets.ime,
@@ -130,6 +188,12 @@ fun ChatScreen(
                 onCancel = viewModel::cancelGeneration,
                 onAnalyze = { filePicker.launch(arrayOf("*/*")) },
                 onDebug = { debugPicker.launch(arrayOf("*/*")) },
+                onVoice = { onVoicePressed() },
+                isVoiceActive = isVoiceActive,
+                translateToEnglish = translateToEnglish,
+                onToggleTranslate = { translateToEnglish = !translateToEnglish },
+                isThinkingModeEnabled = state.isThinkingModeEnabled,
+                onToggleThinking = viewModel::toggleThinkingMode,
                 isLoading = state.isLoading,
                 isGenerating = state.isGenerating,
                 canSend = canSend
@@ -568,6 +632,12 @@ fun FuturisticChatInputDock(
     onCancel: () -> Unit,
     onAnalyze: () -> Unit,
     onDebug: () -> Unit,
+    onVoice: () -> Unit,
+    isVoiceActive: Boolean = false,
+    translateToEnglish: Boolean = false,
+    onToggleTranslate: () -> Unit = {},
+    isThinkingModeEnabled: Boolean = false,
+    onToggleThinking: () -> Unit = {},
     isLoading: Boolean,
     isGenerating: Boolean,
     canSend: Boolean
@@ -725,10 +795,26 @@ fun FuturisticChatInputDock(
                             if (isToolsExpanded) {
                                 FuturisticToolChip(
                                     icon = Icons.Default.Mic,
-                                    label = "Voice",
-                                    onClick = { onAnalyze() },
+                                    label = if (isVoiceActive) "Listening…" else "Voice",
+                                    onClick = onVoice,
                                     enabled = !isLoading && !isGenerating,
-                                    accentColor = Color(0xFF00F2FE)
+                                    accentColor = if (isVoiceActive) Color(0xFFFF2D55) else Color(0xFF00F2FE)
+                                )
+
+                                FuturisticToolChip(
+                                    icon = Icons.Default.Language,
+                                    label = if (translateToEnglish) "Trans → EN" else "Translate",
+                                    onClick = onToggleTranslate,
+                                    enabled = !isLoading && !isGenerating,
+                                    accentColor = Color(0xFF7C4DFF)
+                                )
+
+                                FuturisticToolChip(
+                                    icon = Icons.Default.Science,
+                                    label = if (isThinkingModeEnabled) "Thinking ON" else "Thinking",
+                                    onClick = onToggleThinking,
+                                    enabled = !isLoading && !isGenerating,
+                                    accentColor = if (isThinkingModeEnabled) Color(0xFF00E5FF) else ThinkingMutedSlate
                                 )
 
                                 FuturisticToolChip(

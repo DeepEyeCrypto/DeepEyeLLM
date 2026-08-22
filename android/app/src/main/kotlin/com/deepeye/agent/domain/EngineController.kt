@@ -213,4 +213,67 @@ class EngineController(
 
     fun getPerformanceStats(): com.deepeye.agent.domain.engine.PerformanceStats? =
         (engine as? LlamaCppEngine)?.getPerformanceStats()
+
+    /**
+     * Analyze an image with an optional text prompt using the active vision-capable engine.
+     * Falls back to text-only description if the engine doesn't support multimodal input.
+     */
+    suspend fun executeImageAnalysis(
+        imagePath: String,
+        prompt: String,
+        onChunk: (String) -> Unit
+    ): ModelStatus = withContext(Dispatchers.IO) {
+        if (!isEngineReady) {
+            onChunk("Engine not initialized. Please load or download a model in Settings.")
+            return@withContext ModelStatus.ERROR
+        }
+        try {
+            val deepEyeEngine = engine as? DeepEyeAgentEngine
+            if (deepEyeEngine != null) {
+                // Use native multimodal vision analysis
+                val result = deepEyeEngine.analyzeImage(imagePath, prompt)
+                onChunk(result)
+            } else {
+                // Fallback: describe request via text-only chat
+                engine.chatStream(
+                    "The user has shared an image and asks: $prompt\n\nPlease provide a helpful response.",
+                    onChunk
+                )
+            }
+            ModelStatus.LOCAL_ACTIVE
+        } catch (e: Throwable) {
+            onChunk("Image analysis failed: ${e.message}")
+            ModelStatus.ERROR
+        }
+    }
+
+    /**
+     * Transcribe audio using the active audio-capable engine.
+     * Falls back to text-only response if the engine doesn't support audio input.
+     */
+    suspend fun executeAudioTranscription(
+        audioPath: String,
+        prompt: String,
+        onChunk: (String) -> Unit
+    ): ModelStatus = withContext(Dispatchers.IO) {
+        if (!isEngineReady) {
+            onChunk("Engine not initialized. Please load or download a model in Settings.")
+            return@withContext ModelStatus.ERROR
+        }
+        try {
+            val deepEyeEngine = engine as? DeepEyeAgentEngine
+            if (deepEyeEngine != null) {
+                // Use native audio analysis
+                val result = deepEyeEngine.analyzeAudio(audioPath, prompt)
+                onChunk(result)
+            } else {
+                // Fallback: notify user that audio requires a vision/audio capable model
+                onChunk("Audio transcription requires a multimodal model (Gemma 4). Current engine does not support audio input.")
+            }
+            ModelStatus.LOCAL_ACTIVE
+        } catch (e: Throwable) {
+            onChunk("Audio transcription failed: ${e.message}")
+            ModelStatus.ERROR
+        }
+    }
 }

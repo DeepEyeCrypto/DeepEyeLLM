@@ -58,11 +58,27 @@ val WORKSTATION_TILES = listOf(
         badgeText = "Live Engine"
     ),
     BentoWorkstationTile(
+        title = "Ask Image",
+        subtitle = "Multimodal vision — ask questions about photos & camera",
+        icon = Icons.Default.CameraAlt,
+        route = AgentDestinations.AskImage.route,
+        accentColor = PolicyPurpleDark,
+        badgeText = "Vision AI"
+    ),
+    BentoWorkstationTile(
+        title = "Audio Scribe",
+        subtitle = "Real-time on-device transcription & translation",
+        icon = Icons.Default.Mic,
+        route = AgentDestinations.AudioScribe.route,
+        accentColor = TealCyanSecondary,
+        badgeText = "Transcribe"
+    ),
+    BentoWorkstationTile(
         title = "Prompt Lab A/B",
         subtitle = "Side-by-side prompt testing & GBNF structured schemas",
         icon = Icons.Default.Science,
         route = AgentDestinations.PromptLab.route,
-        accentColor = PolicyPurpleDark,
+        accentColor = PolicyPurple,
         badgeText = "A/B Studio"
     ),
     BentoWorkstationTile(
@@ -74,19 +90,19 @@ val WORKSTATION_TILES = listOf(
         badgeText = "Hardware HUD"
     ),
     BentoWorkstationTile(
-        title = "Crypto Sentinel DEX",
-        subtitle = "On-chain smart contract security & non-custodial intents",
-        icon = Icons.Default.Language,
-        route = "brave_browser",
-        accentColor = BrandOrange,
-        badgeText = "Web3 Shield"
+        title = "Model Manager",
+        subtitle = "Download, import & manage on-device AI models",
+        icon = Icons.Default.Storage,
+        route = AgentDestinations.ModelManager.route,
+        accentColor = CyberCyan,
+        badgeText = "LiteRT + GGUF"
     ),
     BentoWorkstationTile(
         title = "Agent Skills Store",
         subtitle = "AgentSkills.io manifests, verification gates & tools",
         icon = Icons.Default.Extension,
         route = "skill_store",
-        accentColor = TealCyanSecondary,
+        accentColor = AmberAccent,
         badgeText = "8 Verified"
     ),
     BentoWorkstationTile(
@@ -102,16 +118,8 @@ val WORKSTATION_TILES = listOf(
         subtitle = "Zero-trust RBAC governance and audit logs",
         icon = Icons.Default.Security,
         route = AgentDestinations.Security.route,
-        accentColor = AmberAccent,
+        accentColor = StatusWarning,
         badgeText = "Air-Gapped"
-    ),
-    BentoWorkstationTile(
-        title = "Model Manager",
-        subtitle = "Dual-engine runtime & quantization fit manager",
-        icon = Icons.Default.Storage,
-        route = AgentDestinations.ModelManager.route,
-        accentColor = CyberCyan,
-        badgeText = "LiteRT + GGUF"
     )
 )
 
@@ -345,6 +353,34 @@ fun WorkstationHomeScreen(
                     if (rowTiles.size < gridColumns) {
                         Spacer(modifier = Modifier.weight((gridColumns - rowTiles.size).toFloat()))
                     }
+                }
+            }
+
+            // Privacy Badge Footer
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp, bottom = 16.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Lock,
+                        contentDescription = null,
+                        tint = StatusSuccess.copy(alpha = 0.6f),
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = "100% On-Device  •  Your Data Never Leaves",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Medium,
+                            letterSpacing = 0.5.sp
+                        ),
+                        color = ThinkingMutedSlate.copy(alpha = 0.7f)
+                    )
                 }
             }
         }
