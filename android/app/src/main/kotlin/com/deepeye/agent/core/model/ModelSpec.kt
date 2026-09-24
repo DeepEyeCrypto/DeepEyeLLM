@@ -19,6 +19,7 @@ enum class ModelCapability {
 enum class ModelBackend(val displayName: String) {
     LITERT("Google LiteRT / MediaPipe"),
     GGUF_LLAMA_CPP("GGUF via llama.cpp"),
+    COLIBRI("Colibri MoE / Native Engine"),
     ONNX("ONNX Runtime"),
     MNN("Alibaba MNN"),
 }
@@ -255,6 +256,34 @@ data class ModelSpec(
                 capabilities = setOf(ModelCapability.CHAT, ModelCapability.CODE, ModelCapability.FUNCTION_CALLING),
                 fileName = "DeepSeek-V4-Flash-DSpark-support.gguf",
                 downloadUrl = "https://huggingface.co/antirez/deepseek-v4-gguf/resolve/main/DeepSeek-V4-Flash-DSpark-support.gguf",
+            ),
+
+            // --- Colibri Native Edge MoE Models ---
+            ModelSpec(
+                id = "olmoe-1b-7b-colibri",
+                name = "OLMoE 1B-7B Colibri Edge",
+                family = "OLMoE",
+                parameterCount = "1B-7B",
+                backend = ModelBackend.COLIBRI,
+                quantization = Quantization.Q4_K_M,
+                sizeBytes = 1_850_000_000L,
+                requiredRamBytes = 2_400_000_000L,
+                capabilities = setOf(ModelCapability.CHAT, ModelCapability.CODE),
+                fileName = "olmoe-1b-7b-colibri.coli",
+                downloadUrl = "https://huggingface.co/allenai/OLMoE-1B-7B-0924-Instruct/resolve/main/model.safetensors",
+            ),
+            ModelSpec(
+                id = "qwen3.6-3b-colibri",
+                name = "Qwen 3.6 3B MoE Colibri",
+                family = "Qwen",
+                parameterCount = "3B",
+                backend = ModelBackend.COLIBRI,
+                quantization = Quantization.Q4_K_M,
+                sizeBytes = 1_950_000_000L,
+                requiredRamBytes = 2_800_000_000L,
+                capabilities = setOf(ModelCapability.CHAT, ModelCapability.CODE, ModelCapability.FUNCTION_CALLING),
+                fileName = "qwen3.6-3b-colibri.coli",
+                downloadUrl = "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct/resolve/main/model.safetensors",
             ),
         )
     }

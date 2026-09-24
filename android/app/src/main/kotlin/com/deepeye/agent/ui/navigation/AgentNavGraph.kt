@@ -3,12 +3,11 @@ package com.deepeye.agent.ui.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.toRoute
-import kotlin.reflect.typeOf
 import com.deepeye.agent.ui.agent.AgentStudioScreen
 import com.deepeye.agent.ui.audio.AudioScribeScreen
 import com.deepeye.agent.ui.benchmark.BenchmarkScreen
@@ -45,7 +44,17 @@ fun DeepEyeNavGraph(
             )
         }
         composable(route = AgentDestinations.Chat.route) {
-            ChatScreen()
+            ChatScreen(
+                onNavigateToDestination = { targetRoute ->
+                    navController.navigate(targetRoute) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
         }
         composable(route = AgentDestinations.AgentStudio.route) {
             AgentStudioScreen(viewModel = hiltViewModel())

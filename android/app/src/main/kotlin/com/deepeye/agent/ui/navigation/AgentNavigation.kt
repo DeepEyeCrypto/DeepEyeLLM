@@ -170,7 +170,7 @@ sealed class AgentDestinations(
     )
 }
 
-val startDestination: String = AgentDestinations.WorkstationHome.route
+val startDestination: String = AgentDestinations.Chat.route
 
 val agentDestinationsList: List<AgentDestinations> = listOf(
     AgentDestinations.WorkstationHome,

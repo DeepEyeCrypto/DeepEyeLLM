@@ -2,6 +2,7 @@ package com.deepeye.agent.domain
 
 import android.content.Context
 import com.deepeye.agent.DeepEyeAgentEngine
+import com.deepeye.agent.domain.engine.ColibriEngine
 import com.deepeye.agent.domain.engine.LLMEngine
 import com.deepeye.agent.domain.engine.LlamaCppEngine
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,7 +46,9 @@ class EngineController(
         }
 
         val modelsDir = java.io.File(context.filesDir, "models")
-        val availableModels = modelsDir.listFiles { _, name -> (name.endsWith(".bin") || name.endsWith(".gguf")) && !name.endsWith(".tmp") }
+        val availableModels = modelsDir.listFiles { _, name ->
+            (name.endsWith(".bin") || name.endsWith(".gguf") || name.endsWith(".colibri") || name.endsWith(".coli")) && !name.endsWith(".tmp")
+        }
         
         val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as? android.app.ActivityManager
         val memoryInfo = android.app.ActivityManager.MemoryInfo()
@@ -128,7 +131,16 @@ class EngineController(
                 val settings = settingsDataStore.engineSettingsFlow.first()
 
                 // Instantiate appropriate LLMEngine
-                engine = if (file.name.endsWith(".gguf")) {
+                engine = if (file.name.endsWith(".colibri") || file.name.endsWith(".coli") || file.isDirectory) {
+                    ColibriEngine(
+                        modelDir = newModelPath,
+                        context = context,
+                        contextTokens = settings.contextSize,
+                        nThreads = settings.cpuThreads,
+                        temperature = settings.temperature,
+                        topP = settings.topP
+                    )
+                } else if (file.name.endsWith(".gguf")) {
                     LlamaCppEngine(
                         modelPath = newModelPath,
                         context = context,
@@ -147,7 +159,11 @@ class EngineController(
                 engine.init().getOrThrow()
                 isEngineReady = true
 
-                val engineType = if (file.name.endsWith(".gguf")) "GGUF" else "LiteRT"
+                val engineType = when {
+                    file.name.endsWith(".colibri") || file.name.endsWith(".coli") || file.isDirectory -> "Colibri"
+                    file.name.endsWith(".gguf") -> "GGUF"
+                    else -> "LiteRT"
+                }
                 android.util.Log.d("DeepEye", "{\"event\":\"engine_load_succeeded\", \"model_id\":\"$modelId\", \"type\":\"$engineType\"}")
                 val status = ModelStatus.LOCAL_ACTIVE
                 val msg = "$engineType Engine active with model $modelId."

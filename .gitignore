@@ -39,3 +39,8 @@ logs/
 *.iml
 .vscode/
 
+
+# Exclude github workflows from git tracking when token lacks workflow scope
+.github/
+android/app/src/main/cpp/colibri/.github/
+

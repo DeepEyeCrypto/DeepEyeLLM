@@ -19,6 +19,11 @@
 #include <vector>
 #include <atomic>
 #include <chrono>
+#include <fstream>
+#include <algorithm>
+#include <sched.h>
+#include <unistd.h>
+#include <pthread.h>
 #include <sys/resource.h>
 #include <android/log.h>
 
@@ -84,6 +89,52 @@ static void deepEyeLlamaLogCallback(enum ggml_log_level level, const char* text,
     __android_log_print(android_level, LOG_TAG, "%s", text);
 }
 
+
+// ── Performance Thread & CPU Affinity Helpers ────────────────────────────────
+// Dynamically detects ARM Performance (big) cores to avoid LITTLE core throttling.
+static std::vector<int> detectBigCores() {
+    std::vector<std::pair<int, unsigned long>> core_freqs;
+    for (int i = 0; i < 16; i++) {
+        std::string path = "/sys/devices/system/cpu/cpu" + std::to_string(i) + "/cpufreq/cpuinfo_max_freq";
+        std::ifstream f(path);
+        if (f.is_open()) {
+            unsigned long freq = 0;
+            if (f >> freq) {
+                core_freqs.push_back({i, freq});
+            }
+        }
+    }
+    if (core_freqs.empty()) {
+        int num_cpus = sysconf(_SC_NPROCESSORS_CONF);
+        if (num_cpus >= 8) return {6, 7};
+        if (num_cpus >= 4) return {2, 3};
+        return {0};
+    }
+    std::sort(core_freqs.begin(), core_freqs.end(), [](auto& a, auto& b) {
+        return a.second > b.second;
+    });
+    unsigned long max_freq = core_freqs.front().second;
+    std::vector<int> big_cores;
+    for (auto& p : core_freqs) {
+        if (p.second >= max_freq * 0.85) {
+            big_cores.push_back(p.first);
+        }
+    }
+    return big_cores.empty() ? std::vector<int>{core_freqs.front().first} : big_cores;
+}
+
+static void applyPerformanceThreadAffinity() {
+    auto big_cores = detectBigCores();
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    for (int core : big_cores) {
+        CPU_SET(core, &cpuset);
+    }
+    sched_setaffinity(0, sizeof(cpu_set_t), &cpuset);
+    setpriority(PRIO_PROCESS, 0, -10);
+    LOGI("Applied ARM big-core affinity mask to %zu performance cores (elevated priority)", big_cores.size());
+}
+
 // =============================================================================
 // SECTION 2: JNI Lifecycle
 // =============================================================================
@@ -106,52 +157,26 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
 // by deleting jstring refs inside the loop.
 
 static void safeCallToken(JNIEnv* env, jobject callback, jmethodID method, const std::string& token) {
-    if (!callback || !method) return;
-    bool needsDetach = false;
-    JNIEnv* currentEnv = env;
-    if (g_vm && g_vm->GetEnv(reinterpret_cast<void**>(&currentEnv), JNI_VERSION_1_6) == JNI_EDETACHED) {
-        if (g_vm->AttachCurrentThread(&currentEnv, nullptr) == JNI_OK) {
-            needsDetach = true;
-        } else {
-            return;
-        }
+    if (!callback || !method || !env) return;
+    jstring jtoken = env->NewStringUTF(token.c_str());
+    if (jtoken) {
+        env->CallVoidMethod(callback, method, jtoken);
+        env->DeleteLocalRef(jtoken);
     }
-    jstring jtoken = currentEnv->NewStringUTF(token.c_str());
-    currentEnv->CallVoidMethod(callback, method, jtoken);
-    currentEnv->DeleteLocalRef(jtoken);
-    if (needsDetach && g_vm) g_vm->DetachCurrentThread();
 }
 
 static void safeCallComplete(JNIEnv* env, jobject callback, jmethodID method) {
-    if (!callback || !method) return;
-    bool needsDetach = false;
-    JNIEnv* currentEnv = env;
-    if (g_vm && g_vm->GetEnv(reinterpret_cast<void**>(&currentEnv), JNI_VERSION_1_6) == JNI_EDETACHED) {
-        if (g_vm->AttachCurrentThread(&currentEnv, nullptr) == JNI_OK) {
-            needsDetach = true;
-        } else {
-            return;
-        }
-    }
-    currentEnv->CallVoidMethod(callback, method);
-    if (needsDetach && g_vm) g_vm->DetachCurrentThread();
+    if (!callback || !method || !env) return;
+    env->CallVoidMethod(callback, method);
 }
 
 static void safeCallError(JNIEnv* env, jobject callback, jmethodID method, const std::string& errorMsg) {
-    if (!callback || !method) return;
-    bool needsDetach = false;
-    JNIEnv* currentEnv = env;
-    if (g_vm && g_vm->GetEnv(reinterpret_cast<void**>(&currentEnv), JNI_VERSION_1_6) == JNI_EDETACHED) {
-        if (g_vm->AttachCurrentThread(&currentEnv, nullptr) == JNI_OK) {
-            needsDetach = true;
-        } else {
-            return;
-        }
+    if (!callback || !method || !env) return;
+    jstring jmsg = env->NewStringUTF(errorMsg.c_str());
+    if (jmsg) {
+        env->CallVoidMethod(callback, method, jmsg);
+        env->DeleteLocalRef(jmsg);
     }
-    jstring jmsg = currentEnv->NewStringUTF(errorMsg.c_str());
-    currentEnv->CallVoidMethod(callback, method, jmsg);
-    currentEnv->DeleteLocalRef(jmsg);
-    if (needsDetach && g_vm) g_vm->DetachCurrentThread();
 }
 
 // =============================================================================
@@ -608,6 +633,7 @@ Java_com_deepeye_agent_domain_engine_LlamaCppEngine_nativeGenerateResponse(
     std::string prompt(prompt_c ? prompt_c : "");
     env->ReleaseStringUTFChars(jprompt, prompt_c);
 
+    applyPerformanceThreadAffinity();
     LOGI("Synchronous generation for prompt length: %zu chars", prompt.length());
 
     // Accumulate all tokens into a single string
@@ -666,6 +692,7 @@ Java_com_deepeye_agent_domain_engine_LlamaCppEngine_nativeGenerateResponseStream
     std::string prompt(prompt_c ? prompt_c : "");
     env->ReleaseStringUTFChars(jprompt, prompt_c);
 
+    applyPerformanceThreadAffinity();
     LOGI("Streaming generation started (prompt: %zu chars, max_tokens: %d)",
          prompt.length(), max_tokens);
 
