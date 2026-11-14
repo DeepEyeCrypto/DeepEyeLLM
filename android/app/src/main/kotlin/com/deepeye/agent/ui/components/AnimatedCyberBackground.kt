@@ -10,29 +10,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import kotlinx.coroutines.isActive
-import kotlin.math.hypot
-import kotlin.random.Random
-
-private class CyberParticle(
-    var x: Float,
-    var y: Float,
-    var vx: Float,
-    var vy: Float,
-    val radius: Float,
-    val baseAlpha: Float
-)
+import kotlin.math.min
+import kotlin.math.sqrt
 
 /**
  * 60fps GPU-Accelerated Dynamic Animated Neural Background.
  * Features drifting constellation nodes, interactive proximity links,
  * and pulsating ambient glassmorphic color flares.
+ *
+ * Physics (CyberParticle / linkPairs / defaultParticles) live in CyberPhysics.kt
+ * so the O(n²) link pass and per-frame stepping are unit-testable on the JVM.
+ * [enabled] gates the whole simulation (PerformanceGovernor zero-blur / thermal).
  */
 @Composable
 fun AnimatedCyberBackground(
     modifier: Modifier = Modifier,
-    particleCount: Int = 36
+    particleCount: Int = 24,
+    enabled: Boolean = true
 ) {
     // 1. Ambient Pulsing Radial Flares
     val infiniteTransition = rememberInfiniteTransition(label = "cyber_pulse")
@@ -67,39 +62,19 @@ fun AnimatedCyberBackground(
         label = "pulse3"
     )
 
-    // 2. Dynamic Physics-based Particles
-    val particles = remember {
-        val rand = Random(42)
-        List(particleCount) {
-            CyberParticle(
-                x = rand.nextFloat() * 1080f,
-                y = rand.nextFloat() * 2400f,
-                vx = (rand.nextFloat() - 0.5f) * 0.75f,
-                vy = (rand.nextFloat() - 0.5f) * 0.75f,
-                radius = rand.nextFloat() * 2.5f + 1.5f,
-                baseAlpha = rand.nextFloat() * 0.4f + 0.35f
-            )
-        }
-    }
+    // 2. Dynamic Physics-based Particles (capped at 24 for render cost)
+    val particles = remember(particleCount) { defaultParticles(particleCount) }
 
     var frameTick by remember { mutableLongStateOf(0L) }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(enabled) {
+        if (!enabled) return@LaunchedEffect
         var lastTime = 0L
         while (isActive) {
             withFrameNanos { time ->
                 if (lastTime != 0L) {
                     val dt = ((time - lastTime) / 1_000_000_000f).coerceIn(0.001f, 0.05f)
-                    for (p in particles) {
-                        p.x += p.vx * dt * 60f
-                        p.y += p.vy * dt * 60f
-
-                        // Wrap edges smoothly
-                        if (p.x < -20f) p.x = 1100f
-                        if (p.x > 1100f) p.x = -20f
-                        if (p.y < -20f) p.y = 2420f
-                        if (p.y > 2420f) p.y = -20f
-                    }
+                    for (p in particles) p.step(dt, 1080f, 2400f)
                     frameTick = time
                 }
                 lastTime = time
@@ -170,6 +145,11 @@ fun AnimatedCyberBackground(
             val scaleX = width / 1080f
             val scaleY = height / 2400f
 
+            // Conservative squared-distance pre-filter: use the LARGER scale so
+            // the filter never drops a pair that would link under either axis.
+            val filterScale = maxOf(scaleX, scaleY)
+            val maxSq = (maxLinkDistance * filterScale) * (maxLinkDistance * filterScale)
+
             for (i in particles.indices) {
                 val p1 = particles[i]
                 val p1X = p1.x * scaleX
@@ -180,8 +160,13 @@ fun AnimatedCyberBackground(
                     val p2X = p2.x * scaleX
                     val p2Y = p2.y * scaleY
 
-                    val dist = hypot(p2X - p1X, p2Y - p1Y)
-                    if (dist < maxLinkDistance) {
+                    val dx = p2X - p1X
+                    val dy = p2Y - p1Y
+                    val distSq = dx * dx + dy * dy
+
+                    // Only sqrt for pairs that survive the squared pre-filter
+                    if (distSq < maxSq) {
+                        val dist = sqrt(distSq.toDouble()).toFloat()
                         val linkAlpha = (1f - (dist / maxLinkDistance)) * 0.28f
                         drawLine(
                             color = Color(0xFF00E5FF).copy(alpha = linkAlpha),
