@@ -25,6 +25,73 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.deepeye.agent.ui.theme.*
 
+import com.deepeye.agent.core.model.ToolCallModel
+import com.deepeye.agent.core.model.ToolCallStatus
+
+fun ToolCallStatus.toExecutionStatus(): ToolExecutionStatus = when (this) {
+    ToolCallStatus.EXECUTING -> ToolExecutionStatus.RUNNING
+    ToolCallStatus.SUCCESS -> ToolExecutionStatus.SUCCESS
+    ToolCallStatus.FAILED -> ToolExecutionStatus.ERROR
+    ToolCallStatus.AWAITING_APPROVAL -> ToolExecutionStatus.AWAITING_APPROVAL
+}
+
+/**
+ * Tactical Tool Execution Card for displaying on-device or agentic tool invocation traces.
+ */
+@Composable
+fun ToolExecutionCard(
+    toolCall: ToolCallModel,
+    modifier: Modifier = Modifier,
+    onApprove: (() -> Unit)? = null,
+    onDeny: (() -> Unit)? = null
+) {
+    val displayTitle = remember(toolCall.name, toolCall.arguments) {
+        formatToolTitle(toolCall.name, toolCall.arguments)
+    }
+
+    ToolExecutionCard(
+        toolName = displayTitle,
+        status = toolCall.status.toExecutionStatus(),
+        modifier = modifier,
+        targetResource = toolCall.name,
+        durationMs = toolCall.durationMs,
+        outputSummary = buildString {
+            if (toolCall.arguments.isNotBlank()) {
+                appendLine("Parameters:")
+                appendLine(toolCall.arguments)
+            }
+            if (!toolCall.result.isNullOrBlank()) {
+                if (isNotEmpty()) appendLine()
+                appendLine("Result:")
+                appendLine(toolCall.result)
+            }
+        }.takeIf { it.isNotBlank() },
+        onApprove = onApprove,
+        onDeny = onDeny
+    )
+}
+
+private fun formatToolTitle(name: String, args: String): String {
+    val cleanName = when (name.lowercase()) {
+        "web_search", "search" -> "Web Search"
+        "adb_command", "adb" -> "ADB Command"
+        "fetch_device_info" -> "Device Info"
+        "dex_swap", "dex_trade" -> "DEX Swap"
+        "file_analysis", "analyze_file" -> "File Analysis"
+        else -> name.replace("_", " ").replaceFirstChar { it.uppercase() }
+    }
+
+    // Try extracting clean arg like query or command
+    val argMatch = Regex("\"(?:query|command|action|target)\"\\s*:\\s*\"([^\"]+)\"").find(args)
+    return if (argMatch != null) {
+        "$cleanName: ${argMatch.groupValues[1]}"
+    } else if (args.isNotBlank() && !args.startsWith("{") && args.length < 40) {
+        "$cleanName: $args"
+    } else {
+        cleanName
+    }
+}
+
 enum class ToolExecutionStatus {
     RUNNING,
     SUCCESS,

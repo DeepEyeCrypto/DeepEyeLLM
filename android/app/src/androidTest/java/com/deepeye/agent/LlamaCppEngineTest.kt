@@ -3,7 +3,9 @@ package com.deepeye.agent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.deepeye.agent.domain.engine.LlamaCppEngine
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.After
@@ -57,7 +59,7 @@ class LlamaCppEngineTest {
     @get:Rule
     val tempDir = TemporaryFolder()
 
-    private lateinit var realModelAvailable: Boolean
+    private var realModelAvailable: Boolean = false
 
     @Before
     fun setUp() {
@@ -370,7 +372,7 @@ class LlamaCppEngineTest {
         val cancelLatch = CountDownLatch(1)
 
         // Launch streaming in a child job so we can cancel it
-        val streamJob = kotlinx.coroutines.launch(Dispatchers.IO) {
+        val streamJob = kotlinx.coroutines.CoroutineScope(Dispatchers.IO).launch {
             engine.chatStream("Describe the history of computing in great detail.") { chunk ->
                 if (cancelled.get()) {
                     tokensAfterCancel.incrementAndGet()

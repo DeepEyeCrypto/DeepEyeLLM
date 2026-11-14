@@ -51,11 +51,15 @@ class ModelDownloadWorker(
         const val KEY_EXPECTED_CHECKSUM = "expected_checksum"
 
         const val PROGRESS_FLOAT = "progress_float"
+        const val PROGRESS_PERCENT = "progress_percent"
         const val DOWNLOADED_BYTES = "downloaded_bytes"
         const val TOTAL_BYTES = "total_bytes"
         const val ERROR_MSG = "error_msg"
         const val BYTES_PER_SEC = "bytes_per_sec"
-const val ESTIMATED_ETA_SECONDS = "estimated_eta_sec"
+        const val ESTIMATED_ETA_SECONDS = "estimated_eta_sec"
+
+        const val TAG_MODEL_DOWNLOAD = "model_download"
+        const val TAG_PREFIX = "download_"
 
         private const val NOTIFICATION_CHANNEL_ID = "deepeye_downloads"
         private const val NOTIFICATION_ID = 4040

@@ -25,6 +25,7 @@
 #include <pthread.h>
 #include <sys/resource.h>
 #include <android/log.h>
+#include <sys/stat.h>
 
 #define LOG_TAG "DeepEyeLLM-Colibri"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO,  LOG_TAG, __VA_ARGS__)
@@ -36,6 +37,53 @@ extern "C" {
 #include "segment_runtime.h"
 #include "edge_adapters.h"
 #include "segment_adapters.h"
+}
+
+// ── Safe JNI UTF-8 & Byte Array String Conversion Helpers ──────────────────
+// Prevents ART VM abort on invalid/partial UTF-8 bytes by using java.lang.String(byte[], "UTF-8")
+static jstring safeNewStringUTF8(JNIEnv* env, const char* data, size_t len) {
+    if (!data || len == 0) {
+        return env->NewStringUTF("");
+    }
+    jbyteArray byteArray = env->NewByteArray(static_cast<jsize>(len));
+    if (!byteArray) return env->NewStringUTF("");
+    env->SetByteArrayRegion(byteArray, 0, static_cast<jsize>(len), reinterpret_cast<const jbyte*>(data));
+
+    jclass strClass = env->FindClass("java/lang/String");
+    if (!strClass) {
+        env->DeleteLocalRef(byteArray);
+        return env->NewStringUTF("");
+    }
+    jmethodID ctor = env->GetMethodID(strClass, "<init>", "([BLjava/lang/String;)V");
+    jstring encoding = env->NewStringUTF("UTF-8");
+    jstring result = static_cast<jstring>(env->NewObject(strClass, ctor, byteArray, encoding));
+
+    env->DeleteLocalRef(encoding);
+    env->DeleteLocalRef(byteArray);
+    env->DeleteLocalRef(strClass);
+    return result;
+}
+
+static void safeSendTokenChunk(JNIEnv* env, jobject callback, jmethodID onTokenBytesMethod, jmethodID onTokenMethod, const char* data, size_t len) {
+    if (!callback || !env || !data || len == 0) return;
+
+    if (onTokenBytesMethod) {
+        jbyteArray jbytes = env->NewByteArray(static_cast<jsize>(len));
+        if (jbytes) {
+            env->SetByteArrayRegion(jbytes, 0, static_cast<jsize>(len), reinterpret_cast<const jbyte*>(data));
+            env->CallVoidMethod(callback, onTokenBytesMethod, jbytes);
+            env->DeleteLocalRef(jbytes);
+            return;
+        }
+    }
+
+    if (onTokenMethod) {
+        jstring jstr = safeNewStringUTF8(env, data, len);
+        if (jstr) {
+            env->CallVoidMethod(callback, onTokenMethod, jstr);
+            env->DeleteLocalRef(jstr);
+        }
+    }
 }
 
 // ── Native Colibri Session Context ──────────────────────────────────────────
@@ -294,8 +342,47 @@ static std::string detokenize_internal(ColibriContext* ctx, const int32_t* ids, 
 }
 
 // ── CPU Affinity & Thread Priority Helper ───────────────────────────────────
+static std::vector<int> detectBigCores() {
+    std::vector<std::pair<int, unsigned long>> core_freqs;
+    for (int i = 0; i < 16; i++) {
+        std::string path = "/sys/devices/system/cpu/cpu" + std::to_string(i) + "/cpufreq/cpuinfo_max_freq";
+        std::ifstream f(path);
+        if (f.is_open()) {
+            unsigned long freq = 0;
+            if (f >> freq) {
+                core_freqs.push_back({i, freq});
+            }
+        }
+    }
+    if (core_freqs.empty()) {
+        int num_cpus = sysconf(_SC_NPROCESSORS_CONF);
+        if (num_cpus >= 8) return {6, 7};
+        if (num_cpus >= 4) return {2, 3};
+        return {0};
+    }
+    std::sort(core_freqs.begin(), core_freqs.end(), [](auto& a, auto& b) {
+        return a.second > b.second;
+    });
+    unsigned long max_freq = core_freqs.front().second;
+    std::vector<int> big_cores;
+    for (auto& p : core_freqs) {
+        if (p.second >= max_freq * 0.85) {
+            big_cores.push_back(p.first);
+        }
+    }
+    return big_cores.empty() ? std::vector<int>{core_freqs.front().first} : big_cores;
+}
+
 static void applyPerformanceThreadAffinity() {
+    auto big_cores = detectBigCores();
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    for (int core : big_cores) {
+        CPU_SET(core, &cpuset);
+    }
+    sched_setaffinity(0, sizeof(cpu_set_t), &cpuset);
     setpriority(PRIO_PROCESS, 0, -20);
+    LOGI("Applied ARM big-core affinity mask to %zu performance cores (elevated priority)", big_cores.size());
 }
 
 // =============================================================================
@@ -304,50 +391,88 @@ static void applyPerformanceThreadAffinity() {
 
 extern "C" {
 
-// ─────────────────────────────────────────────────────────────────────────────
-// nativeInitModel — Initializes Colibri engine and session
-// Returns: 64-bit jlong handle (ColibriContext*), or 0 on failure
-// ─────────────────────────────────────────────────────────────────────────────
-JNIEXPORT jlong JNICALL
-Java_com_deepeye_agent_domain_engine_ColibriEngine_nativeInitModel(
-    JNIEnv* env, jobject /*thiz*/, jstring jmodel_dir, jstring jfamily,
-    jint max_ctx, jint threads) {
+// =============================================================================
+// JNI Implementation Logic
+// =============================================================================
 
+static jlong initModelInternal(JNIEnv* env, jstring jmodel_dir, jstring jfamily, jint max_ctx, jint threads) {
     register_all_colibri_adapters();
     applyPerformanceThreadAffinity();
 
-    const char* model_dir_c = env->GetStringUTFChars(jmodel_dir, nullptr);
+    const char* model_dir_c = jmodel_dir ? env->GetStringUTFChars(jmodel_dir, nullptr) : nullptr;
     const char* family_c = jfamily ? env->GetStringUTFChars(jfamily, nullptr) : nullptr;
 
     std::string model_dir = model_dir_c ? model_dir_c : "";
-    std::string family = (family_c && strlen(family_c) > 0) ? family_c : "qwen38";
+    std::string family = (family_c && strlen(family_c) > 0) ? family_c : "auto";
 
     if (model_dir_c) env->ReleaseStringUTFChars(jmodel_dir, model_dir_c);
     if (family_c) env->ReleaseStringUTFChars(jfamily, family_c);
 
-    // Auto-detect model family from model directory contents if needed
+    if (model_dir.empty()) {
+        LOGE("Cannot initialize Colibri: model_dir is empty");
+        return 0;
+    }
+
+    struct stat st;
+    if (stat(model_dir.c_str(), &st) != 0) {
+        LOGE("Cannot initialize Colibri: path '%s' does not exist", model_dir.c_str());
+        return 0;
+    }
+
+    std::string actual_dir = model_dir;
+    if (S_ISREG(st.st_mode)) {
+        size_t last_slash = model_dir.find_last_of('/');
+        if (last_slash != std::string::npos) {
+            actual_dir = model_dir.substr(0, last_slash);
+        }
+    }
+
+    // Auto-detect model family from directory contents if needed
     if (family == "auto" || family.empty()) {
-        if (access((model_dir + "/qwen38_core.json").c_str(), F_OK) == 0) {
+        if (access((actual_dir + "/qwen38_core.json").c_str(), F_OK) == 0) {
             family = "qwen38";
-        } else if (access((model_dir + "/qwen36_core.json").c_str(), F_OK) == 0) {
+        } else if (access((actual_dir + "/qwen36_core.json").c_str(), F_OK) == 0) {
             family = "qwen36";
-        } else if (access((model_dir + "/glm53_core.json").c_str(), F_OK) == 0) {
+        } else if (access((actual_dir + "/glm53_core.json").c_str(), F_OK) == 0) {
             family = "glm53";
-        } else if (access((model_dir + "/olmoe_core.json").c_str(), F_OK) == 0) {
+        } else if (access((actual_dir + "/olmoe_core.json").c_str(), F_OK) == 0) {
             family = "olmoe";
+        } else if (access((actual_dir + "/config.json").c_str(), F_OK) == 0) {
+            family = "qwen38";
         } else {
             family = "qwen38";
         }
     }
 
-    LOGI("Initializing Colibri Engine: family='%s', dir='%s', ctx=%d, threads=%d",
-         family.c_str(), model_dir.c_str(), max_ctx, threads);
+    LOGI("Initializing Colibri Engine: family='%s', dir='%s' (actual='%s'), ctx=%d, threads=%d",
+         family.c_str(), model_dir.c_str(), actual_dir.c_str(), max_ctx, threads);
 
     auto ctx = std::make_unique<ColibriContext>();
-    ctx->model_dir = model_dir;
+    ctx->model_dir = actual_dir;
     ctx->family = family;
     ctx->context_tokens = static_cast<uint32_t>(max_ctx > 0 ? max_ctx : 2048);
-    ctx->n_threads = threads > 0 ? threads : 4;
+
+    int num_cpus = sysconf(_SC_NPROCESSORS_CONF);
+    int worker_threads = std::max(1, (threads > 0 ? threads : num_cpus - 2));
+    // Enforce thread affinity / capping to 4 Performance Cores
+    if (worker_threads > 4) {
+        worker_threads = 4;
+    }
+    ctx->n_threads = worker_threads;
+
+    if (ctx->context_tokens > 4096) {
+        LOGW("Requested context tokens %u exceeds safe bound for mobile -- capping at 4096.", ctx->context_tokens);
+        ctx->context_tokens = 4096;
+    }
+
+    setenv("COLI_MMAP", "1", 1);
+    setenv("COLI_MAP_EXPERTS", "1", 1);
+    setenv("K3_MMAP", "1", 1);
+    setenv("TRUNK_RESIDENT_LAYERS", "0", 1);
+    setenv("COLI_DIRECT", "0", 1);
+    setenv("MLOCK", "1", 1);
+    setenv("COLI_MLOCK", "1", 1);
+    setenv("OMP_NUM_THREADS", std::to_string(ctx->n_threads).c_str(), 1);
 
     char error[512] = {0};
 
@@ -367,6 +492,12 @@ Java_com_deepeye_agent_domain_engine_ColibriEngine_nativeInitModel(
     ctx->edge_cap.struct_size = sizeof(ctx->edge_cap);
     if (coli_edge_engine_capabilities(ctx->edge, &ctx->edge_cap, error, sizeof(error)) != 0) {
         LOGE("Failed to get Colibri Edge capabilities: %s", error);
+        return 0;
+    }
+
+    if (ctx->edge_cap.vocab_size == 0 || ctx->edge_cap.state_width == 0) {
+        LOGE("Corrupted Colibri Edge model metadata: vocab_size=%u, state_width=%u",
+             ctx->edge_cap.vocab_size, ctx->edge_cap.state_width);
         return 0;
     }
 
@@ -406,6 +537,27 @@ Java_com_deepeye_agent_domain_engine_ColibriEngine_nativeInitModel(
 
     return reinterpret_cast<jlong>(ctx.release());
 }
+// ─────────────────────────────────────────────────────────────────────────────
+// nativeInitModel Overloads
+// ─────────────────────────────────────────────────────────────────────────────
+JNIEXPORT jlong JNICALL
+Java_com_deepeye_agent_domain_engine_ColibriEngine_nativeInitModel__Ljava_lang_String_2Ljava_lang_String_2II(
+    JNIEnv* env, jobject /*thiz*/, jstring jmodel_dir, jstring jfamily, jint max_ctx, jint threads) {
+    return initModelInternal(env, jmodel_dir, jfamily, max_ctx, threads);
+}
+
+JNIEXPORT jlong JNICALL
+Java_com_deepeye_agent_domain_engine_ColibriEngine_nativeInitModel__Ljava_lang_String_2II(
+    JNIEnv* env, jobject /*thiz*/, jstring jmodel_dir, jint max_ctx, jint threads) {
+    return initModelInternal(env, jmodel_dir, nullptr, max_ctx, threads);
+}
+
+JNIEXPORT jlong JNICALL
+Java_com_deepeye_agent_domain_engine_ColibriEngine_nativeInitModel(
+    JNIEnv* env, jobject /*thiz*/, jstring jmodel_dir, jstring jfamily, jint max_ctx, jint threads) {
+    return initModelInternal(env, jmodel_dir, jfamily, max_ctx, threads);
+}
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // nativeTokenize — Tokenizes a UTF-8 string into an int array of token IDs
@@ -436,17 +588,17 @@ JNIEXPORT jstring JNICALL
 Java_com_deepeye_agent_domain_engine_ColibriEngine_nativeDetokenize(
     JNIEnv* env, jobject /*thiz*/, jlong handle, jintArray jtoken_ids) {
 
-    if (handle == 0 || !jtoken_ids) return env->NewStringUTF("");
+    if (handle == 0 || !jtoken_ids) return safeNewStringUTF8(env, "", 0);
     auto* ctx = reinterpret_cast<ColibriContext*>(handle);
 
     jsize len = env->GetArrayLength(jtoken_ids);
-    if (len == 0) return env->NewStringUTF("");
+    if (len == 0) return safeNewStringUTF8(env, "", 0);
 
     std::vector<int32_t> ids(len);
     env->GetIntArrayRegion(jtoken_ids, 0, len, reinterpret_cast<jint*>(ids.data()));
 
     std::string text = detokenize_internal(ctx, ids.data(), ids.size());
-    return env->NewStringUTF(text.c_str());
+    return safeNewStringUTF8(env, text.data(), text.size());
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -566,19 +718,36 @@ Java_com_deepeye_agent_domain_engine_ColibriEngine_nativeGenerateResponseStream(
     ctx->is_aborted.store(false, std::memory_order_relaxed);
     applyPerformanceThreadAffinity();
 
-    // Resolve callback method IDs
+    // Resolve callback method IDs safely
     jclass cbClass = env->GetObjectClass(callback);
+    jmethodID onTokenBytesMethod = env->GetMethodID(cbClass, "onTokenBytes", "([B)V");
+    if (env->ExceptionCheck()) {
+        env->ExceptionClear();
+        onTokenBytesMethod = nullptr;
+    }
     jmethodID onTokenMethod = env->GetMethodID(cbClass, "onTokenGenerated", "(Ljava/lang/String;)V");
+    if (env->ExceptionCheck()) {
+        env->ExceptionClear();
+        onTokenMethod = nullptr;
+    }
     jmethodID onCompleteMethod = env->GetMethodID(cbClass, "onGenerationComplete", "()V");
+    if (env->ExceptionCheck()) {
+        env->ExceptionClear();
+        onCompleteMethod = nullptr;
+    }
     jmethodID onErrorMethod = env->GetMethodID(cbClass, "onGenerationError", "(Ljava/lang/String;)V");
+    if (env->ExceptionCheck()) {
+        env->ExceptionClear();
+        onErrorMethod = nullptr;
+    }
     env->DeleteLocalRef(cbClass);
 
-    if (!onTokenMethod) {
-        LOGE("FATAL: onTokenGenerated method not found on callback");
+    if (!onTokenMethod && !onTokenBytesMethod) {
+        LOGE("FATAL: neither onTokenGenerated nor onTokenBytes method found on callback");
         return;
     }
 
-    const char* prompt_c = env->GetStringUTFChars(jprompt, nullptr);
+    const char* prompt_c = jprompt ? env->GetStringUTFChars(jprompt, nullptr) : nullptr;
     std::string prompt(prompt_c ? prompt_c : "");
     if (prompt_c) env->ReleaseStringUTFChars(jprompt, prompt_c);
 
@@ -588,7 +757,7 @@ Java_com_deepeye_agent_domain_engine_ColibriEngine_nativeGenerateResponseStream(
     std::vector<int32_t> prompt_tokens = tokenize_internal(ctx, prompt);
     if (prompt_tokens.empty()) {
         if (onErrorMethod) {
-            jstring errStr = env->NewStringUTF("Failed to tokenize prompt");
+            jstring errStr = safeNewStringUTF8(env, "Failed to tokenize prompt", 25);
             env->CallVoidMethod(callback, onErrorMethod, errStr);
             env->DeleteLocalRef(errStr);
         }
@@ -598,7 +767,7 @@ Java_com_deepeye_agent_domain_engine_ColibriEngine_nativeGenerateResponseStream(
     size_t prompt_count = prompt_tokens.size();
     if (prompt_count >= ctx->context_tokens) {
         if (onErrorMethod) {
-            jstring errStr = env->NewStringUTF("Prompt exceeds context token capacity");
+            jstring errStr = safeNewStringUTF8(env, "Prompt exceeds context token capacity", 37);
             env->CallVoidMethod(callback, onErrorMethod, errStr);
             env->DeleteLocalRef(errStr);
         }
@@ -628,7 +797,7 @@ Java_com_deepeye_agent_domain_engine_ColibriEngine_nativeGenerateResponseStream(
     if (coli_edge_embed(ctx->edge, &embed, error, sizeof(error)) != 0) {
         LOGE("coli_edge_embed prefill failed: %s", error);
         if (onErrorMethod) {
-            jstring errStr = env->NewStringUTF(error);
+            jstring errStr = safeNewStringUTF8(env, error, strlen(error));
             env->CallVoidMethod(callback, onErrorMethod, errStr);
             env->DeleteLocalRef(errStr);
         }
@@ -652,7 +821,7 @@ Java_com_deepeye_agent_domain_engine_ColibriEngine_nativeGenerateResponseStream(
     if (coli_segment_run(ctx->session, &run, error, sizeof(error)) != 0) {
         LOGE("coli_segment_run prefill failed: %s", error);
         if (onErrorMethod) {
-            jstring errStr = env->NewStringUTF(error);
+            jstring errStr = safeNewStringUTF8(env, error, strlen(error));
             env->CallVoidMethod(callback, onErrorMethod, errStr);
             env->DeleteLocalRef(errStr);
         }
@@ -684,7 +853,7 @@ Java_com_deepeye_agent_domain_engine_ColibriEngine_nativeGenerateResponseStream(
         if (coli_edge_select(ctx->edge, &select, error, sizeof(error)) != 0) {
             LOGE("coli_edge_select first token failed: %s", error);
             if (onErrorMethod) {
-                jstring errStr = env->NewStringUTF(error);
+                jstring errStr = safeNewStringUTF8(env, error, strlen(error));
                 env->CallVoidMethod(callback, onErrorMethod, errStr);
                 env->DeleteLocalRef(errStr);
             }
@@ -706,7 +875,7 @@ Java_com_deepeye_agent_domain_engine_ColibriEngine_nativeGenerateResponseStream(
         if (coli_edge_logits(ctx->edge, &logits_req, error, sizeof(error)) != 0) {
             LOGE("coli_edge_logits first token failed: %s", error);
             if (onErrorMethod) {
-                jstring errStr = env->NewStringUTF(error);
+                jstring errStr = safeNewStringUTF8(env, error, strlen(error));
                 env->CallVoidMethod(callback, onErrorMethod, errStr);
                 env->DeleteLocalRef(errStr);
             }
@@ -745,10 +914,18 @@ Java_com_deepeye_agent_domain_engine_ColibriEngine_nativeGenerateResponseStream(
 
         drainCompleteUtf8(carry, piece, complete_chunk);
         if (!complete_chunk.empty()) {
-            jstring jchunk = env->NewStringUTF(complete_chunk.c_str());
-            env->CallVoidMethod(callback, onTokenMethod, jchunk);
-            env->DeleteLocalRef(jchunk);
+            if (onTokenBytesMethod) {
+                safeSendTokenChunk(env, callback, onTokenBytesMethod, nullptr, complete_chunk.data(), complete_chunk.size());
+            } else if (onTokenMethod) {
+                safeSendTokenChunk(env, callback, nullptr, onTokenMethod, complete_chunk.data(), complete_chunk.size());
+            }
             complete_chunk.clear();
+        }
+
+        if (env->ExceptionCheck()) {
+            env->ExceptionClear();
+            LOGW("Exception in callback, stopping Colibri generation");
+            break;
         }
 
         n_generated++;
@@ -832,9 +1009,12 @@ Java_com_deepeye_agent_domain_engine_ColibriEngine_nativeGenerateResponseStream(
 
     // Flush any remaining characters in carry
     if (!carry.empty()) {
-        jstring jcarry = env->NewStringUTF(carry.c_str());
-        env->CallVoidMethod(callback, onTokenMethod, jcarry);
-        env->DeleteLocalRef(jcarry);
+        if (onTokenBytesMethod) {
+            safeSendTokenChunk(env, callback, onTokenBytesMethod, nullptr, carry.data(), carry.size());
+        } else if (onTokenMethod) {
+            safeSendTokenChunk(env, callback, nullptr, onTokenMethod, carry.data(), carry.size());
+        }
+        carry.clear();
     }
 
     auto t_end = std::chrono::steady_clock::now();
@@ -1042,7 +1222,7 @@ Java_com_deepeye_agent_domain_engine_ColibriEngine_nativeGenerateResponse(
         result_text.append(carry);
     }
 
-    return env->NewStringUTF(result_text.c_str());
+    return safeNewStringUTF8(env, result_text.data(), result_text.size());
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1110,7 +1290,7 @@ JNIEXPORT jstring JNICALL
 Java_com_deepeye_agent_domain_engine_ColibriEngine_nativeGetModelInfo(
     JNIEnv* env, jobject /*thiz*/, jlong handle) {
 
-    if (handle == 0) return env->NewStringUTF("{}");
+    if (handle == 0) return safeNewStringUTF8(env, "{}", 2);
     auto* ctx = reinterpret_cast<ColibriContext*>(handle);
 
     char info[512];
@@ -1122,7 +1302,7 @@ Java_com_deepeye_agent_domain_engine_ColibriEngine_nativeGetModelInfo(
              ctx->edge_cap.state_width,
              ctx->context_tokens);
 
-    return env->NewStringUTF(info);
+    return safeNewStringUTF8(env, info, strlen(info));
 }
 
 } // extern "C"

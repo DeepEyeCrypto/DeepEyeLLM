@@ -8,6 +8,10 @@ import com.deepeye.agent.core.model.ModelBackend
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -83,7 +87,7 @@ class ColibriEngine(
             if (isNativeLibLoaded) {
                 try {
                     Log.i(TAG, "Initializing Colibri native model: $modelDir (ctx=$contextTokens, th=$nThreads)")
-                    nativeContextHandle = nativeInitModel(modelDir, contextTokens, nThreads)
+                    nativeContextHandle = nativeInitModel(modelDir, "auto", contextTokens, nThreads)
                     if (nativeContextHandle == 0L) {
                         Log.e(TAG, "nativeInitModel returned 0 pointer.")
                         return@withContext Result.failure(
@@ -155,6 +159,11 @@ class ColibriEngine(
                             onChunk(token)
                         }
 
+                        override fun onTokenBytes(bytes: ByteArray) {
+                            val decoded = String(bytes, java.nio.charset.StandardCharsets.UTF_8)
+                            onChunk(decoded)
+                        }
+
                         override fun onGenerationComplete() {
                             Log.d(TAG, "Colibri native streaming generation completed.")
                         }
@@ -177,6 +186,82 @@ class ColibriEngine(
         for (char in simulated) {
             onChunk(char.toString())
         }
+    }
+
+    /**
+     * Syntactic alias for chatStream to unify the ReAct Orchestrator interface.
+     */
+    suspend fun streamGenerate(prompt: String, onToken: (String) -> Unit) {
+        chatStream(prompt, onToken)
+    }
+
+    /**
+     * Reactive Kotlin Flow token streaming bridge for Colibri 14B MoE native inference.
+     * Tokens are yielded asynchronously from the JNI C++ loop, preserving UI responsiveness
+     * and enabling real-time Typewriter effects without blocking Main UI Thread.
+     */
+    fun streamChat(prompt: String): Flow<String> = callbackFlow {
+        if (!isInitialized) {
+            trySend("Error: ColibriEngine is not initialized.")
+            channel.close()
+            return@callbackFlow
+        }
+
+        if (isNativeLibLoaded && nativeContextHandle != 0L) {
+            val handle = nativeContextHandle
+            try {
+                nativeGenerateResponseStream(
+                    handle,
+                    prompt,
+                    MAX_GENERATION_TOKENS,
+                    temperature,
+                    topP,
+                    object : NativeTokenCallback {
+                        override fun onTokenGenerated(token: String) {
+                            trySend(token)
+                        }
+
+                        override fun onTokenBytes(bytes: ByteArray) {
+                            val decoded = String(bytes, java.nio.charset.StandardCharsets.UTF_8)
+                            trySend(decoded)
+                        }
+
+                        override fun onGenerationComplete() {
+                            channel.close()
+                        }
+
+                        override fun onGenerationError(message: String) {
+                            channel.close(RuntimeException(message))
+                        }
+                    }
+                )
+            } catch (e: Throwable) {
+                Log.e(TAG, "Exception during native streaming inference Flow: ${e.message}", e)
+                trySend("\n[Inference Error: ${e.message}]")
+                channel.close(e)
+            }
+
+            awaitClose {
+                Log.d(TAG, "Colibri streamChat Flow closed, aborting native generation.")
+                nativeAbortGeneration(handle)
+            }
+        } else {
+            val simulated = chat(prompt)
+            for (char in simulated) {
+                trySend(char.toString())
+            }
+            channel.close()
+            awaitClose { }
+        }
+    }.flowOn(Dispatchers.IO)
+
+    fun streamChatWithHistory(history: List<ChatMessage>): Flow<String> {
+        val formattedPrompt = ChatMLFormatter.formatPromptWithHistory(
+            history = history,
+            maxContextTokens = contextTokens,
+            maxGenerationTokens = MAX_GENERATION_TOKENS
+        )
+        return streamChat(formattedPrompt)
     }
 
     suspend fun chatWithHistory(history: List<ChatMessage>): String = withContext(Dispatchers.IO) {
@@ -239,6 +324,7 @@ class ColibriEngine(
 
     // ─── Native JNI Declarations ────────────────────────────────────────────
 
+    private external fun nativeInitModel(modelDir: String, family: String, contextTokens: Int, nThreads: Int): Long
     private external fun nativeInitModel(modelDir: String, contextTokens: Int, nThreads: Int): Long
     private external fun nativeGenerateResponse(
         handle: Long, prompt: String, maxTokens: Int, temperature: Float, topP: Float

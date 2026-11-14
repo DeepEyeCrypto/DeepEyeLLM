@@ -12,11 +12,12 @@ class InferenceSettingsValidationTest {
     @Test
     fun `default EngineSettings initializes with safe defaults`() {
         val settings = EngineSettings()
-        assertTrue(settings.useGpu)
-        assertEquals(-1, settings.selectedBackend)
-        assertEquals(99, settings.gpuLayers)
-        assertEquals(1024, settings.contextSize)
-        assertEquals("FP16", settings.kvCacheQuant)
+        assertFalse(settings.useGpu)
+        assertEquals(0, settings.selectedBackend)
+        assertEquals(0, settings.gpuLayers)
+        assertEquals(4, settings.cpuThreads)
+        assertEquals(4096, settings.contextSize)
+        assertEquals("Q8_0", settings.kvCacheQuant)
         assertEquals(0.7f, settings.temperature, 0.001f)
         assertEquals(0.9f, settings.topP, 0.001f)
     }

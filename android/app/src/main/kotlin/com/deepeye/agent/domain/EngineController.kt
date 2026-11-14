@@ -8,6 +8,11 @@ import com.deepeye.agent.domain.engine.LlamaCppEngine
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.Dispatchers
@@ -222,6 +227,52 @@ class EngineController(
         _engineStatus.update { EngineStatus(status, modelName, "Generation completed.") }
         return status
     }
+
+    /**
+     * Exposes asynchronous reactive Flow token streaming from the active local engine
+     * (Colibri MoE / LlamaCpp / LiteRT) directly to ViewModels and UI collectors.
+     */
+    fun streamChat(prompt: String): Flow<String> = callbackFlow {
+        if (!isEngineReady) {
+            val msg = "Engine not initialized. Please load or download a model file in Settings."
+            _engineStatus.update { EngineStatus(ModelStatus.LOCAL_ACTIVE, "Engine Not Ready", msg) }
+            trySend(msg)
+            channel.close()
+            return@callbackFlow
+        }
+
+        val activeEngine = engine
+        if (activeEngine is ColibriEngine) {
+            val job = launch(Dispatchers.IO) {
+                try {
+                    activeEngine.streamChat(prompt).collect { token ->
+                        trySend(token)
+                    }
+                    channel.close()
+                } catch (e: Throwable) {
+                    channel.close(e)
+                }
+            }
+            awaitClose {
+                job.cancel()
+                activeEngine.abortGeneration()
+            }
+        } else {
+            val job = launch(Dispatchers.IO) {
+                try {
+                    activeEngine.chatStream(prompt) { chunk ->
+                        trySend(chunk)
+                    }
+                    channel.close()
+                } catch (e: Throwable) {
+                    channel.close(e)
+                }
+            }
+            awaitClose {
+                job.cancel()
+            }
+        }
+    }.flowOn(Dispatchers.IO)
 
     fun getActiveEngineName(): String = engine.activeModelPath?.let { java.io.File(it).nameWithoutExtension } ?: "No Model Loaded"
 

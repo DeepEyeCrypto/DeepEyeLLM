@@ -9670,8 +9670,12 @@ static void vk_registry_fill(Model *m){
 static int g_mlock=-1;
 static int mem_should_wire(void){
     if(g_mlock>=0) return g_mlock;
-#if defined(__APPLE__)
-    return 1;                                     /* macOS: default ON */
+    const char *env = getenv("MLOCK");
+    if (env) { g_mlock = atoi(env); return g_mlock; }
+    const char *coli_env = getenv("COLI_MLOCK");
+    if (coli_env) { g_mlock = atoi(coli_env); return g_mlock; }
+#if defined(__APPLE__) || defined(__ANDROID__) || defined(__ARM_NEON)
+    return 1;                                     /* macOS/Android: default ON */
 #else
     return 0;                                     /* Linux/altri: opt-in via MLOCK=1 / opt-in */
 #endif

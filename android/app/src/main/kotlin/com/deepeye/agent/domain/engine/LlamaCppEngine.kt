@@ -290,6 +290,9 @@ private const val MAX_GENERATION_TOKENS = 512
 
 interface NativeTokenCallback {
     fun onTokenGenerated(token: String)
+    fun onTokenBytes(bytes: ByteArray) {
+        onTokenGenerated(String(bytes, java.nio.charset.StandardCharsets.UTF_8))
+    }
     fun onGenerationComplete()
     fun onGenerationError(message: String)
 }

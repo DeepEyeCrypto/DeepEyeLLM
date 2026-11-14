@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CompassCalibration
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Description
@@ -103,6 +104,14 @@ sealed class AgentDestinations(
         label = "Models",
         icon = Icons.Default.Storage,
         contentDescription = "Model Manager & Catalog"
+    )
+
+    @Serializable
+    data object ModelHub : AgentDestinations(
+        route = "model_hub",
+        label = "Model Hub",
+        icon = Icons.Default.CloudDownload,
+        contentDescription = "Model Provisioning Hub"
     )
 
     @Serializable

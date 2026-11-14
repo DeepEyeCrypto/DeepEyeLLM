@@ -50,6 +50,24 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideAppDatabase(@dagger.hilt.android.qualifiers.ApplicationContext context: android.content.Context): com.deepeye.agent.data.local.AppDatabase {
+        return com.deepeye.agent.data.local.AppDatabase.getDatabase(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMessageDao(database: com.deepeye.agent.data.local.AppDatabase): com.deepeye.agent.data.local.MessageDao {
+        return database.messageDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideKnowledgeDao(database: com.deepeye.agent.data.local.AppDatabase): com.deepeye.agent.data.local.KnowledgeDao {
+        return database.knowledgeDao()
+    }
+
+    @Provides
+    @Singleton
     fun provideUserSession(): com.deepeye.agent.core.security.rbac.UserSession {
         // Mock session for Ring 1 internal builds.
         // In production, this would come from OIDC/OAuth2 token claims.

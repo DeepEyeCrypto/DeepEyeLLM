@@ -17,6 +17,7 @@ import com.deepeye.agent.ui.home.WorkstationHomeScreen
 import com.deepeye.agent.ui.p2p.P2PShareScreen
 import com.deepeye.agent.ui.promptlab.PromptLabScreen
 import com.deepeye.agent.ui.rag.KnowledgeBaseScreen
+import com.deepeye.agent.ui.models.ModelHubScreen
 import com.deepeye.agent.ui.security.SecurityDashboardScreen
 import com.deepeye.agent.ui.settings.DiagnosticsScreen
 import com.deepeye.agent.ui.settings.ModelManagerScreen
@@ -68,7 +69,7 @@ fun DeepEyeNavGraph(
         composable(route = AgentDestinations.Settings.route) {
             SettingsScreen(
                 onNavigateToModelManager = {
-                    navController.navigate(AgentDestinations.ModelManager.route) {
+                    navController.navigate(AgentDestinations.ModelHub.route) {
                         launchSingleTop = true
                     }
                 }
@@ -82,6 +83,16 @@ fun DeepEyeNavGraph(
         composable(route = AgentDestinations.ModelManager.route) {
             ModelManagerScreen(
                 onBack = { navController.popBackStack() }
+            )
+        }
+        composable(route = AgentDestinations.ModelHub.route) {
+            ModelHubScreen(
+                onBack = { navController.popBackStack() },
+                onNavigateToBenchmark = {
+                    navController.navigate(AgentDestinations.Benchmark.route) {
+                        launchSingleTop = true
+                    }
+                }
             )
         }
         composable(route = AgentDestinations.KnowledgeBase.route) {

@@ -44,6 +44,16 @@
 -keep class * extends androidx.room.RoomDatabase { *; }
 -keep @androidx.room.Entity class * { *; }
 -keep @androidx.room.Dao class * { *; }
+-keep @androidx.room.Fts3 class * { *; }
+-keep @androidx.room.Fts4 class * { *; }
+-keep class com.deepeye.agent.data.local.** { *; }
+
+# --- Gson & Data Models ---
+-keepattributes *Annotation*
+-keep class com.google.gson.** { *; }
+-keep class com.deepeye.agent.core.model.** { *; }
+-keepclassmembers class com.deepeye.agent.core.model.** { *; }
+-keepclassmembers enum com.deepeye.agent.core.model.** { *; }
 
 # --- Compose ---
 # R8 full mode strips Compose runtime metadata; keep stability annotations

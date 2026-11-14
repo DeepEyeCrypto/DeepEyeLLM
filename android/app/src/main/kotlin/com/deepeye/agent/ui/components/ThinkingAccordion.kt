@@ -53,8 +53,11 @@ object ReasoningParser {
     private val THINK_TAG_START = listOf("<think>", "<thought>", "<reasoning>")
     private val THINK_TAG_END = listOf("</think>", "</thought>", "</reasoning>")
 
+    private val THINK_BLOCK_REGEX = Regex("<(?:think|thought|reasoning)>([\\s\\S]*?)(?:</(?:think|thought|reasoning)>|$)", RegexOption.IGNORE_CASE)
+
     /**
-     * Parses raw streamed text into distinct thought stream and final user-facing response.
+     * Parses raw streamed text into distinct thought stream and final user-facing response,
+     * seamlessly handling multiple independent reasoning blocks generated during ReAct loops.
      */
     fun parse(rawText: String, isStreaming: Boolean): ParsedReasoning {
         if (rawText.isBlank()) {
@@ -65,16 +68,8 @@ object ReasoningParser {
             )
         }
 
-        var text = rawText
-        var matchingStartTag: String? = null
-        for (tag in THINK_TAG_START) {
-            if (text.contains(tag, ignoreCase = true)) {
-                matchingStartTag = tag
-                break
-            }
-        }
-
-        if (matchingStartTag == null) {
+        val matches = THINK_BLOCK_REGEX.findAll(rawText).toList()
+        if (matches.isEmpty()) {
             return ParsedReasoning(
                 thoughtTrace = null,
                 isThinkingActive = false,
@@ -82,34 +77,31 @@ object ReasoningParser {
             )
         }
 
-        val startIndex = text.indexOf(matchingStartTag, ignoreCase = true)
-        val afterStart = text.substring(startIndex + matchingStartTag.length)
+        val thoughts = mutableListOf<String>()
+        var isThinkingActive = false
+        var cleanResponse = rawText
 
-        var matchingEndTag: String? = null
-        for (tag in THINK_TAG_END) {
-            if (afterStart.contains(tag, ignoreCase = true)) {
-                matchingEndTag = tag
-                break
+        for (match in matches) {
+            val fullMatch = match.value
+            val innerContent = match.groupValues[1].trim()
+            val hasEndTag = THINK_TAG_END.any { fullMatch.contains(it, ignoreCase = true) }
+
+            if (innerContent.isNotEmpty()) {
+                thoughts.add(innerContent)
             }
+            if (!hasEndTag && isStreaming) {
+                isThinkingActive = true
+            }
+            cleanResponse = cleanResponse.replace(fullMatch, "").trim()
         }
 
-        return if (matchingEndTag != null) {
-            val endIndex = afterStart.indexOf(matchingEndTag, ignoreCase = true)
-            val thought = afterStart.substring(0, endIndex).trim()
-            val remaining = afterStart.substring(endIndex + matchingEndTag.length).trimStart()
-            ParsedReasoning(
-                thoughtTrace = thought,
-                isThinkingActive = false,
-                finalResponse = remaining
-            )
-        } else {
-            // Still streaming inside reasoning block
-            ParsedReasoning(
-                thoughtTrace = afterStart.trim(),
-                isThinkingActive = isStreaming,
-                finalResponse = ""
-            )
-        }
+        val combinedThought = if (thoughts.isNotEmpty()) thoughts.joinToString("\n\n---\n\n") else null
+
+        return ParsedReasoning(
+            thoughtTrace = combinedThought,
+            isThinkingActive = isThinkingActive,
+            finalResponse = cleanResponse
+        )
     }
 }
 

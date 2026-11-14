@@ -156,9 +156,31 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
 // They handle null checks and prevent JNI local reference table overflow
 // by deleting jstring refs inside the loop.
 
+// ── Safe JNI UTF-8 String Conversion Helper ───────────────────────────────
+static jstring safeNewStringUTF8(JNIEnv* env, const char* data, size_t len) {
+    if (!data || len == 0) return env->NewStringUTF("");
+    jbyteArray byteArray = env->NewByteArray(static_cast<jsize>(len));
+    if (!byteArray) return env->NewStringUTF("");
+    env->SetByteArrayRegion(byteArray, 0, static_cast<jsize>(len), reinterpret_cast<const jbyte*>(data));
+
+    jclass strClass = env->FindClass("java/lang/String");
+    if (!strClass) {
+        env->DeleteLocalRef(byteArray);
+        return env->NewStringUTF("");
+    }
+    jmethodID ctor = env->GetMethodID(strClass, "<init>", "([BLjava/lang/String;)V");
+    jstring encoding = env->NewStringUTF("UTF-8");
+    jstring result = static_cast<jstring>(env->NewObject(strClass, ctor, byteArray, encoding));
+
+    env->DeleteLocalRef(encoding);
+    env->DeleteLocalRef(byteArray);
+    env->DeleteLocalRef(strClass);
+    return result;
+}
+
 static void safeCallToken(JNIEnv* env, jobject callback, jmethodID method, const std::string& token) {
     if (!callback || !method || !env) return;
-    jstring jtoken = env->NewStringUTF(token.c_str());
+    jstring jtoken = safeNewStringUTF8(env, token.data(), token.size());
     if (jtoken) {
         env->CallVoidMethod(callback, method, jtoken);
         env->DeleteLocalRef(jtoken);
@@ -172,7 +194,7 @@ static void safeCallComplete(JNIEnv* env, jobject callback, jmethodID method) {
 
 static void safeCallError(JNIEnv* env, jobject callback, jmethodID method, const std::string& errorMsg) {
     if (!callback || !method || !env) return;
-    jstring jmsg = env->NewStringUTF(errorMsg.c_str());
+    jstring jmsg = safeNewStringUTF8(env, errorMsg.data(), errorMsg.size());
     if (jmsg) {
         env->CallVoidMethod(callback, method, jmsg);
         env->DeleteLocalRef(jmsg);

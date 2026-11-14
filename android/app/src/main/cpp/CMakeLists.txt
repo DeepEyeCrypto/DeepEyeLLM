@@ -13,6 +13,10 @@ list(APPEND CMAKE_PREFIX_PATH "/usr/local" "/usr/local/share/cmake" "/opt/homebr
 include_directories("/usr/local/include")
 
 # Optimization flags for arm64-v8a / mobile inference
+# NOTE: -ffast-math and -flto are deliberately NOT here. This block applies to every
+# target in the tree, including the vendored llama.cpp, whose ggml-cpu/vec.h hard-errors
+# on __FINITE_MATH_ONLY__ (which -ffast-math implies). Those flags are scoped to the
+# Colibri engine targets further down instead.
 add_compile_options(
     -isystem/usr/local/include
     -O3
@@ -20,6 +24,7 @@ add_compile_options(
     -fno-finite-math-only
     -march=armv8.2-a+dotprod+fp16
     -fvectorize
+    -ftree-vectorize
     -funroll-loops
     -finline-functions
     -fomit-frame-pointer
@@ -157,7 +162,17 @@ if(EXISTS "${COLIBRI_DIR}/edge_runtime.c")
     target_link_libraries(colibri_jni
         colibri_static
         ${log-lib}
-        m
+        ${vulkan-lib}     # Android Vulkan GPU driver
+        m                  # libm math functions
     )
+
+    # ── Colibri-only aggressive math/LTO flags ──────────────────────────────
+    # Scoped to the Colibri engine (its own C runtime, no ggml headers) because
+    # llama.cpp's ggml rejects __FINITE_MATH_ONLY__ with a hard #error, and
+    # upstream Colibri's own Makefile also keeps these off the shared flag set.
+    # -flto intentionally dropped: NDK clang LTO linking is extremely slow
+    # (minutes) for near-zero on-device gain on mobile inference.
+    target_compile_options(colibri_static PRIVATE -ffast-math -ftree-vectorize)
+    target_compile_options(colibri_jni PRIVATE -ffast-math -ftree-vectorize)
 endif()
 

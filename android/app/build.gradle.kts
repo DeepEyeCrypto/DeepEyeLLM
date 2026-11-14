@@ -23,14 +23,17 @@ android {
         ndk {
             abiFilters += listOf("arm64-v8a")
         }
+        // Do NOT hardcode -DCMAKE_BUILD_TYPE here. AGP auto-sets CMAKE_BUILD_TYPE
+        // per variant (debug->Debug, release->Release); a hardcoded =Release made
+        // the debug variant build native code as Release, forcing a fresh .cxx
+        // cache on every flag change. Optimization flags (-O3 -DNDEBUG ...) are
+        // owned by add_compile_options() in CMakeLists.txt and apply to all targets.
         externalNativeBuild {
             cmake {
                 arguments(
                     "-DANDROID_STL=c++_shared",
                     "-DANDROID_ARM_NEON=ON",
                     "-DANDROID_PLATFORM=android-28",
-                    "-DCMAKE_BUILD_TYPE=Release",
-                    "-DCMAKE_CXX_FLAGS_RELEASE=-O3 -DNDEBUG -fno-finite-math-only -march=armv8.2-a+dotprod+fp16 -fvectorize -funroll-loops -finline-functions -fomit-frame-pointer",
                     "-DGGML_ARM_NEON=ON",
                     "-DGGML_ARM_DOTPROD=ON",
                     "-DGGML_ARM_FP16=ON",
@@ -129,9 +132,15 @@ dependencies {
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
+    // Image Loading (Coil)
+    implementation(libs.coil.compose)
+
+    // Serialization & JSON
+    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.8.5")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
     // Hilt DI
     implementation("com.google.dagger:hilt-android:2.55")

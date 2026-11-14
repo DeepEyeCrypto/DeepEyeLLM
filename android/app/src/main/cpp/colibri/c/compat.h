@@ -471,6 +471,12 @@ static inline int compat_map_readonly(int fd, int64_t off, size_t len,
     size_t view_len = (size_t)delta + len;
     void *base = mmap(NULL, view_len, PROT_READ, MAP_SHARED, fd, (off_t)aligned);
     if (base == MAP_FAILED) return -1;
+    
+    // Memory Thrashing Fix: if mapped size < 2GB, mlock to pin physical RAM
+    if (view_len < 2ULL * 1024 * 1024 * 1024) {
+        mlock(base, view_len);
+    }
+    
     map->base = base;
     map->len = view_len;
     *data = (const char*)base + (size_t)delta;
